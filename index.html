@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BeautyMaster Ops — Store Market Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<button class="mobile-menu-btn" onclick="toggleMobileSidebar()" id="mobile-menu-btn">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+<!-- ══════════════════ SIDEBAR ══════════════════ -->
+<aside class="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">
+      <img src="data:image/png;base64,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" alt="BeautyMaster">
+    </div>
+    <div class="sb-org">Operations Hub</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Workspace</div>
+    <div class="sb-item active" onclick="navTo('dashboard',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Store Summary
+    </div>
+    <div class="sb-item" onclick="navTo('audience',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Audience Segments
+    </div>
+    <div class="sb-item" onclick="navTo('locator',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Store Locator
+    </div>
+    <div class="sb-section-label">System</div>
+    <div class="sb-item" onclick="navTo('settings',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </div>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-status">
+      <div class="live-dot"></div>
+      <span>Live data &nbsp;·&nbsp; <strong>Census 2024</strong></span>
+    </div>
+  </div>
+</aside>
+
+
+<!-- ══════════════════ LAYOUT ══════════════════ -->
+<div class="layout">
+  <main class="main">
+
+    <!-- ══ PAGE: DASHBOARD ══ -->
+    <div id="page-dashboard" class="page active">
+
+      <div class="page-header">
+        <div class="ph-title-group">
+          <div class="ph-eyebrow">Operations</div>
+          <div class="ph-title">Store Market Summary</div>
+          <div class="ph-subtitle">Local market intelligence across 15 BeautyMaster locations</div>
+        </div>
+
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi-card" id="kpi-all" data-kpi="all" draggable="true" onclick="filterKPI('all',this)">
+          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+          <button class="kpi-remove" onclick="removeKPI(event,'all')" title="Remove">×</button>
+          <div class="kpi-label">Total Stores</div>
+          <div class="kpi-value">15</div>
+          <div class="kpi-meta"><span class="kpi-trend trend-up">↑ GA 10 · FL 5</span></div>
+        </div>
+        <div class="kpi-card" id="kpi-income" data-kpi="income" draggable="true" onclick="filterKPI('income',this)">
+          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+          <button class="kpi-remove" onclick="removeKPI(event,'income')" title="Remove">×</button>
+          <div class="kpi-label">Avg. Median Income</div>
+          <div class="kpi-value" style="font-size:22px">$71.8K</div>
+          <div class="kpi-meta" style="margin-bottom:4px"><span class="kpi-trend trend-neu">$50K – $95K range</span></div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:72%;background:var(--info)"></div></div>
+        </div>
+        <div class="kpi-card" id="kpi-black" data-kpi="black" draggable="true" onclick="filterKPI('black',this)">
+          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+          <button class="kpi-remove" onclick="removeKPI(event,'black')" title="Remove">×</button>
+          <div class="kpi-label">Black-Majority</div>
+          <div class="kpi-value">4</div>
+          <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:#6366F1;background:rgba(99,102,241,.1)">stores &gt;50% Black</span></div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:27%;background:#6366F1"></div></div>
+        </div>
+        <div class="kpi-card" id="kpi-hispanic" data-kpi="hispanic" draggable="true" onclick="filterKPI('hispanic',this)">
+          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+          <button class="kpi-remove" onclick="removeKPI(event,'hispanic')" title="Remove">×</button>
+          <div class="kpi-label">Hispanic Focus</div>
+          <div class="kpi-value">4</div>
+          <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:var(--warning);background:var(--warning-bg)">stores &gt;25% Hispanic</span></div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:27%;background:var(--warning)"></div></div>
+        </div>
+        <div class="kpi-card" id="kpi-premium" data-kpi="premium" draggable="true" onclick="filterKPI('premium',this)">
+          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+          <button class="kpi-remove" onclick="removeKPI(event,'premium')" title="Remove">×</button>
+          <div class="kpi-label">High-Income</div>
+          <div class="kpi-value">1</div>
+          <div class="kpi-meta"><span class="kpi-trend trend-up" style="color:var(--info);background:var(--info-bg)">Duluth · $95.3K</span></div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:7%;background:var(--info)"></div></div>
+        </div>
+        <div class="kpi-card" id="kpi-lowincome" data-kpi="lowincome" draggable="true" onclick="filterKPI('lowincome',this)">
+          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+          <button class="kpi-remove" onclick="removeKPI(event,'lowincome')" title="Remove">×</button>
+          <div class="kpi-label">Low Income Area</div>
+          <div class="kpi-value">3</div>
+          <div class="kpi-meta"><span class="kpi-trend trend-down">stores &lt;$65K</span></div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:20%;background:var(--error)"></div></div>
+        </div>
+        <div class="kpi-card" id="kpi-asian" data-kpi="asian" draggable="true" onclick="filterKPI('asian',this)">
+          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+          <button class="kpi-remove" onclick="removeKPI(event,'asian')" title="Remove">×</button>
+          <div class="kpi-label">High Asian Pop.</div>
+          <div class="kpi-value">2</div>
+          <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:#F59E0B;background:rgba(245,158,11,.1)">stores &gt;20% Asian</span></div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:13%;background:#F59E0B"></div></div>
+        </div>
+        <div class="kpi-add-btn" id="kpi-add-btn" onclick="openKPIPicker()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add KPI
+        </div>
+      </div>
+
+      <!-- KPI Picker Modal -->
+      <div class="kpi-picker-backdrop" id="kpi-picker-backdrop" onclick="closeKPIPicker(event)">
+        <div class="kpi-picker">
+          <h3>Add KPI Cards</h3>
+          <div class="kpi-picker-list" id="kpi-picker-list"></div>
+          <div class="kpi-picker-footer">
+            <button class="kpi-picker-close" onclick="closeKPIPicker()">Cancel</button>
+            <button class="kpi-picker-add-btn" id="kpi-picker-confirm" onclick="confirmAddKPIs()" disabled>Add Selected</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter pill -->
+      <div id="filter-pill-wrap"></div>
+
+      <!-- Main content grid -->
+      <div class="content-grid">
+        <!-- TABLE + POVERTY (stacked in main column) -->
+        <div style="display:flex;flex-direction:column;gap:var(--s4);">
+          <div class="card">
+          <div class="card-header">
+            <div class="card-title">Store Market Priorities</div>
+  
+          </div>
+          <div class="tbl-head">
+            <div class="th th-sortable" id="th-name" onclick="sortByCol('name',event)">
+              Store <span class="th-sort" id="sort-name">↕</span>
+            </div>
+            <div class="th th-sortable" id="th-band" onclick="sortByCol('income',event)">
+              Income Band <span class="th-sort" id="sort-band">↕</span>
+            </div>
+            <div class="th th-sortable" id="th-pop" onclick="sortByCol('pop',event)">
+              Population <span class="th-sort" id="sort-pop">↕</span>
+            </div>
+            <div class="th th-sortable" id="th-demo" onclick="openDemoSort(event)">
+              Demographics <span class="th-sort" id="sort-demo">↕</span>
+              <div class="col-filter-dropdown" id="cf-demo">
+                <div class="col-filter-opt" data-val="black" onclick="sortByDemo('black',event)">
+                  <div class="opt-dot" style="background:#4F46E5"></div>Black % 높은 순
+                </div>
+                <div class="col-filter-opt" data-val="hisp" onclick="sortByDemo('hisp',event)">
+                  <div class="opt-dot" style="background:#E81D25"></div>Hispanic % 높은 순
+                </div>
+                <div class="col-filter-opt" data-val="asian" onclick="sortByDemo('asian',event)">
+                  <div class="opt-dot" style="background:#F59E0B"></div>Asian % 높은 순
+                </div>
+                <div class="col-filter-opt" data-val="white" onclick="sortByDemo('white',event)">
+                  <div class="opt-dot" style="background:#9CA3AF"></div>White % 높은 순
+                </div>
+                <div class="col-filter-opt" data-val="" onclick="sortByDemo('',event)">
+                  <div class="opt-dot" style="background:var(--text-tertiary)"></div>정렬 해제
+                </div>
+              </div>
+            </div>
+            <div class="th">Priority Focus</div>
+          </div>
+          <div class="tbl-body" id="tbl-body"></div>
+        </div>
+
+        </div>
+
+        <!-- Right column placeholder (for right panel spacing) -->
+        <div style="display:flex;flex-direction:column;gap:var(--s4);"></div>
+      </div>
+
+    </div><!-- /dashboard -->
+
+    <!-- ══ PAGE: AUDIENCE ══ -->
+    <div id="page-audience" class="page">
+      <div class="page-header">
+        <div class="ph-title-group">
+          <div class="ph-eyebrow">Insights</div>
+          <div class="ph-title">Audience Segments</div>
+          <div class="ph-subtitle">Customer demographic profiles across all store locations</div>
+        </div>
+      </div>
+      <div id="audience-stats-grid" class="stats-grid-3">
+        <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:#6366F1">10</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
+        <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--warning)">6</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
+        <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--info)">2</div><div class="stat-sub">Duluth (22%) · Morrow (29%)</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Segment Profiles</div></div>
+        <div id="audience-seg-list" style="padding:var(--s2) var(--s5) var(--s3);">
+          <div class="seg-row"><div class="seg-dot" style="background:#6366F1"></div><div><div class="seg-name">Black Hair Care Community</div><div class="seg-desc">Union City · Riverdale · Douglasville · Miami Gardens + 6 more</div></div><div class="seg-num">10 stores</div></div>
+          <div class="seg-row"><div class="seg-dot" style="background:var(--warning)"></div><div><div class="seg-name">Hispanic / Bilingual Market</div><div class="seg-desc">Florida Mall · Orlando · Miami Gardens · Morrow · Tamarac · WPB</div></div><div class="seg-num">6 stores</div></div>
+          <div class="seg-row"><div class="seg-dot" style="background:var(--info)"></div><div><div class="seg-name">Premium / K-Beauty Shopper</div><div class="seg-desc">Duluth ($95K income, 22% Asian) · Morrow (29% Asian)</div></div><div class="seg-num">2 stores</div></div>
+          <div class="seg-row"><div class="seg-dot" style="background:var(--error)"></div><div><div class="seg-name">Value / Budget-Conscious</div><div class="seg-desc">Union City ($49K) · Columbus ($58K) · Tamarac ($62K)</div></div><div class="seg-num">3 stores</div></div>
+          <div class="seg-row"><div class="seg-dot" style="background:var(--text-tertiary)"></div><div><div class="seg-name">General / Mixed Market</div><div class="seg-desc">Atlanta cluster · West Palm Beach</div></div><div class="seg-num">5 stores</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: LOCATOR ══ -->
+    <div id="page-locator" class="page">
+      <div class="page-header">
+        <div class="ph-title-group">
+          <div class="ph-eyebrow">Locations</div>
+          <div class="ph-title">Store Locator</div>
+          <div class="ph-subtitle">Geographic overview of all 15 BeautyMaster locations</div>
+        </div>
+      </div>
+      <div id="locator-map-ph" class="map-ph">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Map View — GA (10) · FL (5) Locations
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">All Locations</div></div>
+        <div id="locator-list" style="padding:var(--s2) var(--s5) var(--s3);">
+          ${[['Beauty Master West Palm Beach','FL','4340 Okeechobee Blvd #101, West Palm Beach'],['BeautyMaster Camp Creek','GA','3685 Marketplace Blvd, Atlanta'],['BeautyMaster Columbus','GA','3131 Manchester Expy #2c, Columbus'],['BeautyMaster Duluth','GA','2100 Pleasant Hill Rd #176, Duluth'],['BeautyMaster Florida Mall','FL','1631 Florida Mall Ave, Orlando'],['BeautyMaster Miami Gardens','FL','19410 NW 27th Ave, Miami Gardens'],['BeautyMaster Morrow','GA','1400 Mt Zion Rd, Morrow'],['BeautyMaster Riverdale','GA','7055 GA-85 c, Riverdale'],['BeautyMaster Union City','GA','6851 Shannon Pkwy, Union City']].map(([n,s,a])=>`<div class="dist-item"><div><div class="dist-name">${n}</div><div class="dist-sub">${a}</div></div><span class="badge ${s==='GA'?'badge-green':'badge-blue'}">${s}</span></div>`).join('')}
+          <div class="dist-item" style="border:none"><div class="dist-sub" style="font-size:12px">+ 6 more: Douglasville · Greenbriar · Headland · Old National · Orlando · Tamarac</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: SETTINGS ══ -->
+    <div id="page-settings" class="page">
+
+      <!-- Remove Dataset Modal -->
+      <div class="modal-backdrop" id="remove-modal" onclick="closeRemoveModal(event)">
+        <div class="modal-box">
+          <div class="modal-icon-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--error)"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="modal-title">Remove Dataset?</div>
+          <div class="modal-body">This will permanently remove <strong>bm_updated.csv</strong> and all associated data from the dashboard. All views will revert to an empty state until a new CSV is uploaded.<br><br>This action cannot be undone.</div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeRemoveModal()">Cancel</button>
+            <button class="btn btn-danger" onclick="confirmRemoveDataset()">Remove Dataset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-header">
+        <div class="ph-title-group">
+          <div class="ph-eyebrow">System</div>
+          <div class="ph-title">Settings</div>
+          <div class="ph-subtitle">Manage your dataset, dashboard defaults, and internal notes</div>
+        </div>
+      </div>
+
+      <div class="settings-layout">
+
+        <!-- ── LEFT COLUMN ── -->
+        <div class="settings-col-main">
+
+          <!-- 1. DATA SOURCE -->
+          <div class="card settings-card">
+            <div class="card-header">
+              <div class="card-title">Data Source</div>
+              <span class="badge badge-green" id="ds-status-badge">● Active</span>
+            </div>
+            <div class="settings-meta-grid" id="ds-meta-grid">
+              <div class="smeta-row">
+                <div class="smeta-label">File Name</div>
+                <div class="smeta-val mono" id="ds-filename">bm_updated.csv</div>
+              </div>
+              <div class="smeta-row">
+                <div class="smeta-label">Stores</div>
+                <div class="smeta-val" id="ds-stores">15</div>
+              </div>
+              <div class="smeta-row">
+                <div class="smeta-label">Last Updated</div>
+                <div class="smeta-val" id="ds-updated">May 2024</div>
+              </div>
+              <div class="smeta-row">
+                <div class="smeta-label">Coverage</div>
+                <div class="smeta-val" id="ds-coverage">Georgia (10) · Florida (5)</div>
+              </div>
+              <div class="smeta-row" style="border:none">
+                <div class="smeta-label">Source</div>
+                <div class="smeta-val" id="ds-source">BLS May 2024 · Census 2024</div>
+              </div>
+            </div>
+            <!-- Empty state (hidden by default) -->
+            <div class="ds-empty-state" id="ds-empty-state" style="display:none;">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+              <div class="ds-empty-title">No dataset loaded</div>
+              <div class="ds-empty-sub">Upload a CSV file to populate the dashboard. The file must include store name, address, state, and demographic columns.</div>
+            </div>
+          </div>
+
+          <!-- 2. DATASET ACTIONS -->
+          <div class="card settings-card">
+            <div class="card-header">
+              <div class="card-title">Dataset Actions</div>
+            </div>
+            <div class="settings-actions-body">
+
+              <!-- When dataset EXISTS -->
+              <div id="actions-has-data">
+                <div class="action-row">
+                  <div class="action-info">
+                    <div class="action-label">Replace CSV</div>
+                    <div class="action-desc">Upload a new CSV file to replace the current dataset. Existing data will be overwritten.</div>
+                  </div>
+                  <label class="btn btn-primary action-btn" style="cursor:pointer;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+                    Replace CSV
+                    <input type="file" accept=".csv" style="display:none" onchange="handleCSVUpload(event,'replace')">
+                  </label>
+                </div>
+                <div class="action-divider"></div>
+                <div class="action-row">
+                  <div class="action-info">
+                    <div class="action-label">Validate Data</div>
+                    <div class="action-desc">Run a field-level check to identify missing columns, invalid values, or row errors.</div>
+                  </div>
+                  <button class="btn btn-ghost action-btn" onclick="runValidation()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                    Validate
+                  </button>
+                </div>
+                <div class="action-divider"></div>
+                <div class="action-row">
+                  <div class="action-info">
+                    <div class="action-label">Refresh Data</div>
+                    <div class="action-desc">Re-parse the current CSV and refresh all dashboard calculations without re-uploading.</div>
+                  </div>
+                  <button class="btn btn-ghost action-btn" onclick="refreshData()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                    Refresh
+                  </button>
+                </div>
+                <div class="action-divider"></div>
+                <div class="action-row action-row-danger">
+                  <div class="action-info">
+                    <div class="action-label" style="color:var(--error)">Remove Dataset</div>
+                    <div class="action-desc">Permanently delete the current dataset. Dashboard will be empty until a new file is uploaded.</div>
+                  </div>
+                  <button class="btn btn-danger-ghost action-btn" onclick="openRemoveModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                    Remove
+                  </button>
+                </div>
+              </div>
+
+              <!-- When NO dataset (hidden by default) -->
+              <div id="actions-no-data" style="display:none;">
+                <div class="upload-zone" id="upload-zone"
+                  ondragover="uploadZoneDragOver(event)"
+                  ondragleave="uploadZoneDragLeave(event)"
+                  ondrop="uploadZoneDrop(event)">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+                  <div class="upload-zone-title">Upload CSV</div>
+                  <div class="upload-zone-sub">Drag & drop your CSV file here, or click to browse</div>
+                  <label class="btn btn-primary" style="cursor:pointer;margin-top:var(--s4)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Choose File
+                    <input type="file" accept=".csv" style="display:none" onchange="handleCSVUpload(event,'upload')">
+                  </label>
+                  <div class="upload-zone-hint">Accepts .csv files only · UTF-8 encoding recommended</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+
+        </div><!-- /left col -->
+
+        <!-- ── RIGHT COLUMN ── -->
+        <div class="settings-col-side">
+
+          <!-- 4. FIELD MAPPING / DATA HEALTH -->
+          <div class="card settings-card">
+            <div class="card-header">
+              <div class="card-title">Field Mapping & Data Health</div>
+            </div>
+            <div id="fh-has-data" style="display:none;">
+              <div class="fh-summary-row">
+                <div class="fh-summary-item">
+                  <div class="fh-summary-val" id="fh-val-mapped" style="color:var(--success)">—</div>
+                  <div class="fh-summary-label">Mapped Fields</div>
+                </div>
+                <div class="fh-summary-item">
+                  <div class="fh-summary-val" id="fh-val-warnings">—</div>
+                  <div class="fh-summary-label">Warnings</div>
+                </div>
+                <div class="fh-summary-item">
+                  <div class="fh-summary-val" id="fh-val-rows">—</div>
+                  <div class="fh-summary-label">Rows</div>
+                </div>
+              </div>
+              <div class="fh-field-list" id="fh-field-list"></div>
+              <div class="fh-footer" id="fh-footer"></div>
+            </div>
+            <div id="fh-no-data">
+              <div class="fh-empty">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                No dataset loaded. Upload a CSV to see field mapping and validation results.
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. INTERNAL NOTES -->
+          <div class="card settings-card">
+            <div class="card-header">
+              <div class="card-title">Internal Notes</div>
+              <div class="card-sub">Admin-only. Not displayed on any dashboard view.</div>
+            </div>
+            <div class="settings-form-body">
+              <div class="form-group">
+                <label class="form-label" for="note-source">Source Note</label>
+                <div class="form-helper">Describe the origin and methodology of this dataset</div>
+                <textarea class="form-textarea" id="note-source" rows="2" placeholder="e.g. BLS May 2024 OES data, Census ACS 5-year estimates for ZIP-level demographics.">BLS May 2024 OES · Census ACS 5-year (2024) · ZIP-level demographics mapped to store addresses.</textarea>
+              </div>
+              <div class="form-divider"></div>
+              <div class="form-group">
+                <label class="form-label" for="note-memo">Update Memo</label>
+                <div class="form-helper">What changed in the most recent data update</div>
+                <textarea class="form-textarea" id="note-memo" rows="2" placeholder="e.g. Added 3 Florida stores. Updated income bands based on Q1 actuals.">Updated FL store count from 3 → 5. Recalculated income bands. Flagged Tamarac for review.</textarea>
+              </div>
+              <div class="form-divider"></div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="note-admin">Admin Note</label>
+                <div class="form-helper">Short internal context for this ops hub instance</div>
+                <textarea class="form-textarea" id="note-admin" rows="2" placeholder="e.g. Internal MVP — not for client sharing. Reviewed by ops lead.">Internal MVP only. Do not share externally. Reviewed by ops lead May 2024.</textarea>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /right col -->
+
+      </div><!-- /settings-layout -->
+
+    </div><!-- /settings page -->
+
+  </main><!-- /main -->
+
+  <!-- ══════════════════ RIGHT PANEL ══════════════════ -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-photo" id="rp-photo">
+        <div class="rp-photo-bg" id="rp-photo-bg"></div>
+        <div class="rp-photo-overlay"></div>
+        <div class="rp-photo-badge" id="rp-photo-state">GA</div>
+        <label class="rp-photo-upload" title="Upload store photo" onclick="triggerPhotoUpload()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </label>
+        <input type="file" id="rp-photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+        <div class="rp-photo-caption">
+          <div class="rp-photo-caption-name" id="rp-photo-name">Union City</div>
+          <div class="rp-photo-caption-addr" id="rp-photo-addr">6851 Shannon Pkwy, Union City, GA</div>
+        </div>
+      </div>
+      <div class="rp-header-info">
+        <div class="rp-eyebrow">Store Intelligence</div>
+        <div class="rp-store-name" id="rp-name">Union City</div>
+        <div class="rp-store-sub" id="rp-sub">Georgia · Lower-Mid Income</div>
+      </div>
+    </div>
+    <div class="rp-section">
+      <div class="rp-section-label">📍 Recommended Messaging</div>
+      <div class="rp-msg" id="rp-msg">"Everyday beauty essentials nearby. Shop the Black hair care brands you trust."</div>
+    </div>
+    <div class="rp-section">
+      <div class="rp-section-label">📊 Market Stats</div>
+      <div class="rp-stats-grid" id="rp-stats">
+        <div class="rp-stat"><div class="rp-stat-label">Median Income</div><div class="rp-stat-value">$49,549</div></div>
+        <div class="rp-stat"><div class="rp-stat-label">Poverty Rate</div><div class="rp-stat-value">14.2%</div></div>
+        <div class="rp-stat"><div class="rp-stat-label">Black Pop.</div><div class="rp-stat-value">81.9%</div></div>
+        <div class="rp-stat"><div class="rp-stat-label">Avg Wage/hr</div><div class="rp-stat-value">$33.73</div></div>
+      </div>
+    </div>
+    <div class="rp-section">
+      <div class="rp-section-label">🛍 Merchandising Focus</div>
+      <div id="rp-merch">
+        <div class="merch-item"><div class="merch-dot merch-done">✓</div>Black hair &amp; braiding essentials</div>
+        <div class="merch-item"><div class="merch-dot merch-done">✓</div>Value bundles &amp; bulk packs</div>
+        <div class="merch-item"><div class="merch-dot merch-pend">○</div><span class="merch-pend-text">Loyalty card promo (Pending)</span></div>
+      </div>
+    </div>
+    <div class="rp-section">
+      <div class="rp-section-label">⚡ Actions</div>
+      <div class="rp-cta-group">
+        <button class="rp-cta rp-cta-primary" id="rp-act1">Launch Awareness Campaign</button>
+        <button class="rp-cta rp-cta-secondary" id="rp-act2">Update Shelf Displays</button>
+        <button class="rp-cta rp-cta-accent">Open Store Playbook</button>
+      </div>
+    </div>
+  </aside>
+
+</div><!-- /layout -->
+
+<script src="script.js"></script>
+</body>
+</html>
