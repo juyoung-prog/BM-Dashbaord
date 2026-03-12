@@ -1131,3 +1131,35 @@ function showToast(msg) {
 }
 
 syncDatasetState();
+
+// ══════════════════════════════════════════
+// THEME (Dark / Light Mode)
+// ══════════════════════════════════════════
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('bm-theme', next);
+  _applyThemeIcon(next);
+}
+
+function _applyThemeIcon(theme) {
+  const isDark = theme === 'dark';
+  const sun  = document.getElementById('theme-icon-sun');
+  const moon = document.getElementById('theme-icon-moon');
+  const lbl  = document.getElementById('theme-label');
+  if (sun)  sun.style.display  = isDark ? '' : 'none';
+  if (moon) moon.style.display = isDark ? 'none' : '';
+  if (lbl)  lbl.textContent    = isDark ? 'Light Mode' : 'Dark Mode';
+}
+
+// Restore saved theme on load
+(function() {
+  const saved = localStorage.getItem('bm-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => _applyThemeIcon(saved));
+  } else {
+    _applyThemeIcon(saved);
+  }
+})();

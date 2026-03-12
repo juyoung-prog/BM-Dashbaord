@@ -76,6 +76,29 @@
   --dur:  160ms;
 }
 
+/* ═══════════════════════════════════════════
+   DARK MODE TOKENS
+   ═══════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg-base:      #0F0F10;
+  --bg-surface:   #1C1C1E;
+  --bg-elevated:  #2C2C2E;
+  --bg-subtle:    #1C1C1E;
+  --bg-overlay:   rgba(255,255,255,.06);
+
+  --text-primary:   #F5F5F7;
+  --text-secondary: #A1A1A6;
+  --text-tertiary:  #6E6E73;
+  --text-inverse:   #1D1D1F;
+
+  --border-default: rgba(255,255,255,.10);
+  --border-subtle:  rgba(255,255,255,.06);
+  --border-strong:  rgba(255,255,255,.18);
+
+  --shadow-1: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+  --shadow-2: 0 4px 16px rgba(0,0,0,.4), 0 1px 4px rgba(0,0,0,.3);
+}
+
 /* ═══════ RESET & BASE ═══════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
@@ -1445,3 +1468,29 @@ svg { display: block; }
   pointer-events: none;
 }
 .validate-toast.show { opacity: 1; }
+
+/* ═══════ TOPBAR — dark override ═══════ */
+[data-theme="dark"] .topbar { background: rgba(28,28,30,.88); }
+
+/* ═══════ THEME TOGGLE BUTTON ═══════ */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  width: 100%;
+  padding: 7px var(--s3);
+  margin-top: var(--s2);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 450;
+  font-family: var(--font-sans);
+  letter-spacing: -.01em;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.theme-toggle:hover { background: var(--bg-overlay); color: var(--text-primary); border-color: var(--border-strong); }
+.theme-toggle svg { width: 14px; height: 14px; flex-shrink: 0; }
+.theme-toggle .toggle-label { flex: 1; text-align: left; }
