@@ -1472,6 +1472,9 @@ svg { display: block; }
 /* ═══════ TOPBAR — dark override ═══════ */
 [data-theme="dark"] .topbar { background: rgba(28,28,30,.88); }
 
+/* ═══════ TOAST — dark override ═══════ */
+[data-theme="dark"] .validate-toast { background: #3A3A3C; color: var(--text-primary); }
+
 /* ═══════ THEME TOGGLE BUTTON ═══════ */
 .theme-toggle {
   display: flex;
