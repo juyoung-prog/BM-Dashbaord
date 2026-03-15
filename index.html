@@ -75,32 +75,15 @@
 
       </div>
 
-      <!-- KPI Zone -->
-      <div class="kpi-zone">
-
-        <!-- Portfolio Overview -->
-        <div class="kpi-group">
-          <div class="kpi-group-header">Portfolio Overview</div>
-          <div class="kpi-overview-strip">
-            <div class="kpi-card kpi-card--strip" id="kpi-all" data-kpi="all" onclick="filterKPI('all',this)">
-              <div class="kpi-label">Active Portfolio</div>
-              <div class="kpi-value">15</div>
-              <div class="kpi-meta"><span class="kpi-trend trend-up">GA 10 &nbsp;·&nbsp; FL 5</span></div>
-            </div>
-            <div class="ks-divider"></div>
-            <div class="kpi-card kpi-card--strip" id="kpi-income" data-kpi="income" onclick="filterKPI('income',this)">
-              <div class="kpi-label">Avg. Median Income</div>
-              <div class="kpi-value">$71.8K</div>
-              <div class="kpi-meta" style="margin-bottom:4px"><span class="kpi-trend trend-neu">$50K – $95K range</span></div>
-              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:72%;background:var(--info)"></div></div>
-            </div>
-          </div>
+      <!-- KPI Grid -->
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi-card" id="kpi-all" data-kpi="all" draggable="true" onclick="filterKPI('all',this)">
+          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+          <button class="kpi-remove" onclick="removeKPI(event,'all')" title="Remove">×</button>
+          <div class="kpi-label">Total Stores</div>
+          <div class="kpi-value">15</div>
+          <div class="kpi-meta"><span class="kpi-trend trend-up">GA 10 &nbsp;·&nbsp; FL 5</span></div>
         </div>
-
-        <!-- Market Signals -->
-        <div class="kpi-group">
-          <div class="kpi-group-header">Market Signals</div>
-          <div class="kpi-grid" id="kpi-grid">
             <div class="kpi-card" id="kpi-black" data-kpi="black" draggable="true" onclick="filterKPI('black',this)">
               <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
               <button class="kpi-remove" onclick="removeKPI(event,'black')" title="Remove">×</button>
@@ -146,9 +129,6 @@
               Add Signal
             </div>
           </div>
-        </div>
-
-      </div>
 
       <!-- KPI Picker Modal -->
       <div class="kpi-picker-backdrop" id="kpi-picker-backdrop" onclick="closeKPIPicker(event)">
@@ -217,8 +197,6 @@
 
         </div>
 
-        <!-- Right column placeholder (for right panel spacing) -->
-        <div style="display:flex;flex-direction:column;gap:var(--s4);"></div>
       </div>
 
     </div><!-- /dashboard -->
@@ -311,7 +289,7 @@
             <div class="settings-meta-grid" id="ds-meta-grid">
               <div class="smeta-row">
                 <div class="smeta-label">File Name</div>
-                <div class="smeta-val mono" id="ds-filename">bm_updated.csv</div>
+                <div class="smeta-val mono" id="ds-filename">BM_Market_Data.csv</div>
               </div>
               <div class="smeta-row">
                 <div class="smeta-label">Stores</div>
@@ -489,6 +467,7 @@
 
   <!-- ══════════════════ RIGHT PANEL ══════════════════ -->
   <aside class="right-panel">
+    <div class="rp-resize-handle" id="rp-resize-handle"></div>
     <div class="rp-header">
       <div class="rp-photo" id="rp-photo">
         <div class="rp-photo-bg" id="rp-photo-bg"></div>

@@ -24,12 +24,11 @@ let selectedId = 0;
 let colFilters = { name: '', band: '', demo: '' }; // column-level filters
 
 // KPI visibility state
-let visibleKPIs = ['all','income','black','hispanic','premium','lowincome','asian'];
+let visibleKPIs = ['all','black','hispanic','premium','lowincome','asian'];
 let pickerSelection = new Set();
 
 const ALL_KPI_DEFS = {
-  all:       { label:'Active Portfolio',       value:'15',     meta:'GA 10 · FL 5',           color:'var(--text-primary)', barW:null   },
-  income:    { label:'Avg. Median Income',     value:'$71.8K', meta:'$50K – $95K range',      color:'var(--info)',          barW:'72%', barC:'var(--info)'    },
+  all:       { label:'Total Stores',           value:'15',     meta:'GA 10 · FL 5',           color:'var(--text-primary)', barW:null   },
   black:     { label:'Black-Majority Markets', value:'4',      meta:'stores >50% Black pop.', color:'#6366F1',              barW:'27%', barC:'#6366F1'        },
   hispanic:  { label:'Hispanic Market Stores', value:'4',      meta:'stores >25% Hisp. pop.', color:'var(--warning)',        barW:'27%', barC:'var(--warning)' },
   premium:   { label:'Premium Income',         value:'1',      meta:'Duluth · $95.3K',        color:'var(--info)',           barW:'7%',  barC:'var(--info)'    },
@@ -542,12 +541,38 @@ function closeMobileSidebar() {
 }
 
 // ══════════════════════════════════════════
+// RIGHT PANEL RESIZE
+// ══════════════════════════════════════════
+function initRpResize() {
+  const handle = document.getElementById('rp-resize-handle');
+  if (!handle) return;
+  let startX, startW;
+  handle.addEventListener('mousedown', e => {
+    startX = e.clientX;
+    startW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--rpanel-w')) || 288;
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    e.preventDefault();
+  });
+  function onMove(e) {
+    const dx = startX - e.clientX;
+    const newW = Math.max(220, Math.min(520, startW + dx));
+    document.documentElement.style.setProperty('--rpanel-w', newW + 'px');
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+}
+
+// ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
 renderTable();
 initKPIDrag();
 refreshAddBtn();
 updatePhotoPanel(STORES[0]);
+initRpResize();
 
 // Sync KPI cards to STORES data on initial load
 (function initKPIFromStores() {
@@ -719,7 +744,7 @@ function confirmRemoveDataset() {
 }
 
 // ══════════════════════════════════════════
-// CSV PARSER — converts bm_updated.csv rows into STORES objects
+// CSV PARSER — converts BM_Market_Data.csv rows into STORES objects
 // ══════════════════════════════════════════
 function parseCSV(text) {
   const lines = text.trim().split('\n');
@@ -997,7 +1022,7 @@ function handleCSVUpload(event, mode) {
 // FIELD MAPPING & DATA HEALTH
 // ══════════════════════════════════════════
 
-// Required fields + their aliases from bm_updated.csv
+// Required fields + their aliases from BM_Market_Data.csv
 const FIELD_SCHEMA = [
   { key: 'store_name',  aliases: ['store_name','name','store'],                       required: true,  type: 'string' },
   { key: 'address',     aliases: ['address','addr','store_address'],                   required: true,  type: 'string' },
