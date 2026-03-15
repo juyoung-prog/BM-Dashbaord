@@ -99,10 +99,7 @@ function renderTable() {
         </div>
       </div>
       <div class="tbl-cell">
-        <div class="priority-cell">
-          <div class="p-dot" style="background:${s.pColor}"></div>
-          <span class="p-text ${s.priority}">${s.priorityText}</span>
-        </div>
+        <span class="priority-badge priority-badge--${s.priority}">${s.priorityText}</span>
       </div>
     </div>
   `;
@@ -506,6 +503,13 @@ function selectStore(id) {
     // Primary action label — derived from store priority segment
     const guideMap = { accent: 'View Black Hair Care Guide', warn: 'View Bilingual Market Guide', info: 'View K-Beauty Playbook' };
     document.getElementById('rp-act1').textContent = guideMap[s.priority] || 'View Campaign Guide';
+    // Header summary tags
+    const htagState = document.getElementById('rp-htag-state');
+    if (htagState) { htagState.textContent = s.state; htagState.className = `rp-htag ${s.state === 'FL' ? 'rp-htag--fl' : 'rp-htag--state'}`; }
+    const htagBand = document.getElementById('rp-htag-band');
+    if (htagBand) htagBand.textContent = s.bannerLabel;
+    const htagType = document.getElementById('rp-htag-type');
+    if (htagType) htagType.textContent = s.priorityText;
   }
   renderTable();
 }

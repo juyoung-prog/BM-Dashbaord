@@ -81,15 +81,16 @@
         <!-- Portfolio Overview -->
         <div class="kpi-group">
           <div class="kpi-group-header">Portfolio Overview</div>
-          <div class="kpi-overview-row">
-            <div class="kpi-card kpi-card--overview" id="kpi-all" data-kpi="all" onclick="filterKPI('all',this)">
+          <div class="kpi-overview-strip">
+            <div class="kpi-card kpi-card--strip" id="kpi-all" data-kpi="all" onclick="filterKPI('all',this)">
               <div class="kpi-label">Active Portfolio</div>
               <div class="kpi-value">15</div>
               <div class="kpi-meta"><span class="kpi-trend trend-up">GA 10 &nbsp;·&nbsp; FL 5</span></div>
             </div>
-            <div class="kpi-card kpi-card--overview" id="kpi-income" data-kpi="income" onclick="filterKPI('income',this)">
+            <div class="ks-divider"></div>
+            <div class="kpi-card kpi-card--strip" id="kpi-income" data-kpi="income" onclick="filterKPI('income',this)">
               <div class="kpi-label">Avg. Median Income</div>
-              <div class="kpi-value" style="font-size:26px">$71.8K</div>
+              <div class="kpi-value">$71.8K</div>
               <div class="kpi-meta" style="margin-bottom:4px"><span class="kpi-trend trend-neu">$50K – $95K range</span></div>
               <div class="kpi-bar"><div class="kpi-bar-fill" style="width:72%;background:var(--info)"></div></div>
             </div>
@@ -183,8 +184,14 @@
             <div class="th th-sortable" id="th-pop" onclick="sortByCol('pop',event)">
               Population <span class="th-sort" id="sort-pop">↕</span>
             </div>
-            <div class="th th-sortable" id="th-demo" onclick="openDemoSort(event)">
-              Demographics <span class="th-sort" id="sort-demo">↕</span>
+            <div class="th th-sortable th-demo-col" id="th-demo" onclick="openDemoSort(event)">
+              <div class="th-demo-top">Demographics <span class="th-sort" id="sort-demo">↕</span></div>
+              <div class="demo-key-row">
+                <span class="dk-item"><span class="dk-dot" style="background:#4F46E5"></span>B=Black</span>
+                <span class="dk-item"><span class="dk-dot" style="background:#E81D25"></span>H=Hispanic</span>
+                <span class="dk-item"><span class="dk-dot" style="background:#F59E0B"></span>A=Asian</span>
+                <span class="dk-item"><span class="dk-dot" style="background:#9CA3AF"></span>W=White</span>
+              </div>
               <div class="col-filter-dropdown" id="cf-demo">
                 <div class="col-filter-opt" data-val="black" onclick="sortByDemo('black',event)">
                   <div class="opt-dot" style="background:#4F46E5"></div>Highest Black %
@@ -499,7 +506,12 @@
       <div class="rp-header-info">
         <div class="rp-eyebrow">Store Playbook</div>
         <div class="rp-store-name" id="rp-name">Union City</div>
-        <div class="rp-store-sub" id="rp-sub">Georgia · Lower-Mid Income</div>
+        <div class="rp-header-tags" id="rp-header-tags">
+          <span class="rp-htag rp-htag--state" id="rp-htag-state">GA</span>
+          <span class="rp-htag rp-htag--band" id="rp-htag-band">Lower-Mid Income</span>
+          <span class="rp-htag rp-htag--type" id="rp-htag-type">Black Hair Essentials</span>
+        </div>
+        <div class="rp-store-sub" id="rp-sub" style="display:none">Georgia · Lower-Mid Income</div>
       </div>
     </div>
 
