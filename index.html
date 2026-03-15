@@ -75,73 +75,84 @@
 
       </div>
 
-      <!-- KPI -->
-      <div class="kpi-grid" id="kpi-grid">
-        <div class="kpi-card" id="kpi-all" data-kpi="all" draggable="true" onclick="filterKPI('all',this)">
-          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
-          <button class="kpi-remove" onclick="removeKPI(event,'all')" title="Remove">×</button>
-          <div class="kpi-label">Total Stores</div>
-          <div class="kpi-value">15</div>
-          <div class="kpi-meta"><span class="kpi-trend trend-up">↑ GA 10 · FL 5</span></div>
+      <!-- KPI Zone -->
+      <div class="kpi-zone">
+
+        <!-- Portfolio Overview -->
+        <div class="kpi-group">
+          <div class="kpi-group-header">Portfolio Overview</div>
+          <div class="kpi-overview-row">
+            <div class="kpi-card kpi-card--overview" id="kpi-all" data-kpi="all" onclick="filterKPI('all',this)">
+              <div class="kpi-label">Active Portfolio</div>
+              <div class="kpi-value">15</div>
+              <div class="kpi-meta"><span class="kpi-trend trend-up">GA 10 &nbsp;·&nbsp; FL 5</span></div>
+            </div>
+            <div class="kpi-card kpi-card--overview" id="kpi-income" data-kpi="income" onclick="filterKPI('income',this)">
+              <div class="kpi-label">Avg. Median Income</div>
+              <div class="kpi-value" style="font-size:26px">$71.8K</div>
+              <div class="kpi-meta" style="margin-bottom:4px"><span class="kpi-trend trend-neu">$50K – $95K range</span></div>
+              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:72%;background:var(--info)"></div></div>
+            </div>
+          </div>
         </div>
-        <div class="kpi-card" id="kpi-income" data-kpi="income" draggable="true" onclick="filterKPI('income',this)">
-          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
-          <button class="kpi-remove" onclick="removeKPI(event,'income')" title="Remove">×</button>
-          <div class="kpi-label">Avg. Median Income</div>
-          <div class="kpi-value" style="font-size:22px">$71.8K</div>
-          <div class="kpi-meta" style="margin-bottom:4px"><span class="kpi-trend trend-neu">$50K – $95K range</span></div>
-          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:72%;background:var(--info)"></div></div>
+
+        <!-- Market Signals -->
+        <div class="kpi-group">
+          <div class="kpi-group-header">Market Signals</div>
+          <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi-card" id="kpi-black" data-kpi="black" draggable="true" onclick="filterKPI('black',this)">
+              <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+              <button class="kpi-remove" onclick="removeKPI(event,'black')" title="Remove">×</button>
+              <div class="kpi-label">Black-Majority Markets</div>
+              <div class="kpi-value">4</div>
+              <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:#6366F1;background:rgba(99,102,241,.1)">stores &gt;50% Black pop.</span></div>
+              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:27%;background:#6366F1"></div></div>
+            </div>
+            <div class="kpi-card" id="kpi-hispanic" data-kpi="hispanic" draggable="true" onclick="filterKPI('hispanic',this)">
+              <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+              <button class="kpi-remove" onclick="removeKPI(event,'hispanic')" title="Remove">×</button>
+              <div class="kpi-label">Hispanic Market Stores</div>
+              <div class="kpi-value">4</div>
+              <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:var(--warning);background:var(--warning-bg)">stores &gt;25% Hispanic pop.</span></div>
+              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:27%;background:var(--warning)"></div></div>
+            </div>
+            <div class="kpi-card" id="kpi-premium" data-kpi="premium" draggable="true" onclick="filterKPI('premium',this)">
+              <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+              <button class="kpi-remove" onclick="removeKPI(event,'premium')" title="Remove">×</button>
+              <div class="kpi-label">Premium Income</div>
+              <div class="kpi-value">1</div>
+              <div class="kpi-meta"><span class="kpi-trend trend-up" style="color:var(--info);background:var(--info-bg)">Duluth · $95.3K</span></div>
+              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:7%;background:var(--info)"></div></div>
+            </div>
+            <div class="kpi-card" id="kpi-lowincome" data-kpi="lowincome" draggable="true" onclick="filterKPI('lowincome',this)">
+              <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+              <button class="kpi-remove" onclick="removeKPI(event,'lowincome')" title="Remove">×</button>
+              <div class="kpi-label">Value Income Markets</div>
+              <div class="kpi-value">3</div>
+              <div class="kpi-meta"><span class="kpi-trend trend-down">stores &lt;$65K income</span></div>
+              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:20%;background:var(--error)"></div></div>
+            </div>
+            <div class="kpi-card" id="kpi-asian" data-kpi="asian" draggable="true" onclick="filterKPI('asian',this)">
+              <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+              <button class="kpi-remove" onclick="removeKPI(event,'asian')" title="Remove">×</button>
+              <div class="kpi-label">High Asian Population</div>
+              <div class="kpi-value">2</div>
+              <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:#F59E0B;background:rgba(245,158,11,.1)">stores &gt;20% Asian pop.</span></div>
+              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:13%;background:#F59E0B"></div></div>
+            </div>
+            <div class="kpi-add-btn" id="kpi-add-btn" onclick="openKPIPicker()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Signal
+            </div>
+          </div>
         </div>
-        <div class="kpi-card" id="kpi-black" data-kpi="black" draggable="true" onclick="filterKPI('black',this)">
-          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
-          <button class="kpi-remove" onclick="removeKPI(event,'black')" title="Remove">×</button>
-          <div class="kpi-label">Black-Majority</div>
-          <div class="kpi-value">4</div>
-          <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:#6366F1;background:rgba(99,102,241,.1)">stores &gt;50% Black</span></div>
-          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:27%;background:#6366F1"></div></div>
-        </div>
-        <div class="kpi-card" id="kpi-hispanic" data-kpi="hispanic" draggable="true" onclick="filterKPI('hispanic',this)">
-          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
-          <button class="kpi-remove" onclick="removeKPI(event,'hispanic')" title="Remove">×</button>
-          <div class="kpi-label">Hispanic Focus</div>
-          <div class="kpi-value">4</div>
-          <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:var(--warning);background:var(--warning-bg)">stores &gt;25% Hispanic</span></div>
-          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:27%;background:var(--warning)"></div></div>
-        </div>
-        <div class="kpi-card" id="kpi-premium" data-kpi="premium" draggable="true" onclick="filterKPI('premium',this)">
-          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
-          <button class="kpi-remove" onclick="removeKPI(event,'premium')" title="Remove">×</button>
-          <div class="kpi-label">High-Income</div>
-          <div class="kpi-value">1</div>
-          <div class="kpi-meta"><span class="kpi-trend trend-up" style="color:var(--info);background:var(--info-bg)">Duluth · $95.3K</span></div>
-          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:7%;background:var(--info)"></div></div>
-        </div>
-        <div class="kpi-card" id="kpi-lowincome" data-kpi="lowincome" draggable="true" onclick="filterKPI('lowincome',this)">
-          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
-          <button class="kpi-remove" onclick="removeKPI(event,'lowincome')" title="Remove">×</button>
-          <div class="kpi-label">Low Income Area</div>
-          <div class="kpi-value">3</div>
-          <div class="kpi-meta"><span class="kpi-trend trend-down">stores &lt;$65K</span></div>
-          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:20%;background:var(--error)"></div></div>
-        </div>
-        <div class="kpi-card" id="kpi-asian" data-kpi="asian" draggable="true" onclick="filterKPI('asian',this)">
-          <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
-          <button class="kpi-remove" onclick="removeKPI(event,'asian')" title="Remove">×</button>
-          <div class="kpi-label">High Asian Pop.</div>
-          <div class="kpi-value">2</div>
-          <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:#F59E0B;background:rgba(245,158,11,.1)">stores &gt;20% Asian</span></div>
-          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:13%;background:#F59E0B"></div></div>
-        </div>
-        <div class="kpi-add-btn" id="kpi-add-btn" onclick="openKPIPicker()">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add KPI
-        </div>
+
       </div>
 
       <!-- KPI Picker Modal -->
       <div class="kpi-picker-backdrop" id="kpi-picker-backdrop" onclick="closeKPIPicker(event)">
         <div class="kpi-picker">
-          <h3>Add KPI Cards</h3>
+          <h3>Add Market Signal Card</h3>
           <div class="kpi-picker-list" id="kpi-picker-list"></div>
           <div class="kpi-picker-footer">
             <button class="kpi-picker-close" onclick="closeKPIPicker()">Cancel</button>
@@ -160,7 +171,7 @@
           <div class="card">
           <div class="card-header">
             <div class="card-title">Store Market Priorities</div>
-  
+          <div style="font-size:11px;color:var(--text-tertiary)">Click a row to open Store Playbook</div>
           </div>
           <div class="tbl-head">
             <div class="th th-sortable" id="th-name" onclick="sortByCol('name',event)">
@@ -176,23 +187,23 @@
               Demographics <span class="th-sort" id="sort-demo">↕</span>
               <div class="col-filter-dropdown" id="cf-demo">
                 <div class="col-filter-opt" data-val="black" onclick="sortByDemo('black',event)">
-                  <div class="opt-dot" style="background:#4F46E5"></div>Black % 높은 순
+                  <div class="opt-dot" style="background:#4F46E5"></div>Highest Black %
                 </div>
                 <div class="col-filter-opt" data-val="hisp" onclick="sortByDemo('hisp',event)">
-                  <div class="opt-dot" style="background:#E81D25"></div>Hispanic % 높은 순
+                  <div class="opt-dot" style="background:#E81D25"></div>Highest Hispanic %
                 </div>
                 <div class="col-filter-opt" data-val="asian" onclick="sortByDemo('asian',event)">
-                  <div class="opt-dot" style="background:#F59E0B"></div>Asian % 높은 순
+                  <div class="opt-dot" style="background:#F59E0B"></div>Highest Asian %
                 </div>
                 <div class="col-filter-opt" data-val="white" onclick="sortByDemo('white',event)">
-                  <div class="opt-dot" style="background:#9CA3AF"></div>White % 높은 순
+                  <div class="opt-dot" style="background:#9CA3AF"></div>Highest White %
                 </div>
                 <div class="col-filter-opt" data-val="" onclick="sortByDemo('',event)">
-                  <div class="opt-dot" style="background:var(--text-tertiary)"></div>정렬 해제
+                  <div class="opt-dot" style="background:var(--text-tertiary)"></div>Clear Sort
                 </div>
               </div>
             </div>
-            <div class="th">Priority Focus</div>
+            <div class="th" style="font-weight:700;color:var(--text-primary)">Store Priority</div>
           </div>
           <div class="tbl-body" id="tbl-body"></div>
         </div>
@@ -486,17 +497,15 @@
         </div>
       </div>
       <div class="rp-header-info">
-        <div class="rp-eyebrow">Store Intelligence</div>
+        <div class="rp-eyebrow">Store Playbook</div>
         <div class="rp-store-name" id="rp-name">Union City</div>
         <div class="rp-store-sub" id="rp-sub">Georgia · Lower-Mid Income</div>
       </div>
     </div>
+
+    <!-- Store Snapshot -->
     <div class="rp-section">
-      <div class="rp-section-label">📍 Recommended Messaging</div>
-      <div class="rp-msg" id="rp-msg">"Everyday beauty essentials nearby. Shop the Black hair care brands you trust."</div>
-    </div>
-    <div class="rp-section">
-      <div class="rp-section-label">📊 Market Stats</div>
+      <div class="rp-section-label">Store Snapshot</div>
       <div class="rp-stats-grid" id="rp-stats">
         <div class="rp-stat"><div class="rp-stat-label">Median Income</div><div class="rp-stat-value">$49,549</div></div>
         <div class="rp-stat"><div class="rp-stat-label">Poverty Rate</div><div class="rp-stat-value">14.2%</div></div>
@@ -504,20 +513,45 @@
         <div class="rp-stat"><div class="rp-stat-label">Avg Wage/hr</div><div class="rp-stat-value">$33.73</div></div>
       </div>
     </div>
+
+    <!-- Key Audience -->
     <div class="rp-section">
-      <div class="rp-section-label">🛍 Merchandising Focus</div>
+      <div class="rp-section-label">Key Audience</div>
+      <div class="rp-audience">
+        <div class="rp-aud-demographics" id="rp-aud-demo">82% Black · 10% Hispanic</div>
+        <div class="rp-aud-meta">
+          <span class="rp-aud-band" id="rp-aud-band">Lower-Mid Income</span>
+          <span class="rp-aud-divider">·</span>
+          <span class="rp-aud-priority" id="rp-aud-priority">Black Hair Essentials</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommended Messaging -->
+    <div class="rp-section">
+      <div class="rp-section-label">Recommended Messaging</div>
+      <div class="rp-msg" id="rp-msg">"Everyday beauty essentials nearby. Shop the Black hair care brands you trust."</div>
+    </div>
+
+    <!-- Merchandising Focus -->
+    <div class="rp-section">
+      <div class="rp-section-label">Merchandising Focus</div>
       <div id="rp-merch">
         <div class="merch-item"><div class="merch-dot merch-done">✓</div>Black hair &amp; braiding essentials</div>
         <div class="merch-item"><div class="merch-dot merch-done">✓</div>Value bundles &amp; bulk packs</div>
         <div class="merch-item"><div class="merch-dot merch-pend">○</div><span class="merch-pend-text">Loyalty card promo (Pending)</span></div>
       </div>
     </div>
+
+    <!-- Suggested Actions -->
     <div class="rp-section">
-      <div class="rp-section-label">⚡ Actions</div>
+      <div class="rp-section-label">Suggested Actions</div>
       <div class="rp-cta-group">
-        <button class="rp-cta rp-cta-primary" id="rp-act1">Launch Awareness Campaign</button>
-        <button class="rp-cta rp-cta-secondary" id="rp-act2">Update Shelf Displays</button>
-        <button class="rp-cta rp-cta-accent">Open Store Playbook</button>
+        <button class="rp-cta rp-cta-primary" id="rp-act1">View Campaign Guide</button>
+        <button class="rp-cta rp-cta-secondary" id="rp-act2">Export Store Brief</button>
+        <button class="rp-cta rp-cta-secondary" onclick="showToast('Opening store playbook...')">Open Store Playbook</button>
+        <button class="rp-cta rp-cta-secondary" onclick="showToast('Opening merchandising notes...')">Review Merchandising Notes</button>
+        <button class="rp-cta rp-cta-accent" onclick="showToast('Opening comparison view...')">Compare Similar Stores</button>
       </div>
     </div>
   </aside>

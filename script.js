@@ -28,13 +28,13 @@ let visibleKPIs = ['all','income','black','hispanic','premium','lowincome','asia
 let pickerSelection = new Set();
 
 const ALL_KPI_DEFS = {
-  all:       { label:'Total Stores',      value:'15',     meta:'GA 10 · FL 5',      color:'var(--text-primary)', barW:null   },
-  income:    { label:'Avg. Median Income', value:'$71.8K', meta:'$50K – $95K range', color:'var(--info)',          barW:'72%', barC:'var(--info)'    },
-  black:     { label:'Black-Majority',    value:'4',      meta:'stores >50% Black', color:'#6366F1',              barW:'27%', barC:'#6366F1'        },
-  hispanic:  { label:'Hispanic Focus',    value:'4',      meta:'stores >25% Hisp.', color:'var(--warning)',        barW:'27%', barC:'var(--warning)' },
-  premium:   { label:'High-Income',       value:'1',      meta:'Duluth · $95.3K',   color:'var(--info)',           barW:'7%',  barC:'var(--info)'    },
-  lowincome: { label:'Low Income Area',   value:'3',      meta:'stores <$65K',       color:'var(--error)',          barW:'20%', barC:'var(--error)'   },
-  asian:     { label:'High Asian Pop.',   value:'2',      meta:'stores >20% Asian', color:'#F59E0B',               barW:'13%', barC:'#F59E0B'        },
+  all:       { label:'Active Portfolio',       value:'15',     meta:'GA 10 · FL 5',           color:'var(--text-primary)', barW:null   },
+  income:    { label:'Avg. Median Income',     value:'$71.8K', meta:'$50K – $95K range',      color:'var(--info)',          barW:'72%', barC:'var(--info)'    },
+  black:     { label:'Black-Majority Markets', value:'4',      meta:'stores >50% Black pop.', color:'#6366F1',              barW:'27%', barC:'#6366F1'        },
+  hispanic:  { label:'Hispanic Market Stores', value:'4',      meta:'stores >25% Hisp. pop.', color:'var(--warning)',        barW:'27%', barC:'var(--warning)' },
+  premium:   { label:'Premium Income',         value:'1',      meta:'Duluth · $95.3K',        color:'var(--info)',           barW:'7%',  barC:'var(--info)'    },
+  lowincome: { label:'Value Income Markets',   value:'3',      meta:'stores <$65K income',    color:'var(--error)',          barW:'20%', barC:'var(--error)'   },
+  asian:     { label:'High Asian Population',  value:'2',      meta:'stores >20% Asian pop.', color:'#F59E0B',               barW:'13%', barC:'#F59E0B'        },
 };
 
 // ══════════════════════════════════════════
@@ -72,7 +72,17 @@ function renderTable() {
   const data = getFiltered();
   const body = document.getElementById('tbl-body');
   if (!data.length) { body.innerHTML='<div class="no-results">No stores match this filter.</div>'; return; }
-  body.innerHTML = data.map(s => `
+  body.innerHTML = data.map(s => {
+    const raceParts = s.raceLabel.split(' / ');
+    const expandPart = l => l.trim()
+      .replace(/(\d+)% B$/, '$1% Black')
+      .replace(/(\d+)% H$/, '$1% Hispanic')
+      .replace(/(\d+)% A$/, '$1% Asian')
+      .replace(/(\d+)% W$/, '$1% White');
+    const demoLegend = raceParts.map((p, i) =>
+      s.raceBar[i] ? `<span class="dl-item"><span class="dl-dot" style="background:${s.raceBar[i].c}"></span>${expandPart(p)}</span>` : ''
+    ).join('');
+    return `
     <div class="tbl-row ${s.id===selectedId?'selected':''}" onclick="selectStore(${s.id})">
       <div class="tbl-cell">
         <div class="store-name">${s.name}</div>
@@ -85,7 +95,7 @@ function renderTable() {
       <div class="tbl-cell">
         <div class="race-wrap">
           <div class="race-track">${s.raceBar.map(r=>`<div class="race-seg" style="width:${r.w}%;background:${r.c}"></div>`).join('')}</div>
-          <div class="race-label">${s.raceLabel}</div>
+          <div class="demo-legend">${demoLegend}</div>
         </div>
       </div>
       <div class="tbl-cell">
@@ -95,7 +105,8 @@ function renderTable() {
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // ══════════════════════════════════════════
@@ -480,8 +491,21 @@ function selectStore(id) {
     document.getElementById('rp-merch').innerHTML = s.merch.map(([t,txt]) =>
       `<div class="merch-item"><div class="merch-dot merch-${t}">${t==='done'?'✓':'○'}</div><span class="${t==='pend'?'merch-pend-text':''}">${txt}</span></div>`
     ).join('');
-    document.getElementById('rp-act1').textContent = s.act1;
-    document.getElementById('rp-act2').textContent = s.act2;
+    // Key Audience section
+    const expandRace = l => l.trim()
+      .replace(/(\d+)% B\b/g, '$1% Black')
+      .replace(/(\d+)% H\b/g, '$1% Hispanic')
+      .replace(/(\d+)% A\b/g, '$1% Asian')
+      .replace(/(\d+)% W\b/g, '$1% White');
+    const audDemo = document.getElementById('rp-aud-demo');
+    if (audDemo) audDemo.textContent = expandRace(s.raceLabel);
+    const audBand = document.getElementById('rp-aud-band');
+    if (audBand) audBand.textContent = s.bannerLabel;
+    const audPri = document.getElementById('rp-aud-priority');
+    if (audPri) audPri.textContent = s.priorityText;
+    // Primary action label — derived from store priority segment
+    const guideMap = { accent: 'View Black Hair Care Guide', warn: 'View Bilingual Market Guide', info: 'View K-Beauty Playbook' };
+    document.getElementById('rp-act1').textContent = guideMap[s.priority] || 'View Campaign Guide';
   }
   renderTable();
 }
