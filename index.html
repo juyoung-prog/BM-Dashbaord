@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+1<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -155,8 +155,14 @@
           <div style="font-size:11px;color:var(--text-tertiary)">Click a row to open Store Playbook</div>
           </div>
           <div class="tbl-head">
-            <div class="th th-sortable" id="th-name" onclick="sortByCol('name',event)">
+            <div class="th th-sortable" id="th-name" onclick="openStoreSort(event)">
               Store <span class="th-sort" id="sort-name">↕</span>
+              <div class="col-filter-dropdown" id="cf-name">
+                <div class="col-filter-opt" data-val="alpha" onclick="sortByStore('alpha',event)">A → Z</div>
+                <div class="col-filter-opt" data-val="ga" onclick="sortByStore('ga',event)">GA First</div>
+                <div class="col-filter-opt" data-val="fl" onclick="sortByStore('fl',event)">FL First</div>
+                <div class="col-filter-opt" data-val="" onclick="sortByStore('',event)">Clear Sort</div>
+              </div>
             </div>
             <div class="th th-sortable" id="th-band" onclick="sortByCol('income',event)">
               Income Band <span class="th-sort" id="sort-band">↕</span>
@@ -171,6 +177,7 @@
                 <span class="dk-item"><span class="dk-dot" style="background:#E81D25"></span>H=Hispanic</span>
                 <span class="dk-item"><span class="dk-dot" style="background:#F59E0B"></span>A=Asian</span>
                 <span class="dk-item"><span class="dk-dot" style="background:#9CA3AF"></span>W=White</span>
+                <span class="dk-item"><span class="dk-dot" style="background:#A78BFA"></span>M=Multiracial</span>
               </div>
               <div class="col-filter-dropdown" id="cf-demo">
                 <div class="col-filter-opt" data-val="black" onclick="sortByDemo('black',event)">
@@ -468,29 +475,24 @@
   <!-- ══════════════════ RIGHT PANEL ══════════════════ -->
   <aside class="right-panel">
     <div class="rp-resize-handle" id="rp-resize-handle"></div>
-    <div class="rp-header">
-      <div class="rp-photo" id="rp-photo">
-        <div class="rp-photo-bg" id="rp-photo-bg"></div>
-        <div class="rp-photo-overlay"></div>
-        <div class="rp-photo-badge" id="rp-photo-state">GA</div>
-        <label class="rp-photo-upload" title="Upload store photo" onclick="triggerPhotoUpload()">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        </label>
+
+    <!-- Hero Card -->
+    <div class="rp-hero-wrap">
+      <div class="rp-hero" id="rp-photo" onclick="triggerPhotoUpload()" title="Click to upload store photo">
+        <div class="rp-hero-bg" id="rp-photo-bg"></div>
+        <div class="rp-hero-overlay"></div>
         <input type="file" id="rp-photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
-        <div class="rp-photo-caption">
-          <div class="rp-photo-caption-name" id="rp-photo-name">Union City</div>
-          <div class="rp-photo-caption-addr" id="rp-photo-addr">6851 Shannon Pkwy, Union City, GA</div>
-        </div>
+        <!-- hidden JS anchors -->
+        <span id="rp-photo-state" style="display:none">GA</span>
+        <span id="rp-photo-name" style="display:none">Union City</span>
+        <span id="rp-photo-addr" style="display:none">6851 Shannon Pkwy, Union City, GA</span>
+        <span id="rp-name" style="display:none">Union City</span>
+        <span id="rp-sub" style="display:none">Georgia · Lower-Mid Income</span>
       </div>
-      <div class="rp-header-info">
-        <div class="rp-eyebrow">Store Playbook</div>
-        <div class="rp-store-name" id="rp-name">Union City</div>
-        <div class="rp-header-tags" id="rp-header-tags">
-          <span class="rp-htag rp-htag--state" id="rp-htag-state">GA</span>
-          <span class="rp-htag rp-htag--band" id="rp-htag-band">Lower-Mid Income</span>
-          <span class="rp-htag rp-htag--type" id="rp-htag-type">Black Hair Essentials</span>
-        </div>
-        <div class="rp-store-sub" id="rp-sub" style="display:none">Georgia · Lower-Mid Income</div>
+      <div class="rp-hero-tags-row" id="rp-header-tags">
+        <span class="rp-htag rp-htag--state" id="rp-htag-state">GA</span>
+        <span class="rp-htag rp-htag--band" id="rp-htag-band">Lower-Mid Income</span>
+        <span class="rp-htag rp-htag--type" id="rp-htag-type">Black Hair Essentials</span>
       </div>
     </div>
 

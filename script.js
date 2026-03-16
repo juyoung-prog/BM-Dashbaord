@@ -19,7 +19,7 @@ const STORES = [
 // STATE
 // ══════════════════════════════════════════
 let activeFilter = 'all';
-let sortField = null, sortAsc = true;
+let sortField = null, sortAsc = true, storeSortField = null;
 let selectedId = 0;
 let colFilters = { name: '', band: '', demo: '' }; // column-level filters
 
@@ -49,8 +49,13 @@ function getFiltered() {
   if (activeFilter === 'lowincome') d = d.filter(s => s.income < 65000);
   if (activeFilter === 'asian')     d = d.filter(s => s.asian > 20);
 
+  // Store sort (alpha / state)
+  if (storeSortField === 'alpha') d = [...d].sort((a,b) => a.name.localeCompare(b.name));
+  if (storeSortField === 'ga')    d = [...d].sort((a,b) => a.state === b.state ? 0 : a.state === 'GA' ? -1 : 1);
+  if (storeSortField === 'fl')    d = [...d].sort((a,b) => a.state === b.state ? 0 : a.state === 'FL' ? -1 : 1);
+
   // Header sort
-  if (sortField) {
+  if (!storeSortField && sortField) {
     d = [...d].sort((a,b) => {
       const va = a[sortField], vb = b[sortField];
       return typeof va === 'string'
@@ -67,20 +72,70 @@ function getBandBadge(band) {
   return '<span class="badge badge-green">Mid Income</span>';
 }
 
+
+// ══════════════════════════════════════════
+// TABLE COLUMN RESIZE
+// ══════════════════════════════════════════
+let colPxWidths = null;
+
+function applyColWidths() {
+  if (!colPxWidths) return;
+  const template = colPxWidths.map(w => w + 'px').join(' ');
+  document.querySelector('.tbl-head').style.gridTemplateColumns = template;
+  document.querySelectorAll('.tbl-row').forEach(r => r.style.gridTemplateColumns = template);
+}
+
+function initColResize() {
+  const head = document.querySelector('.tbl-head');
+  if (!head) return;
+  const ths = [...head.querySelectorAll('.th')];
+  ths.forEach((th, i) => {
+    if (i === ths.length - 1) return; // no handle on last column
+    if (i === 3) return;              // no handle between Demographics and Store Priority
+    const handle = document.createElement('div');
+    handle.className = 'th-resize-handle';
+    handle.addEventListener('mousedown', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!colPxWidths) {
+        colPxWidths = ths.map(t => t.getBoundingClientRect().width);
+      }
+      const startX = e.clientX;
+      const startW = colPxWidths[i];
+      handle.classList.add('dragging');
+      function onMove(e) {
+        colPxWidths[i] = Math.max(60, startW + (e.clientX - startX));
+        applyColWidths();
+      }
+      function onUp() {
+        handle.classList.remove('dragging');
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+    th.appendChild(handle);
+  });
+}
+
 function renderTable() {
   const data = getFiltered();
   const body = document.getElementById('tbl-body');
   if (!data.length) { body.innerHTML='<div class="no-results">No stores match this filter.</div>'; return; }
+  const COLOR_LABEL = {
+    '#4F46E5': 'Black', '#6366F1': 'Black',
+    '#E81D25': 'Hispanic',
+    '#F59E0B': 'Asian',
+    '#E5E7EB': 'White', '#9CA3AF': 'White',
+    '#FCD34D': 'Other',
+    '#A78BFA': 'Multiracial',
+  };
   body.innerHTML = data.map(s => {
-    const raceParts = s.raceLabel.split(' / ');
-    const expandPart = l => l.trim()
-      .replace(/(\d+)% B$/, '$1% Black')
-      .replace(/(\d+)% H$/, '$1% Hispanic')
-      .replace(/(\d+)% A$/, '$1% Asian')
-      .replace(/(\d+)% W$/, '$1% White');
-    const demoLegend = raceParts.map((p, i) =>
-      s.raceBar[i] ? `<span class="dl-item"><span class="dl-dot" style="background:${s.raceBar[i].c}"></span>${expandPart(p)}</span>` : ''
-    ).join('');
+    const demoLegend = s.raceBar
+      .filter(r => r.w >= 5)
+      .map(r => `<span class="dl-item"><span class="dl-dot" style="background:${r.c}"></span>${Math.round(r.w)}% ${COLOR_LABEL[r.c] || 'Other'}</span>`)
+      .join('');
     return `
     <div class="tbl-row ${s.id===selectedId?'selected':''}" onclick="selectStore(${s.id})">
       <div class="tbl-cell">
@@ -103,6 +158,7 @@ function renderTable() {
     </div>
   `;
   }).join('');
+  applyColWidths();
 }
 
 // ══════════════════════════════════════════
@@ -340,10 +396,42 @@ function closeSortPanel() {}
 // ══════════════════════════════════════════
 let demoSortField = null; // 'black' | 'hisp' | 'asian' | 'white' | null
 
+function openStoreSort(e) {
+  e.stopPropagation();
+  document.getElementById('cf-name').classList.toggle('open');
+}
+
+function sortByStore(field, e) {
+  e.stopPropagation();
+  document.getElementById('cf-name').classList.remove('open');
+  // Reset other sorts
+  demoSortField = null; sortField = null;
+  ['sort-band','sort-pop','sort-demo'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = '↕';
+  });
+  document.querySelectorAll('.th').forEach(t => t.classList.remove('th-active'));
+  storeSortField = field || null;
+  const nameEl = document.getElementById('sort-name');
+  if (storeSortField) {
+    const labels = { alpha:'A→Z', ga:'↓ GA', fl:'↓ FL' };
+    if (nameEl) nameEl.textContent = labels[field];
+    document.getElementById('th-name').classList.add('th-active');
+  } else {
+    if (nameEl) nameEl.textContent = '↕';
+  }
+  document.querySelectorAll('#cf-name .col-filter-opt').forEach(o =>
+    o.classList.toggle('active', o.getAttribute('data-val') === field)
+  );
+  renderTable();
+}
+
 function sortByCol(col, e) {
   if (e) e.stopPropagation();
-  // Reset demo sort
-  demoSortField = null;
+  // Reset demo + store sort
+  demoSortField = null; storeSortField = null;
+  const nameEl = document.getElementById('sort-name');
+  if (nameEl) nameEl.textContent = '↕';
+  document.querySelectorAll('#cf-name .col-filter-opt').forEach(o => o.classList.remove('active'));
   const demoEl = document.getElementById('sort-demo');
   if (demoEl) demoEl.textContent = '↕';
   document.getElementById('th-demo').classList.remove('th-active');
@@ -410,11 +498,14 @@ function sortByDemo(field, e) {
   renderTable();
 }
 
-// Close demo dropdown on outside click
+// Close store/demo dropdowns on outside click
 document.addEventListener('click', function(e) {
-  const dd = document.getElementById('cf-demo');
-  const th = document.getElementById('th-demo');
-  if (dd && th && !th.contains(e.target)) dd.classList.remove('open');
+  const demoTh = document.getElementById('th-demo');
+  const demoDd = document.getElementById('cf-demo');
+  if (demoDd && demoTh && !demoTh.contains(e.target)) demoDd.classList.remove('open');
+  const nameTh = document.getElementById('th-name');
+  const nameDd = document.getElementById('cf-name');
+  if (nameDd && nameTh && !nameTh.contains(e.target)) nameDd.classList.remove('open');
 });
 
 function sortTable(col) {
@@ -422,34 +513,42 @@ function sortTable(col) {
 }
 
 // ══════════════════════════════════════════
-// STORE PHOTOS (per-store, persisted in memory)
+// STORE PHOTOS (per-store, persisted in localStorage)
 // ══════════════════════════════════════════
-const storePhotos = {}; // id → data URL
+const storePhotos = JSON.parse(localStorage.getItem('bm_storePhotos') || '{}');
+
+function saveStorePhotos() {
+  localStorage.setItem('bm_storePhotos', JSON.stringify(storePhotos));
+}
 
 function updatePhotoPanel(s) {
-  const bg = document.getElementById('rp-photo-bg');
-  const badge = document.getElementById('rp-photo-state');
+  const hero = document.getElementById('rp-photo');
+  const bg   = document.getElementById('rp-photo-bg');
+  const hint = document.querySelector('.rp-hero-upload-hint');
   const capName = document.getElementById('rp-photo-name');
   const capAddr = document.getElementById('rp-photo-addr');
+  const badge   = document.getElementById('rp-photo-state');
   if (!bg) return;
   if (storePhotos[s.id]) {
     bg.style.backgroundImage = `url('${storePhotos[s.id]}')`;
-    bg.style.filter = 'brightness(.72) saturate(1.1)';
+    bg.style.opacity = '1';
+    if (hero) hero.style.background = '';
+    if (hint) hint.style.display = 'none';
   } else {
-    bg.style.backgroundImage = 'none';
-    bg.style.filter = 'none';
-    // Apply gradient fallback
-    const photo = document.getElementById('rp-photo');
-    if (photo) photo.style.background = s.photoGrad;
+    bg.style.backgroundImage = '';
+    bg.style.opacity = '0';
+    if (hero) hero.style.background = s.photoGrad;
+    if (hint) hint.style.display = '';
   }
-  if (badge) { badge.textContent = s.state; badge.style.background = s.state === 'FL' ? 'rgba(0,122,255,.4)' : 'rgba(52,199,89,.4)'; }
   if (capName) capName.textContent = s.name;
   if (capAddr) capAddr.textContent = s.addr;
+  if (badge)   badge.textContent   = s.state;
 }
 
 function triggerPhotoUpload() {
   document.getElementById('rp-photo-input').click();
 }
+
 
 function handlePhotoUpload(event) {
   const file = event.target.files[0];
@@ -457,12 +556,11 @@ function handlePhotoUpload(event) {
   const reader = new FileReader();
   reader.onload = (e) => {
     storePhotos[selectedId] = e.target.result;
+    saveStorePhotos();
     const bg = document.getElementById('rp-photo-bg');
     if (bg) {
       bg.style.backgroundImage = `url('${e.target.result}')`;
-      bg.style.filter = 'brightness(.72) saturate(1.1)';
-      const photo = document.getElementById('rp-photo');
-      if (photo) photo.style.background = 'none';
+      bg.style.opacity = '1';
     }
   };
   reader.readAsDataURL(file);
@@ -570,9 +668,21 @@ function initRpResize() {
 // ══════════════════════════════════════════
 renderTable();
 initKPIDrag();
+initColResize();
 refreshAddBtn();
 updatePhotoPanel(STORES[0]);
 initRpResize();
+
+// Force right panel reflow on initial render.
+// position:fixed + CSS variable width causes flex/grid children
+// to miscalculate on first paint in some environments.
+requestAnimationFrame(() => {
+  const rp = document.querySelector('.right-panel');
+  if (!rp) return;
+  rp.style.display = 'none';
+  rp.offsetHeight; // trigger reflow
+  rp.style.display = '';
+});
 
 // Sync KPI cards to STORES data on initial load
 (function initKPIFromStores() {
