@@ -198,14 +198,10 @@ svg { display: block; }
 .live-dot {
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: var(--success);
-  animation: livepulse 2.4s ease infinite;
+  background: #94A3B8;
+  animation: none;
 }
-@keyframes livepulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(52,199,89,.4); }
-  50%      { box-shadow: 0 0 0 4px rgba(52,199,89,0); }
-}
-.sb-status strong { color: var(--success); font-weight: 500; }
+.sb-status strong { color: #94A3B8; font-weight: 500; }
 
 /* ═══════ TOPBAR ═══════ */
 .topbar {
@@ -966,7 +962,7 @@ svg { display: block; }
   display: flex; align-items: center; justify-content: center;
   font-size: 8px; flex-shrink: 0; margin-top: 1px;
 }
-.merch-done { background: var(--success); color: #fff; }
+.merch-done { background: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border-default); }
 .merch-pend { background: var(--bg-base); border: 1px solid var(--border-strong); color: var(--text-tertiary); }
 .merch-pend-text { color: var(--text-tertiary); }
 
@@ -1797,4 +1793,4 @@ svg { display: block; }
 .rp-htag--state  { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
 .rp-htag--fl     { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
 .rp-htag--band   { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
-.rp-htag--type   { background: var(--bg-subtle); color: #1E293B; border-color: var(--border-strong); font-weight: 600; }
+.rp-htag--type   { background: #F1F5F9; color: #334155; border-color: #E2E8F0; font-weight: 500; }
