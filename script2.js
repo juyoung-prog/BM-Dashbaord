@@ -538,13 +538,11 @@ function updatePhotoPanel(s) {
   if (storePhotos[s.id]) {
     bg.style.backgroundImage = `url('${storePhotos[s.id]}')`;
     bg.style.opacity = '1';
-    if (hero) hero.style.background = '';
-    if (hint) hint.style.display = 'none';
+    if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
   } else {
     bg.style.backgroundImage = '';
     bg.style.opacity = '0';
-    if (hero) hero.style.background = s.photoGrad;
-    if (hint) hint.style.display = '';
+    if (hero) { hero.style.background = ''; hero.classList.remove('has-photo'); }
   }
   if (capName) capName.textContent = s.name;
   if (capAddr) capAddr.textContent = s.addr;
@@ -564,10 +562,12 @@ function handlePhotoUpload(event) {
     storePhotos[selectedId] = e.target.result;
     saveStorePhotos();
     const bg = document.getElementById('rp-photo-bg');
+    const hero = document.getElementById('rp-photo');
     if (bg) {
       bg.style.backgroundImage = `url('${e.target.result}')`;
       bg.style.opacity = '1';
     }
+    if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
   };
   reader.readAsDataURL(file);
   event.target.value = '';
@@ -758,8 +758,8 @@ function clearDashboard() {
   // 4. Photo bg → neutral grey
   const rpPhoto = document.getElementById('rp-photo');
   const rpPhotoBg = document.getElementById('rp-photo-bg');
-  if (rpPhoto)   rpPhoto.style.background = 'var(--bg-overlay)';
-  if (rpPhotoBg) { rpPhotoBg.style.backgroundImage = 'none'; rpPhotoBg.style.filter = 'none'; }
+  if (rpPhoto)   { rpPhoto.style.background = ''; rpPhoto.classList.remove('has-photo'); }
+  if (rpPhotoBg) { rpPhotoBg.style.backgroundImage = 'none'; rpPhotoBg.style.opacity = '0'; rpPhotoBg.style.filter = 'none'; }
 
   // 5. Sidebar status dot → grey / "No data"
   const sbStatus = document.querySelector('.sb-status');

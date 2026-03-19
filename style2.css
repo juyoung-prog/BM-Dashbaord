@@ -702,15 +702,18 @@ svg { display: block; }
 .rp-hero {
   position: relative;
   width: 100%;
-  height: 180px;
+  height: 160px;
   border-radius: 12px;
   overflow: hidden;
-  background: linear-gradient(135deg, #0f62fe 0%, #0d9488 100%);
+  background: #F1F5F9;
+  border: 1.5px dashed #CBD5E1;
   box-sizing: border-box;
-  box-shadow: 0 4px 20px rgba(0,0,0,.25);
-}
-.rp-hero {
   cursor: pointer;
+}
+.rp-hero.has-photo {
+  background: #000;
+  border: 1px solid #E2E8F0;
+  border-style: solid;
 }
 .rp-hero-bg {
   position: absolute;
@@ -718,17 +721,20 @@ svg { display: block; }
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transition: transform .5s ease, opacity .3s ease;
+  transition: transform .4s ease, opacity .3s ease;
   z-index: 1;
 }
-.rp-hero:hover .rp-hero-bg { transform: scale(1.04); }
+.rp-hero.has-photo:hover .rp-hero-bg { transform: scale(1.03); }
 .rp-hero-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,.1) 0%, rgba(0,0,0,.55) 100%);
+  background: linear-gradient(to bottom, rgba(0,0,0,.08) 0%, rgba(0,0,0,.4) 100%);
   z-index: 2;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s ease;
 }
+.rp-hero.has-photo .rp-hero-overlay { opacity: 1; }
 .rp-hero-upload-hint {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -736,14 +742,50 @@ svg { display: block; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  color: rgba(255,255,255,.55);
+  gap: 7px;
+  color: var(--text-tertiary);
   font-size: 12px;
   z-index: 3;
-  pointer-events: none;
-  transition: opacity .2s ease;
+  cursor: pointer;
 }
-.rp-hero:hover .rp-hero-upload-hint { color: rgba(255,255,255,.85); }
+.rp-hero.has-photo .rp-hero-upload-hint { display: none; }
+/* Hover overlay shown over photo */
+.rp-hero-hover-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0);
+  color: rgba(255,255,255,0);
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 4;
+  pointer-events: none;
+  transition: background .2s ease, color .2s ease;
+}
+.rp-hero.has-photo:hover .rp-hero-hover-overlay {
+  background: rgba(0,0,0,0.32);
+  color: rgba(255,255,255,1);
+}
+/* Corner change button */
+.rp-hero-change-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255,255,255,0.85);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  z-index: 5;
+  display: none;
+  line-height: 1.4;
+}
+.rp-hero.has-photo .rp-hero-change-btn { display: block; }
 .rp-hero-identity {
   padding: 11px 2px 14px;
   display: flex;
@@ -925,7 +967,7 @@ svg { display: block; }
   padding: var(--s3) var(--s3);
   background: var(--bg-base);
   border-radius: var(--r-sm);
-  border-left: 2.5px solid var(--accent);
+  border-left: 2.5px solid #E2E8F0;
 }
 .rp-stats-grid {
   display: grid;
@@ -1697,17 +1739,11 @@ svg { display: block; }
   flex-wrap: wrap;
 }
 .rp-aud-band {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 20px;
-  background: var(--bg-base);
-  border: 1px solid var(--border-default);
+  font-size: 12px;
   color: var(--text-secondary);
-  white-space: nowrap;
 }
 .rp-aud-divider {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary);
 }
 .rp-aud-priority {
