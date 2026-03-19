@@ -134,9 +134,10 @@ function renderTable() {
     '#A78BFA': 'Multiracial',
   };
   body.innerHTML = data.map(s => {
-    const demoLegend = [...s.raceBar]
+    const sortedRaceBar = [...s.raceBar].sort((a, b) => Number(b.w) - Number(a.w));
+    console.log(`[demo sort] ${s.name}:`, sortedRaceBar.map(r => `${Math.round(r.w)}% ${COLOR_LABEL[r.c]||'?'}`));
+    const demoLegend = sortedRaceBar
       .filter(r => r.w >= 5)
-      .sort((a, b) => Number(b.w) - Number(a.w))
       .map(r => `<span class="dl-item"><span class="dl-dot" style="background:${r.c}"></span>${Math.round(r.w)}% ${COLOR_LABEL[r.c] || 'Other'}</span>`)
       .join('');
     return `
@@ -1045,7 +1046,10 @@ function applyCSVData(file, mode) {
 
       // Replace global STORES
       STORES.length = 0;
-      buildStoresFromCSV(rows).forEach(s => STORES.push(s));
+      buildStoresFromCSV(rows).forEach(s => {
+        s.raceBar.sort((a, b) => b.w - a.w);
+        STORES.push(s);
+      });
 
       // Update ALL_KPI_DEFS
       const kpis = computeKPIsFromStores(STORES);
