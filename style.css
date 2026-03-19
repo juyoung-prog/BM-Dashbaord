@@ -4,22 +4,22 @@
    ═══════════════════════════════════════════ */
 :root {
   /* Backgrounds */
-  --bg-base:      #F5F5F7;
+  --bg-base:      #F8FAFC;
   --bg-surface:   #FFFFFF;
   --bg-elevated:  #FFFFFF;
-  --bg-subtle:    #FAFAFA;
-  --bg-overlay:   rgba(0,0,0,.04);
+  --bg-subtle:    #F1F5F9;
+  --bg-overlay:   rgba(0,0,0,.03);
 
   /* Text */
-  --text-primary:   #1D1D1F;
-  --text-secondary: #6E6E73;
-  --text-tertiary:  #AEAEB2;
+  --text-primary:   #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary:  #94A3B8;
   --text-inverse:   #FFFFFF;
 
   /* Borders */
-  --border-default: rgba(0,0,0,.08);
-  --border-subtle:  rgba(0,0,0,.05);
-  --border-strong:  rgba(0,0,0,.14);
+  --border-default: #E2E8F0;
+  --border-subtle:  #EEF2F7;
+  --border-strong:  #CBD5E1;
 
   /* Accent — BeautyMaster Red */
   --accent:         #E81D25;
@@ -168,7 +168,7 @@ svg { display: block; }
 }
 .sb-item:hover { background: var(--bg-overlay); color: var(--text-primary); }
 .sb-item.active {
-  background: var(--bg-overlay);
+  background: #FEF2F2;
   color: var(--accent);
   font-weight: 500;
 }
@@ -392,28 +392,10 @@ svg { display: block; }
 }
 .kpi-card.active { /* base — overridden per card below */ }
 
-/* Per-KPI active colors */
-#kpi-all.active      { border-color: var(--text-secondary); background: rgba(0,0,0,.04); }
-#kpi-all.active::after { background: var(--text-secondary); }
-#kpi-all.active .kpi-value { color: var(--text-primary); }
-#kpi-income.active   { border-color: var(--info); background: var(--info-bg); }
-#kpi-income.active::after { background: var(--info); }
-#kpi-income.active .kpi-value { color: var(--info); }
-#kpi-black.active    { border-color: #6366F1; background: rgba(99,102,241,.08); }
-#kpi-black.active::after { background: #6366F1; }
-#kpi-black.active .kpi-value { color: #6366F1; }
-#kpi-hispanic.active { border-color: var(--warning); background: rgba(245,158,11,.08); }
-#kpi-hispanic.active::after { background: var(--warning); }
-#kpi-hispanic.active .kpi-value { color: var(--warning); }
-#kpi-premium.active  { border-color: var(--info); background: var(--info-bg); }
-#kpi-premium.active::after { background: var(--info); }
-#kpi-premium.active .kpi-value { color: var(--info); }
-#kpi-lowincome.active { border-color: var(--error); background: var(--error-bg); }
-#kpi-lowincome.active::after { background: var(--error); }
-#kpi-lowincome.active .kpi-value { color: var(--error); }
-#kpi-asian.active    { border-color: #F59E0B; background: rgba(245,158,11,.08); }
-#kpi-asian.active::after { background: #F59E0B; }
-#kpi-asian.active .kpi-value { color: #F59E0B; }
+/* Per-KPI active colors — unified neutral */
+.kpi-card.active      { border-color: var(--border-strong); background: var(--bg-subtle); }
+.kpi-card.active::after { background: var(--border-strong); }
+.kpi-card.active .kpi-value { color: var(--text-primary); }
 .kpi-label {
   font-size: 10.5px;
   font-weight: 500;
@@ -450,7 +432,7 @@ svg { display: block; }
 }
 .trend-up   { color: var(--success); background: var(--success-bg); }
 .trend-down { color: var(--error);   background: var(--error-bg);   }
-.trend-neu  { color: var(--text-tertiary); background: var(--bg-overlay); }
+.trend-neu  { color: var(--text-secondary); background: var(--bg-subtle); }
 .kpi-bar {
   height: 2px;
   background: var(--border-subtle);
@@ -615,11 +597,11 @@ svg { display: block; }
   font-weight: 500;
   letter-spacing: .01em;
 }
-.badge-blue    { background: var(--info-bg);    color: var(--info);    }
-.badge-green   { background: var(--success-bg); color: #1A8C39;         }
-.badge-red     { background: var(--error-bg);   color: var(--error);   }
-.badge-amber   { background: var(--warning-bg); color: #B86800;         }
-.badge-neutral { background: var(--bg-base);    color: var(--text-secondary); border: 1px solid var(--border-default); }
+.badge-blue    { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
+.badge-green   { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
+.badge-red     { background: #FEF2F2;          color: #DC2626;               border-color: #FECACA; }
+.badge-amber   { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
+.badge-neutral { background: var(--bg-subtle); color: #334155;               border: 1px solid var(--border-default); }
 
 /* RACE BAR */
 .race-wrap { display: flex; flex-direction: column; gap: 3px; }
@@ -1768,10 +1750,10 @@ svg { display: block; }
   letter-spacing: -.01em;
   border: 1px solid transparent;
 }
-.priority-badge--accent { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-dim2); font-weight: 600; }
-.priority-badge--warn   { background: var(--warning-bg); color: #B86800; border-color: rgba(255,159,10,.2); }
-.priority-badge--info   { background: var(--info-bg); color: var(--info); border-color: rgba(0,122,255,.18); }
-.priority-badge--success{ background: var(--success-bg); color: #1A8C39; border-color: rgba(52,199,89,.2); }
+.priority-badge--accent { background: var(--bg-subtle); color: #334155; border-color: var(--border-default); font-weight: 500; }
+.priority-badge--warn   { background: var(--bg-subtle); color: #334155; border-color: var(--border-default); }
+.priority-badge--info   { background: var(--bg-subtle); color: #334155; border-color: var(--border-default); }
+.priority-badge--success{ background: var(--bg-subtle); color: #334155; border-color: var(--border-default); }
 
 /* ═══════ DEMOGRAPHICS KEY — column header mini-legend ═══════ */
 .th-demo-col {
@@ -1814,7 +1796,7 @@ svg { display: block; }
   white-space: nowrap;
   border: 1px solid transparent;
 }
-.rp-htag--state  { background: var(--success-bg); color: #1A8C39; border-color: rgba(52,199,89,.2); }
-.rp-htag--fl     { background: var(--info-bg); color: var(--info); border-color: rgba(0,122,255,.18); }
-.rp-htag--band   { background: var(--bg-base); border-color: var(--border-default); color: var(--text-secondary); }
-.rp-htag--type   { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-dim2); }
+.rp-htag--state  { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
+.rp-htag--fl     { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
+.rp-htag--band   { background: var(--bg-subtle); border-color: var(--border-default); color: var(--text-secondary); }
+.rp-htag--type   { background: var(--bg-subtle); color: #334155; border-color: var(--border-default); }

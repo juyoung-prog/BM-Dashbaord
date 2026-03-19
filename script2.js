@@ -32,12 +32,12 @@ let visibleKPIs = ['all','black','hispanic','premium','lowincome','asian'];
 let pickerSelection = new Set();
 
 const ALL_KPI_DEFS = {
-  all:       { label:'Total Stores',           value:'15',     meta:'GA 10 · FL 5',           color:'var(--text-primary)', barW:null   },
-  black:     { label:'Black-Majority Markets', value:'4',      meta:'stores >50% Black pop.', color:'#0072B2',              barW:'27%', barC:'#0072B2'        },
-  hispanic:  { label:'Hispanic Market Stores', value:'4',      meta:'stores >25% Hisp. pop.', color:'var(--warning)',        barW:'27%', barC:'var(--warning)' },
-  premium:   { label:'Premium Income',         value:'1',      meta:'Duluth · $95.3K',        color:'var(--info)',           barW:'7%',  barC:'var(--info)'    },
-  lowincome: { label:'Value Income Markets',   value:'3',      meta:'stores <$65K income',    color:'var(--error)',          barW:'20%', barC:'var(--error)'   },
-  asian:     { label:'High Asian Population',  value:'2',      meta:'stores >20% Asian pop.', color:'#009E73',               barW:'13%', barC:'#009E73'        },
+  all:       { label:'Total Stores',           value:'15',     meta:'GA 10 · FL 5',           color:'var(--text-secondary)', barW:null   },
+  black:     { label:'Black-Majority Markets', value:'4',      meta:'stores >50% Black pop.', color:'var(--text-secondary)', barW:'27%', barC:'#CBD5E1'        },
+  hispanic:  { label:'Hispanic Market Stores', value:'4',      meta:'stores >25% Hisp. pop.', color:'var(--text-secondary)', barW:'27%', barC:'#CBD5E1'        },
+  premium:   { label:'Premium Income',         value:'1',      meta:'Duluth · $95.3K',        color:'var(--text-secondary)', barW:'7%',  barC:'#CBD5E1'        },
+  lowincome: { label:'Value Income Markets',   value:'3',      meta:'stores <$65K income',    color:'var(--text-secondary)', barW:'20%', barC:'#CBD5E1'        },
+  asian:     { label:'High Asian Population',  value:'2',      meta:'stores >20% Asian pop.', color:'var(--text-secondary)', barW:'13%', barC:'#CBD5E1'        },
 };
 
 // ══════════════════════════════════════════
@@ -806,17 +806,17 @@ function restoreDashboard() {
   const asianStores = STORES.filter(s => s.asian >= 15);
   const audStats = document.getElementById('audience-stats-grid');
   if (audStats) audStats.innerHTML = `
-    <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:#0072B2">${blackStores.length}</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
-    <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--warning)">${hispStores.length}</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
-    <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--info)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s=>`${s.name} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
+    <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:var(--text-primary)">${blackStores.length}</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
+    <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--text-primary)">${hispStores.length}</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
+    <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s=>`${s.name} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
   const audList = document.getElementById('audience-seg-list');
   if (audList) {
     const segs = [
-      { name:'Black Hair Care Community', color:'#0072B2', stores: STORES.filter(s=>s.black>=40) },
-      { name:'Hispanic / Bilingual Market', color:'var(--warning)', stores: STORES.filter(s=>s.hisp>=20) },
-      { name:'Premium / K-Beauty Shopper', color:'var(--info)', stores: STORES.filter(s=>s.asian>=15||s.income>=85000) },
-      { name:'Value / Budget-Conscious', color:'var(--error)', stores: STORES.filter(s=>s.income<65000) },
-      { name:'General / Mixed Market', color:'var(--text-tertiary)', stores: STORES.filter(s=>s.black<40&&s.hisp<20&&s.asian<15&&s.income>=65000) },
+      { name:'Black Hair Care Community', color:'var(--border-strong)', stores: STORES.filter(s=>s.black>=40) },
+      { name:'Hispanic / Bilingual Market', color:'var(--border-strong)', stores: STORES.filter(s=>s.hisp>=20) },
+      { name:'Premium / K-Beauty Shopper', color:'var(--border-strong)', stores: STORES.filter(s=>s.asian>=15||s.income>=85000) },
+      { name:'Value / Budget-Conscious', color:'var(--border-strong)', stores: STORES.filter(s=>s.income<65000) },
+      { name:'General / Mixed Market', color:'var(--border-strong)', stores: STORES.filter(s=>s.black<40&&s.hisp<20&&s.asian<15&&s.income>=65000) },
     ].filter(seg=>seg.stores.length>0);
     audList.innerHTML = segs.map(seg=>`<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s=>s.name).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length>1?'s':''}</div></div>`).join('');
   }
@@ -1029,13 +1029,13 @@ function computeKPIsFromStores(stores) {
   const highIncStore = stores.reduce((a, b) => a.income > b.income ? a : b, stores[0]);
 
   return {
-    all:       { val: String(n),              meta: `GA ${gaCount} · FL ${flCount}`,       color: 'var(--text-primary)', barW: null },
-    income:    { val: `$${(avgInc/1000).toFixed(1)}K`, meta: `$${(minInc/1000).toFixed(0)}K – $${(maxInc/1000).toFixed(0)}K range`, color: 'var(--info)', barW: `${Math.round(avgInc/maxInc*100)}%`, barC: 'var(--info)' },
-    black:     { val: String(blackMaj.length), meta: 'stores >50% Black',    color: '#0072B2',         barW: `${Math.round(blackMaj.length/n*100)}%`, barC: '#0072B2' },
-    hispanic:  { val: String(hispFocus.length),meta: 'stores >25% Hispanic', color: 'var(--warning)',  barW: `${Math.round(hispFocus.length/n*100)}%`, barC: 'var(--warning)' },
-    premium:   { val: String(premium.length),  meta: premium.length > 0 ? `${premium[0].name} · $${(premium[0].income/1000).toFixed(1)}K` : 'None', color: 'var(--info)', barW: `${Math.round(premium.length/n*100)}%`, barC: 'var(--info)' },
-    lowincome: { val: String(lowInc.length),   meta: 'stores <$65K',         color: 'var(--error)',    barW: `${Math.round(lowInc.length/n*100)}%`, barC: 'var(--error)' },
-    asian:     { val: String(asianHigh.length),meta: 'stores >20% Asian',    color: '#009E73',         barW: `${Math.round(asianHigh.length/n*100)}%`, barC: '#009E73' },
+    all:       { val: String(n),              meta: `GA ${gaCount} · FL ${flCount}`,       color: 'var(--text-secondary)', barW: null },
+    income:    { val: `$${(avgInc/1000).toFixed(1)}K`, meta: `$${(minInc/1000).toFixed(0)}K – $${(maxInc/1000).toFixed(0)}K range`, color: 'var(--text-secondary)', barW: `${Math.round(avgInc/maxInc*100)}%`, barC: '#CBD5E1' },
+    black:     { val: String(blackMaj.length), meta: 'stores >50% Black',    color: 'var(--text-secondary)', barW: `${Math.round(blackMaj.length/n*100)}%`, barC: '#CBD5E1' },
+    hispanic:  { val: String(hispFocus.length),meta: 'stores >25% Hispanic', color: 'var(--text-secondary)', barW: `${Math.round(hispFocus.length/n*100)}%`, barC: '#CBD5E1' },
+    premium:   { val: String(premium.length),  meta: premium.length > 0 ? `${premium[0].name} · $${(premium[0].income/1000).toFixed(1)}K` : 'None', color: 'var(--text-secondary)', barW: `${Math.round(premium.length/n*100)}%`, barC: '#CBD5E1' },
+    lowincome: { val: String(lowInc.length),   meta: 'stores <$65K',         color: 'var(--text-secondary)', barW: `${Math.round(lowInc.length/n*100)}%`, barC: '#CBD5E1' },
+    asian:     { val: String(asianHigh.length),meta: 'stores >20% Asian',    color: 'var(--text-secondary)', barW: `${Math.round(asianHigh.length/n*100)}%`, barC: '#CBD5E1' },
   };
 }
 
@@ -1095,18 +1095,18 @@ function applyCSVText(csvText, filename, mode) {
       const asianStores = STORES.filter(s => s.asian >= 15);
       const audStats = document.getElementById('audience-stats-grid');
       if (audStats) audStats.innerHTML = `
-        <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:#0072B2">${blackStores.length}</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
-        <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--warning)">${hispStores.length}</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
-        <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--info)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s => `${s.name} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
+        <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:var(--text-primary)">${blackStores.length}</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
+        <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--text-primary)">${hispStores.length}</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
+        <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s => `${s.name} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
 
       const audList = document.getElementById('audience-seg-list');
       if (audList) {
         const segments = [
-          { name: 'Black Hair Care Community', color: '#0072B2', stores: STORES.filter(s => s.black >= 40) },
-          { name: 'Hispanic / Bilingual Market', color: 'var(--warning)', stores: STORES.filter(s => s.hisp >= 20) },
-          { name: 'Premium / K-Beauty Shopper', color: 'var(--info)', stores: STORES.filter(s => s.asian >= 15 || s.income >= 85000) },
-          { name: 'Value / Budget-Conscious', color: 'var(--error)', stores: STORES.filter(s => s.income < 65000) },
-          { name: 'General / Mixed Market', color: 'var(--text-tertiary)', stores: STORES.filter(s => s.black < 40 && s.hisp < 20 && s.asian < 15 && s.income >= 65000) },
+          { name: 'Black Hair Care Community', color: 'var(--border-strong)', stores: STORES.filter(s => s.black >= 40) },
+          { name: 'Hispanic / Bilingual Market', color: 'var(--border-strong)', stores: STORES.filter(s => s.hisp >= 20) },
+          { name: 'Premium / K-Beauty Shopper', color: 'var(--border-strong)', stores: STORES.filter(s => s.asian >= 15 || s.income >= 85000) },
+          { name: 'Value / Budget-Conscious', color: 'var(--border-strong)', stores: STORES.filter(s => s.income < 65000) },
+          { name: 'General / Mixed Market', color: 'var(--border-strong)', stores: STORES.filter(s => s.black < 40 && s.hisp < 20 && s.asian < 15 && s.income >= 65000) },
         ].filter(seg => seg.stores.length > 0);
         audList.innerHTML = segments.map(seg =>
           `<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s => s.name).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length > 1 ? 's' : ''}</div></div>`
