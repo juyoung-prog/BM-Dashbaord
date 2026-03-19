@@ -23,7 +23,7 @@ STORES.forEach(s => s.raceBar.sort((a, b) => b.w - a.w));
 // STATE
 // ══════════════════════════════════════════
 let activeFilter = 'all';
-let sortField = null, sortAsc = true, storeSortField = null;
+let sortField = null, sortAsc = true, storeSortField = 'alpha';
 let selectedId = 0;
 let colFilters = { name: '', band: '', demo: '' }; // column-level filters
 
