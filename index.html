@@ -89,8 +89,8 @@
               <button class="kpi-remove" onclick="removeKPI(event,'black')" title="Remove">×</button>
               <div class="kpi-label">Black-Majority Markets</div>
               <div class="kpi-value">4</div>
-              <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:#2563EB;background:rgba(99,102,241,.1)">stores &gt;50% Black pop.</span></div>
-              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:27%;background:#2563EB"></div></div>
+              <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:#0072B2;background:rgba(99,102,241,.1)">stores &gt;50% Black pop.</span></div>
+              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:27%;background:#0072B2"></div></div>
             </div>
             <div class="kpi-card" id="kpi-hispanic" data-kpi="hispanic" draggable="true" onclick="filterKPI('hispanic',this)">
               <span class="kpi-drag-handle"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
@@ -121,8 +121,8 @@
               <button class="kpi-remove" onclick="removeKPI(event,'asian')" title="Remove">×</button>
               <div class="kpi-label">High Asian Population</div>
               <div class="kpi-value">2</div>
-              <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:#16A34A;background:rgba(245,158,11,.1)">stores &gt;20% Asian pop.</span></div>
-              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:13%;background:#16A34A"></div></div>
+              <div class="kpi-meta"><span class="kpi-trend trend-neu" style="color:#009E73;background:rgba(245,158,11,.1)">stores &gt;20% Asian pop.</span></div>
+              <div class="kpi-bar"><div class="kpi-bar-fill" style="width:13%;background:#009E73"></div></div>
             </div>
             <div class="kpi-add-btn" id="kpi-add-btn" onclick="openKPIPicker()">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -173,21 +173,21 @@
             <div class="th th-sortable th-demo-col" id="th-demo" onclick="openDemoSort(event)">
               <div class="th-demo-top">Demographics <span class="th-sort" id="sort-demo">↕</span></div>
               <div class="demo-key-row">
-                <span class="dk-item"><span class="dk-dot" style="background:#2563EB"></span>B=Black</span>
-                <span class="dk-item"><span class="dk-dot" style="background:#0891B2"></span>H=Hispanic</span>
-                <span class="dk-item"><span class="dk-dot" style="background:#16A34A"></span>A=Asian</span>
+                <span class="dk-item"><span class="dk-dot" style="background:#0072B2"></span>B=Black</span>
+                <span class="dk-item"><span class="dk-dot" style="background:#E69F00"></span>H=Hispanic</span>
+                <span class="dk-item"><span class="dk-dot" style="background:#009E73"></span>A=Asian</span>
                 <span class="dk-item"><span class="dk-dot" style="background:#64748B"></span>W=White</span>
-                <span class="dk-item"><span class="dk-dot" style="background:#9333EA"></span>M=Multiracial</span>
+                <span class="dk-item"><span class="dk-dot" style="background:#CC79A7"></span>M=Multiracial</span>
               </div>
               <div class="col-filter-dropdown" id="cf-demo">
                 <div class="col-filter-opt" data-val="black" onclick="sortByDemo('black',event)">
-                  <div class="opt-dot" style="background:#2563EB"></div>Highest Black %
+                  <div class="opt-dot" style="background:#0072B2"></div>Highest Black %
                 </div>
                 <div class="col-filter-opt" data-val="hisp" onclick="sortByDemo('hisp',event)">
-                  <div class="opt-dot" style="background:#0891B2"></div>Highest Hispanic %
+                  <div class="opt-dot" style="background:#E69F00"></div>Highest Hispanic %
                 </div>
                 <div class="col-filter-opt" data-val="asian" onclick="sortByDemo('asian',event)">
-                  <div class="opt-dot" style="background:#16A34A"></div>Highest Asian %
+                  <div class="opt-dot" style="background:#009E73"></div>Highest Asian %
                 </div>
                 <div class="col-filter-opt" data-val="white" onclick="sortByDemo('white',event)">
                   <div class="opt-dot" style="background:#64748B"></div>Highest White %
@@ -218,14 +218,14 @@
         </div>
       </div>
       <div id="audience-stats-grid" class="stats-grid-3">
-        <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:#2563EB">10</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
+        <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:#0072B2">10</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
         <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--warning)">6</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
         <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--info)">2</div><div class="stat-sub">Duluth (22%) · Morrow (29%)</div></div>
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title">Segment Profiles</div></div>
         <div id="audience-seg-list" style="padding:var(--s2) var(--s5) var(--s3);">
-          <div class="seg-row"><div class="seg-dot" style="background:#2563EB"></div><div><div class="seg-name">Black Hair Care Community</div><div class="seg-desc">Union City · Riverdale · Douglasville · Miami Gardens + 6 more</div></div><div class="seg-num">10 stores</div></div>
+          <div class="seg-row"><div class="seg-dot" style="background:#0072B2"></div><div><div class="seg-name">Black Hair Care Community</div><div class="seg-desc">Union City · Riverdale · Douglasville · Miami Gardens + 6 more</div></div><div class="seg-num">10 stores</div></div>
           <div class="seg-row"><div class="seg-dot" style="background:var(--warning)"></div><div><div class="seg-name">Hispanic / Bilingual Market</div><div class="seg-desc">Florida Mall · Orlando · Miami Gardens · Morrow · Tamarac · WPB</div></div><div class="seg-num">6 stores</div></div>
           <div class="seg-row"><div class="seg-dot" style="background:var(--info)"></div><div><div class="seg-name">Premium / K-Beauty Shopper</div><div class="seg-desc">Duluth ($95K income, 22% Asian) · Morrow (29% Asian)</div></div><div class="seg-num">2 stores</div></div>
           <div class="seg-row"><div class="seg-dot" style="background:var(--error)"></div><div><div class="seg-name">Value / Budget-Conscious</div><div class="seg-desc">Union City ($49K) · Columbus ($58K) · Tamarac ($62K)</div></div><div class="seg-num">3 stores</div></div>
