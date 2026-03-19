@@ -132,9 +132,9 @@ function renderTable() {
     '#A78BFA': 'Multiracial',
   };
   body.innerHTML = data.map(s => {
-    const demoLegend = s.raceBar
+    const demoLegend = [...s.raceBar]
       .filter(r => r.w >= 5)
-      .sort((a, b) => b.w - a.w)
+      .sort((a, b) => Number(b.w) - Number(a.w))
       .map(r => `<span class="dl-item"><span class="dl-dot" style="background:${r.c}"></span>${Math.round(r.w)}% ${COLOR_LABEL[r.c] || 'Other'}</span>`)
       .join('');
     return `
@@ -977,6 +977,7 @@ function rowToStore(row, id) {
   const under18   = parseFloat(row.under_18_pct) || 0;
   const twoPlus   = parseFloat(row.two_or_more_races_pct) || 0;
   if (twoPlus > 3) raceBar.push({ w: twoPlus, c: '#A78BFA' });
+  raceBar.sort((a, b) => b.w - a.w);
 
   return {
     id, name, addr,
