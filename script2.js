@@ -705,14 +705,6 @@ requestAnimationFrame(() => {
   });
 })();
 
-// Restore CSV from localStorage if available (survives page refresh)
-(function restoreCSV() {
-  const saved = localStorage.getItem('bm_csvRaw');
-  if (!saved) return;
-  const filename = localStorage.getItem('bm_csvFilename') || 'dataset.csv';
-  applyCSVText(saved, filename, 'upload');
-})();
-
 // ══════════════════════════════════════════
 // SETTINGS PAGE
 // ══════════════════════════════════════════
@@ -1321,6 +1313,15 @@ function showToast(msg) {
 }
 
 syncDatasetState();
+
+// Restore CSV from localStorage — must run after datasetExists and all
+// settings functions are declared, and after the initial renderTable().
+(function restoreCSV() {
+  const saved = localStorage.getItem('bm_csvRaw');
+  if (!saved) return;
+  const filename = localStorage.getItem('bm_csvFilename') || 'dataset.csv';
+  applyCSVText(saved, filename, 'upload');
+})();
 
 // ══════════════════════════════════════════
 // THEME (Dark / Light Mode)
