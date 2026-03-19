@@ -1033,10 +1033,10 @@ svg { display: block; }
   box-shadow: none !important;
 }
 .kpi-card.drag-over {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(232,29,37,.12);
+  border-color: #CBD5E1;
+  background: #F1F5F9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 .kpi-drag-handle {
   position: absolute;
