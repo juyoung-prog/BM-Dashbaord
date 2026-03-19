@@ -714,6 +714,7 @@ svg { display: block; }
   background: #000;
   border: 1px solid #E2E8F0;
   border-style: solid;
+  cursor: default;
 }
 .rp-hero-bg {
   position: absolute;
@@ -724,11 +725,10 @@ svg { display: block; }
   transition: transform .4s ease, opacity .3s ease;
   z-index: 1;
 }
-.rp-hero.has-photo:hover .rp-hero-bg { transform: scale(1.03); }
 .rp-hero-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,.08) 0%, rgba(0,0,0,.4) 100%);
+  background: linear-gradient(to bottom, rgba(0,0,0,.06) 0%, rgba(0,0,0,.32) 100%);
   z-index: 2;
   pointer-events: none;
   opacity: 0;
@@ -749,24 +749,17 @@ svg { display: block; }
   cursor: pointer;
 }
 .rp-hero.has-photo .rp-hero-upload-hint { display: none; }
-/* Hover overlay shown over photo */
+/* Hover tint — pure tone shift, no competing CTA text */
 .rp-hero-hover-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background: rgba(0,0,0,0);
-  color: rgba(255,255,255,0);
-  font-size: 13px;
-  font-weight: 500;
   z-index: 4;
   pointer-events: none;
-  transition: background .2s ease, color .2s ease;
+  transition: background .25s ease;
 }
 .rp-hero.has-photo:hover .rp-hero-hover-overlay {
-  background: rgba(0,0,0,0.32);
-  color: rgba(255,255,255,1);
+  background: rgba(0,0,0,0.14);
 }
 /* Corner change button */
 .rp-hero-change-btn {
