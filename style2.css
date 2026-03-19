@@ -759,26 +759,37 @@ svg { display: block; }
   transition: background .25s ease;
 }
 .rp-hero.has-photo:hover .rp-hero-hover-overlay {
-  background: rgba(0,0,0,0.14);
+  background: rgba(0,0,0,0.08);
 }
-/* Corner change button */
+/* Corner edit button — quiet utility micro-control */
 .rp-hero-change-btn {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(255,255,255,0.85);
-  border: none;
+  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
   border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 11px;
+  padding: 3px 7px;
+  font-size: 10px;
   font-weight: 500;
-  color: #334155;
+  color: rgba(30,30,30,0.65);
   cursor: pointer;
   z-index: 5;
   display: none;
   line-height: 1.4;
+  transition: background .15s ease, color .15s ease, box-shadow .15s ease;
 }
 .rp-hero.has-photo .rp-hero-change-btn { display: block; }
+.rp-hero-change-btn:hover {
+  background: rgba(255,255,255,0.88);
+  color: rgba(30,30,30,0.9);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.rp-hero-change-btn:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.8);
+  outline-offset: 1px;
+}
 .rp-hero-identity {
   padding: 11px 2px 14px;
   display: flex;
