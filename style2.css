@@ -744,11 +744,38 @@ svg { display: block; }
   transition: opacity .2s ease;
 }
 .rp-hero:hover .rp-hero-upload-hint { color: rgba(255,255,255,.85); }
-.rp-hero-tags-row {
+.rp-hero-identity {
+  padding: 11px 2px 14px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  padding: 10px 2px 12px;
+  flex-direction: column;
+  gap: 2px;
+}
+.rp-hero-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.rp-hero-location {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.rp-hero-lens {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  margin-top: 7px;
+  padding: 3px 10px;
+  background: #F1F5F9;
+  color: #334155;
+  border: 1px solid #CBD5E1;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .rp-header {

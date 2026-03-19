@@ -583,7 +583,7 @@ function selectStore(id) {
   if (rp) {
     updatePhotoPanel(s);
     document.getElementById('rp-name').textContent = s.name;
-    document.getElementById('rp-sub').textContent = s.store + ' · ' + s.bannerLabel;
+    document.getElementById('rp-sub').textContent = s.store;
     document.getElementById('rp-msg').textContent = s.msg;
     document.getElementById('rp-stats').innerHTML = s.stats.map((v,i) =>
       `<div class="rp-stat"><div class="rp-stat-label">${s.statLabels[i]}</div><div class="rp-stat-value">${v}</div></div>`
@@ -606,11 +606,7 @@ function selectStore(id) {
     // Primary action label — derived from store priority segment
     const guideMap = { accent: 'View Black Hair Care Guide', warn: 'View Bilingual Market Guide', info: 'View K-Beauty Playbook' };
     document.getElementById('rp-act1').textContent = guideMap[s.priority] || 'View Campaign Guide';
-    // Header summary tags
-    const htagState = document.getElementById('rp-htag-state');
-    if (htagState) { htagState.textContent = s.state; htagState.className = `rp-htag ${s.state === 'FL' ? 'rp-htag--fl' : 'rp-htag--state'}`; }
-    const htagBand = document.getElementById('rp-htag-band');
-    if (htagBand) htagBand.textContent = s.bannerLabel;
+    // Market lens label
     const htagType = document.getElementById('rp-htag-type');
     if (htagType) htagType.textContent = s.priorityText;
   }
@@ -748,7 +744,7 @@ function clearDashboard() {
   const rpPhotoName = document.getElementById('rp-photo-name');
   const rpPhotoAddr = document.getElementById('rp-photo-addr');
   if (rpName)  rpName.textContent  = '—';
-  if (rpSub)   rpSub.textContent   = 'No dataset';
+  if (rpSub)   rpSub.textContent   = 'No store selected';
   if (rpMsg)   rpMsg.textContent   = 'Upload a dataset to view store intelligence.';
   if (rpStats) rpStats.innerHTML = ['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'].map(l => `<div class="rp-stat"><div class="rp-stat-label">${l}</div><div class="rp-stat-value">—</div></div>`).join('');
   if (rpMerch) rpMerch.innerHTML   = '<div class="merch-item" style="color:var(--text-tertiary)">No data available.</div>';
@@ -756,6 +752,8 @@ function clearDashboard() {
   if (rpAct2)  rpAct2.textContent  = 'No actions available';
   if (rpPhotoName) rpPhotoName.textContent = '—';
   if (rpPhotoAddr) rpPhotoAddr.textContent = 'No dataset';
+  const rpLens = document.getElementById('rp-htag-type');
+  if (rpLens) rpLens.textContent = '—';
 
   // 4. Photo bg → neutral grey
   const rpPhoto = document.getElementById('rp-photo');
