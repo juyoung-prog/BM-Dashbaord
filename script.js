@@ -1,4 +1,6 @@
 
+console.log('[BM script] v4 loaded — ' + new Date().toISOString());
+
 // ══════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════
@@ -703,6 +705,14 @@ requestAnimationFrame(() => {
   });
 })();
 
+// Restore CSV from localStorage if available (survives page refresh)
+(function restoreCSV() {
+  const saved = localStorage.getItem('bm_csvRaw');
+  if (!saved) return;
+  const filename = localStorage.getItem('bm_csvFilename') || 'dataset.csv';
+  applyCSVText(saved, filename, 'upload');
+})();
+
 // ══════════════════════════════════════════
 // SETTINGS PAGE
 // ══════════════════════════════════════════
@@ -1037,27 +1047,32 @@ function computeKPIsFromStores(stores) {
   };
 }
 
-function applyCSVData(file, mode) {
-  const reader = new FileReader();
-  reader.onload = function(e) {
+function applyCSVText(csvText, filename, mode) {
+  try {
+    const rows = parseCSV(csvText);
+    if (!rows.length) { showToast('CSV appears empty. Please check the file.'); return; }
+
+    // Persist CSV for reload survival
     try {
-      const rows = parseCSV(e.target.result);
-      if (!rows.length) { showToast('CSV appears empty. Please check the file.'); return; }
+      localStorage.setItem('bm_csvRaw', csvText);
+      localStorage.setItem('bm_csvFilename', filename || 'dataset.csv');
+      localStorage.setItem('bm_csvDate', new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
+    } catch(e) { /* quota exceeded — skip */ }
 
-      // Replace global STORES
-      STORES.length = 0;
-      buildStoresFromCSV(rows).forEach(s => {
-        s.raceBar.sort((a, b) => b.w - a.w);
-        STORES.push(s);
-      });
+    // Replace global STORES
+    STORES.length = 0;
+    buildStoresFromCSV(rows).forEach(s => {
+      s.raceBar.sort((a, b) => b.w - a.w);
+      STORES.push(s);
+    });
 
-      // Update ALL_KPI_DEFS
-      const kpis = computeKPIsFromStores(STORES);
-      Object.keys(kpis).forEach(k => { if (ALL_KPI_DEFS[k]) Object.assign(ALL_KPI_DEFS[k], { value: kpis[k].val, meta: kpis[k].meta }); });
+    // Update ALL_KPI_DEFS
+    const kpis = computeKPIsFromStores(STORES);
+    Object.keys(kpis).forEach(k => { if (ALL_KPI_DEFS[k]) Object.assign(ALL_KPI_DEFS[k], { value: kpis[k].val, meta: kpis[k].meta }); });
 
-      datasetExists = true;
-      document.getElementById('ds-filename').textContent = file.name;
-      document.getElementById('ds-updated').textContent = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    datasetExists = true;
+    document.getElementById('ds-filename').textContent = filename || 'dataset.csv';
+    document.getElementById('ds-updated').textContent = localStorage.getItem('bm_csvDate') || new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
       syncDatasetState();
 
       // Re-render everything from new STORES
@@ -1120,11 +1135,15 @@ function applyCSVData(file, mode) {
       runDataHealth(Object.keys(rows[0]), rows);
 
       showToast(mode === 'replace' ? `Dataset replaced — ${STORES.length} stores loaded.` : `Dataset uploaded — ${STORES.length} stores loaded.`);
-    } catch(err) {
-      showToast('Error parsing CSV. Please check the file format.');
-      console.error(err);
-    }
-  };
+  } catch(err) {
+    showToast('Error parsing CSV. Please check the file format.');
+    console.error(err);
+  }
+}
+
+function applyCSVData(file, mode) {
+  const reader = new FileReader();
+  reader.onload = function(e) { applyCSVText(e.target.result, file.name, mode); };
   reader.readAsText(file);
 }
 
