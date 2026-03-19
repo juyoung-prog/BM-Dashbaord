@@ -159,7 +159,7 @@ function renderTable() {
         </div>
       </div>
       <div class="tbl-cell">
-        <span class="priority-badge priority-badge--${s.priority}">${s.priorityText}</span>
+        <span class="priority-badge">${s.priorityText}</span>
       </div>
     </div>
   `;
