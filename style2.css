@@ -1793,4 +1793,4 @@ svg { display: block; }
 .rp-htag--state  { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
 .rp-htag--fl     { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
 .rp-htag--band   { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
-.rp-htag--type   { background: #F1F5F9; color: #334155; border-color: #E2E8F0; font-weight: 500; }
+.rp-htag--type   { background: #F1F5F9 !important; color: #334155 !important; border: 1px solid #E2E8F0 !important; font-weight: 500; }
