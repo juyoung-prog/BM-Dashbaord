@@ -2,6 +2,18 @@
 console.log('[BM script] v4 loaded — ' + new Date().toISOString());
 
 // ══════════════════════════════════════════
+// XSS ESCAPE HELPER — use on ALL CSV-derived values in innerHTML
+// ══════════════════════════════════════════
+function esc(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ══════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════
 const STORES = [
@@ -145,8 +157,8 @@ function renderTable() {
     return `
     <div class="tbl-row ${s.id===selectedId?'selected':''}" onclick="selectStore(${s.id})">
       <div class="tbl-cell">
-        <div class="store-name">${s.name}</div>
-        <div class="store-sub">${s.sub}</div>
+        <div class="store-name">${esc(s.name)}</div>
+        <div class="store-sub">${esc(s.sub)}</div>
       </div>
       <div class="tbl-cell">${getBandBadge(s.band)}</div>
       <div class="tbl-cell">
@@ -806,7 +818,7 @@ function restoreDashboard() {
   if (audStats) audStats.innerHTML = `
     <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:var(--text-primary)">${blackStores.length}</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
     <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--text-primary)">${hispStores.length}</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
-    <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s=>`${s.name} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
+    <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s=>`${esc(s.name)} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
   const audList = document.getElementById('audience-seg-list');
   if (audList) {
     const segs = [
@@ -816,14 +828,14 @@ function restoreDashboard() {
       { name:'Value / Budget-Conscious', color:'var(--border-strong)', stores: STORES.filter(s=>s.income<65000) },
       { name:'General / Mixed Market', color:'var(--border-strong)', stores: STORES.filter(s=>s.black<40&&s.hisp<20&&s.asian<15&&s.income>=65000) },
     ].filter(seg=>seg.stores.length>0);
-    audList.innerHTML = segs.map(seg=>`<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s=>s.name).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length>1?'s':''}</div></div>`).join('');
+    audList.innerHTML = segs.map(seg=>`<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s=>esc(s.name)).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length>1?'s':''}</div></div>`).join('');
   }
   const gaC = STORES.filter(s=>s.state==='GA').length;
   const flC = STORES.filter(s=>s.state==='FL').length;
   const locMap = document.getElementById('locator-map-ph');
   if (locMap) locMap.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Map View — GA (${gaC}) · FL (${flC}) Locations`;
   const locList = document.getElementById('locator-list');
-  if (locList) locList.innerHTML = STORES.map(s=>`<div class="dist-item"><div><div class="dist-name">${s.name}</div><div class="dist-sub">${s.addr}</div></div><span class="badge ${s.state==='GA'?'badge-green':'badge-blue'}">${s.state}</span></div>`).join('');
+  if (locList) locList.innerHTML = STORES.map(s=>`<div class="dist-item"><div><div class="dist-name">${esc(s.name)}</div><div class="dist-sub">${esc(s.addr)}</div></div><span class="badge ${s.state==='GA'?'badge-green':'badge-blue'}">${esc(s.state)}</span></div>`).join('');
 }
 
 function syncDatasetState() {
@@ -1095,7 +1107,7 @@ function applyCSVText(csvText, filename, mode) {
       if (audStats) audStats.innerHTML = `
         <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:var(--text-primary)">${blackStores.length}</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
         <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--text-primary)">${hispStores.length}</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
-        <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s => `${s.name} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
+        <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s => `${esc(s.name)} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
 
       const audList = document.getElementById('audience-seg-list');
       if (audList) {
@@ -1107,7 +1119,7 @@ function applyCSVText(csvText, filename, mode) {
           { name: 'General / Mixed Market', color: 'var(--border-strong)', stores: STORES.filter(s => s.black < 40 && s.hisp < 20 && s.asian < 15 && s.income >= 65000) },
         ].filter(seg => seg.stores.length > 0);
         audList.innerHTML = segments.map(seg =>
-          `<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s => s.name).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length > 1 ? 's' : ''}</div></div>`
+          `<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s => esc(s.name)).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length > 1 ? 's' : ''}</div></div>`
         ).join('');
       }
 
@@ -1118,7 +1130,7 @@ function applyCSVText(csvText, filename, mode) {
       if (locMap) locMap.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Map View — GA (${gaC}) · FL (${flC}) Locations`;
       const locList = document.getElementById('locator-list');
       if (locList) locList.innerHTML = STORES.map(s =>
-        `<div class="dist-item"><div><div class="dist-name">${s.name}</div><div class="dist-sub">${s.addr}</div></div><span class="badge ${s.state === 'GA' ? 'badge-green' : 'badge-blue'}">${s.state}</span></div>`
+        `<div class="dist-item"><div><div class="dist-name">${esc(s.name)}</div><div class="dist-sub">${esc(s.addr)}</div></div><span class="badge ${s.state === 'GA' ? 'badge-green' : 'badge-blue'}">${esc(s.state)}</span></div>`
       ).join('');
 
       // Run field mapping & data health check
