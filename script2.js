@@ -1306,6 +1306,7 @@ function uploadZoneDrop(e) {
   const file = e.dataTransfer.files[0];
   if (!file) return;
   if (!file.name.endsWith('.csv')) { showToast('Please drop a .csv file only.'); return; }
+  if (file.size > 10 * 1024 * 1024) { showToast('File too large. Please upload a CSV under 10 MB.'); return; }
   applyCSVData(file, 'upload');
 }
 
