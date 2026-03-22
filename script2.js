@@ -1,20 +1,50 @@
 
-console.log('[BM script] v4 loaded — ' + new Date().toISOString());
+// ══════════════════════════════════════════
+// XSS ESCAPE HELPER — use on ALL CSV-derived values in innerHTML
+// ══════════════════════════════════════════
+function esc(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 // ══════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════
 const STORES = [
-  {id:0,name:'Union City',addr:'6851 Shannon Pkwy, Union City, GA',photoGrad:'linear-gradient(135deg,#2d1b69 0%,#11998e 100%)',state:'GA',sub:'Georgia · $49.5K',income:49549,poverty:14.2,black:81.9,hisp:9.8,asian:0,white:3.6,wage:33.73,band:'lower',raceLabel:'82% B / 10% H',raceBar:[{w:81.9,c:'#0072B2'},{w:9.8,c:'#E69F00'},{w:8.3,c:'#64748B'}],priority:'accent',priorityText:'Black Hair Essentials',pColor:'var(--accent)',store:'Union City, GA',bannerLabel:'Lower-Mid Income',msg:'"Everyday beauty essentials nearby. Shop the Black hair care brands you trust."',stats:['$49,549','14.2%','81.9%','$33.73'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr'],merch:[['done','Black hair & braiding essentials'],['done','Value bundles & bulk packs'],['pend','Loyalty card promo (Pending)']],act1:'Launch Awareness Campaign',act2:'Update Shelf Displays'},
-  {id:1,name:'Miami Gardens',addr:'19410 NW 27th Ave, Miami Gardens, FL',photoGrad:'linear-gradient(135deg,#0052d4 0%,#e040fb 100%)',state:'FL',sub:'FL · $63.6K',income:63627,poverty:13.6,black:60.3,hisp:36.3,asian:0.3,white:2.4,wage:31.88,band:'mid',raceLabel:'60% B / 36% H',raceBar:[{w:60.3,c:'#0072B2'},{w:36.3,c:'#E69F00'},{w:3.4,c:'#64748B'}],priority:'warn',priorityText:'Bilingual + Black Beauty',pColor:'var(--warning)',store:'Miami Gardens, FL',bannerLabel:'Mid Income',msg:'"Beauty for every culture — Black hair care, bilingual beauty, and more."',stats:['$63,627','13.6%','60.3%','$31.88'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr'],merch:[['done','Black hair essentials'],['done','Bilingual signage'],['pend','Latin beauty brands (In Progress)']],act1:'Deploy Bilingual Campaign',act2:'Activate Spanish Ads'},
-  {id:2,name:'Duluth',addr:'2100 Pleasant Hill Rd #176, Duluth, GA',photoGrad:'linear-gradient(135deg,#1a237e 0%,#4fc3f7 100%)',state:'GA',sub:'Georgia · $95.3K',income:95331,poverty:8.9,black:23.7,hisp:16.3,asian:22.1,white:32.6,wage:33.73,band:'upper',raceLabel:'Diverse · 22% Asian',raceBar:[{w:23.7,c:'#0072B2'},{w:16.3,c:'#E69F00'},{w:22.1,c:'#009E73'},{w:32.6,c:'#64748B'}],priority:'info',priorityText:'Premium + K-Beauty',pColor:'var(--info)',store:'Duluth, GA (Gwinnett Co.)',bannerLabel:'Upper-Mid Income',msg:'"Elevated beauty at BeautyMaster Duluth — K-Beauty, premium skincare, diverse essentials."',stats:['$95,331','8.9%','23.7%','$33.73'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr'],merch:[['done','K-Beauty & Asian hair care'],['done','Premium skincare shelf'],['done','Fragrance & luxury sets']],act1:'Launch Premium Loyalty Tier',act2:'Update K-Beauty Section'},
-  {id:3,name:'Riverdale',addr:'7055 GA-85 C, Riverdale, GA',photoGrad:'linear-gradient(135deg,#4a148c 0%,#e81d25 100%)',state:'GA',sub:'Southside ATL · $63.5K',income:63455,poverty:12.4,black:74.0,hisp:12.9,asian:7.3,white:3.4,wage:33.73,band:'mid',raceLabel:'74% B / 13% H',raceBar:[{w:74,c:'#0072B2'},{w:12.9,c:'#E69F00'},{w:13.1,c:'#64748B'}],priority:'',priorityText:'Black Hair + Protective',pColor:'var(--success)',store:'Riverdale, GA (Southside ATL)',bannerLabel:'Mid Income',msg:'"Your neighborhood beauty destination. Protective styles, natural hair essentials."',stats:['$63,455','12.4%','74.0%','$33.73'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr'],merch:[['done','Black hair & protective styles'],['done','Bulk purchase wigs & bundles'],['pend','Seasonal skincare promo (Pending)']],act1:'Launch Local Campaign',act2:'Update Protective Styles Signage'},
-  {id:4,name:'Florida Mall',addr:'1631 Florida Mall Ave, Orlando, FL',photoGrad:'linear-gradient(135deg,#e65100 0%,#ffd54f 100%)',state:'FL',sub:'Orlando FL · $72.3K',income:72336,poverty:14.7,black:23.4,hisp:35.4,asian:5.0,white:31.2,wage:28.95,band:'mid',raceLabel:'35% H / 23% B',raceBar:[{w:35.4,c:'#E69F00'},{w:23.4,c:'#0072B2'},{w:31.2,c:'#64748B'},{w:10,c:'#FCD34D'}],priority:'warn',priorityText:'Bilingual Styling',pColor:'var(--warning)',store:'Florida Mall, Orlando FL',bannerLabel:'Mid Income',msg:'"BeautyMaster Florida Mall — tu destino de belleza. Bilingual beauty for everyone."',stats:['$72,336','14.7%','23.4%','$28.95'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr'],merch:[['done','Spanish-language POP displays'],['done','Latin hair & skin brands'],['pend','Quinceañera package (Pending)']],act1:'Deploy Spanish Social Content',act2:'Partner with Local Influencers'},
-  {id:5,name:'Morrow',addr:'1400 Mt Zion Rd, Morrow, GA',photoGrad:'linear-gradient(135deg,#004d40 0%,#f9a825 100%)',state:'GA',sub:'Georgia · $73.7K',income:73693,poverty:19.1,black:32.5,hisp:30.0,asian:29.2,white:8.7,wage:33.73,band:'mid',raceLabel:'33% B / 30% H / 29% A',raceBar:[{w:32.5,c:'#0072B2'},{w:30,c:'#E69F00'},{w:29.2,c:'#009E73'},{w:8.3,c:'#64748B'}],priority:'accent',priorityText:'K-Beauty + Multicultural',pColor:'var(--accent)',store:'Morrow, GA',bannerLabel:'Mid Income',msg:'"K-Beauty, Latin beauty, and Black hair care — every culture, every look."',stats:['$73,693','19.1%','32.5%','$33.73'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr'],merch:[['done','K-Beauty & Asian hair care'],['done','Bilingual signage'],['pend','Multicultural promo bundle (Pending)']],act1:'Launch Multicultural Campaign',act2:'Expand K-Beauty Section'},
-  {id:6,name:'Douglasville',addr:'Douglasville, GA',photoGrad:'linear-gradient(135deg,#1b5e20 0%,#9c27b0 100%)',state:'GA',sub:'Georgia · $79.1K',income:79107,poverty:10.7,black:68.2,hisp:4.7,asian:1.8,white:20.1,wage:33.73,band:'mid',raceLabel:'68% B / 5% H',raceBar:[{w:68.2,c:'#0072B2'},{w:4.7,c:'#E69F00'},{w:27.1,c:'#64748B'}],priority:'',priorityText:'Black Beauty Focus',pColor:'var(--success)',store:'Douglasville, GA',bannerLabel:'Mid Income',msg:'"BeautyMaster Douglasville — premium Black beauty essentials for your community."',stats:['$79,107','10.7%','68.2%','$33.73'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr'],merch:[['done','Black hair & protective styles'],['done','Natural hair essentials'],['pend','Summer promo bundle (Pending)']],act1:'Activate Community Sponsorship',act2:'Update Natural Hair Section'},
-  {id:7,name:'Atlanta (×4)',addr:'Atlanta Metro, GA (4 locations)',photoGrad:'linear-gradient(135deg,#b71c1c 0%,#212121 100%)',state:'GA',sub:'GA · $85.7K avg',income:85652,poverty:16.9,black:46.0,hisp:6.3,asian:5.3,white:38.1,wage:33.73,band:'mid',raceLabel:'46% B / 38% W',raceBar:[{w:46,c:'#0072B2'},{w:6.3,c:'#E69F00'},{w:5.3,c:'#009E73'},{w:38.1,c:'#64748B'}],priority:'',priorityText:'Black + General Market',pColor:'var(--info)',store:'Atlanta, GA (4 Stores)',bannerLabel:'Mid Income',msg:'"Your Atlanta BeautyMaster — serving every neighborhood with Black beauty essentials."',stats:['$85,652','16.9%','46.0%','$33.73'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr'],merch:[['done','Black hair essentials'],['done','General market range'],['pend','Cross-store loyalty promo (Pending)']],act1:'Run Atlanta-Wide Campaign',act2:'Standardize Store Shelf Layouts'},
-  {id:8,name:'Columbus',addr:'3131 Manchester Expy #2C, Columbus, GA',photoGrad:'linear-gradient(135deg,#37474f 0%,#e81d25 100%)',state:'GA',sub:'Georgia · $58.1K',income:58073,poverty:19.0,black:47.0,hisp:8.5,asian:2.7,white:36.7,wage:26.19,band:'mid',raceLabel:'47% B / 37% W',raceBar:[{w:47,c:'#0072B2'},{w:8.5,c:'#E69F00'},{w:36.7,c:'#64748B'}],priority:'accent',priorityText:'Value + Black Beauty',pColor:'var(--accent)',store:'Columbus, GA',bannerLabel:'Mid Income',msg:'"Affordable beauty essentials at BeautyMaster Columbus. Quality products, everyday prices."',stats:['$58,073','19.0%','47.0%','$26.19'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr'],merch:[['done','Value bundles & multipacks'],['done','Black hair essentials'],['pend','Community discount program (Pending)']],act1:'Launch Value Promotions',act2:'Activate Discount Program'},
-  {id:9,name:'FL Others (×3)',addr:'Orlando · Tamarac · West Palm Beach, FL',photoGrad:'linear-gradient(135deg,#01579b 0%,#00897b 100%)',state:'FL',sub:'Orlando · Tamarac · WPB',income:69167,poverty:13.9,black:31.0,hisp:27.2,asian:2.9,white:29.9,wage:31.88,band:'mid',raceLabel:'~30% H / ~31% B',raceBar:[{w:31,c:'#E69F00'},{w:31,c:'#0072B2'},{w:30,c:'#64748B'}],priority:'warn',priorityText:'Bilingual + Multicultural',pColor:'var(--warning)',store:'FL: Orlando · Tamarac · WPB',bannerLabel:'Mid Income',msg:'"Bilingual beauty for every Florida community. Tu belleza, nuestro compromiso."',stats:['$69,167','13.9%','~31%','$31.88'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr'],merch:[['done','Bilingual product displays'],['done','Hispanic & Black beauty brands'],['pend','Seasonal FL promo (Pending)']],act1:'Deploy FL Bilingual Campaign',act2:'Update Store GMB Listings'},
+  // id:0 — West Palm Beach, FL
+  {id:0,name:'West Palm Beach',addr:'4340 Okeechobee Blvd Suite #101, West Palm Beach, FL 33409, USA',photoGrad:'linear-gradient(135deg,#2d1b69 0%,#11998e 100%)',state:'FL',sub:'FL · $73.4K',income:73446,poverty:14.1,black:32.8,hisp:24.6,asian:2.7,white:36.2,wage:23.04,pop:127744,femalePct:50.2,under18:17.7,twoPlus:17.8,band:'mid',raceLabel:'36% W / 33% B',raceBar:[{w:36.2,c:'#64748B'},{w:32.8,c:'#0072B2'},{w:24.6,c:'#E69F00'},{w:17.8,c:'#CC79A7'}],priority:'',priorityText:'Black + General Market',pColor:'var(--info)',store:'West Palm Beach, FL',bannerLabel:'Mid Income',msg:'"Your neighborhood BeautyMaster — serving every community with quality beauty essentials."',stats:['$73,446','14.1%','32.8%','$23.04','127,744','50.2%','17.7%','17.8%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','General beauty essentials'],['pend','Seasonal promo (Pending)']],act1:'Run Local Awareness Campaign',act2:'Update Store Shelf Displays'},
+  // id:1 — Camp Creek, GA (Atlanta)
+  {id:1,name:'Camp Creek',addr:'3685 Marketplace Blvd, Atlanta, GA 30344, USA',photoGrad:'linear-gradient(135deg,#0052d4 0%,#e040fb 100%)',state:'GA',sub:'GA · $85.7K',income:85652,poverty:16.9,black:46,hisp:6.3,asian:5.3,white:38.1,wage:23.93,pop:520070,femalePct:51,under18:16.6,twoPlus:7.2,band:'mid',raceLabel:'46% B / 38% W',raceBar:[{w:46,c:'#0072B2'},{w:38.1,c:'#64748B'},{w:7.2,c:'#CC79A7'},{w:6.3,c:'#E69F00'},{w:5.3,c:'#009E73'}],priority:'',priorityText:'Black Beauty Focus',pColor:'var(--success)',store:'Camp Creek, GA',bannerLabel:'Mid Income',msg:'"Your neighborhood BeautyMaster — serving every community with quality beauty essentials."',stats:['$85,652','16.9%','46.0%','$23.93','520,070','51.0%','16.6%','7.2%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Black hair & protective styles'],['done','Premium skincare shelf'],['pend','Seasonal promo (Pending)']],act1:'Run Local Awareness Campaign',act2:'Update Store Shelf Displays'},
+  // id:2 — Columbus, GA
+  {id:2,name:'Columbus',addr:'3131 Manchester Expy #2c, Columbus, GA 31909, USA',photoGrad:'linear-gradient(135deg,#1a237e 0%,#4fc3f7 100%)',state:'GA',sub:'GA · $58.1K',income:58073,poverty:19,black:47,hisp:8.5,asian:2.7,white:36.7,wage:19.6,pop:201830,femalePct:51.9,under18:24.9,twoPlus:8.1,band:'lower',raceLabel:'47% B / 37% W',raceBar:[{w:47,c:'#0072B2'},{w:36.7,c:'#64748B'},{w:8.5,c:'#E69F00'},{w:8.1,c:'#CC79A7'}],priority:'',priorityText:'Black Beauty Focus',pColor:'var(--success)',store:'Columbus, GA',bannerLabel:'Lower-Mid Income',msg:'"Your neighborhood BeautyMaster — serving every community with quality beauty essentials."',stats:['$58,073','19.0%','47.0%','$19.60','201,830','51.9%','24.9%','8.1%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Black hair & protective styles'],['done','Value bundles & bulk packs'],['pend','Seasonal promo (Pending)']],act1:'Run Local Awareness Campaign',act2:'Update Store Shelf Displays'},
+  // id:3 — Douglasville, GA
+  {id:3,name:'Douglasville',addr:'6967 Concourse Pkwy, Douglasville, GA 30134, USA',photoGrad:'linear-gradient(135deg,#4a148c 0%,#e81d25 100%)',state:'GA',sub:'GA · $79.1K',income:79107,poverty:10.7,black:68.2,hisp:4.7,asian:1.8,white:20.1,wage:23.93,pop:40540,femalePct:51.5,under18:26.4,twoPlus:4.7,band:'mid',raceLabel:'68% B / 20% W',raceBar:[{w:68.2,c:'#0072B2'},{w:20.1,c:'#64748B'},{w:4.7,c:'#CC79A7'}],priority:'accent',priorityText:'Black Hair + Protective',pColor:'var(--accent)',store:'Douglasville, GA',bannerLabel:'Mid Income',msg:'"Everyday beauty essentials nearby. Shop the Black hair care brands you trust."',stats:['$79,107','10.7%','68.2%','$23.93','40,540','51.5%','26.4%','4.7%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Black hair & protective styles'],['pend','Seasonal promo (Pending)']],act1:'Launch Black Beauty Campaign',act2:'Update Store Shelf Displays'},
+  // id:4 — Duluth, GA
+  {id:4,name:'Duluth',addr:'2100 Pleasant Hill Rd #176, Duluth, GA 30096, USA',photoGrad:'linear-gradient(135deg,#e65100 0%,#ffd54f 100%)',state:'GA',sub:'GA · $95.3K',income:95331,poverty:8.9,black:23.7,hisp:16.3,asian:22.1,white:32.6,wage:23.93,pop:33157,femalePct:52.6,under18:21.6,twoPlus:11.4,band:'upper',raceLabel:'33% W / 24% B',raceBar:[{w:32.6,c:'#64748B'},{w:23.7,c:'#0072B2'},{w:22.1,c:'#009E73'},{w:16.3,c:'#E69F00'},{w:11.4,c:'#CC79A7'}],priority:'info',priorityText:'Premium + K-Beauty',pColor:'var(--info)',store:'Duluth, GA',bannerLabel:'Upper-Mid Income',msg:'"Elevated beauty at Duluth — K-Beauty, premium skincare, diverse essentials."',stats:['$95,331','8.9%','23.7%','$23.93','33,157','52.6%','21.6%','11.4%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','K-Beauty & Asian hair care'],['done','Premium skincare shelf'],['pend','Seasonal promo (Pending)']],act1:'Run Local Awareness Campaign',act2:'Expand K-Beauty Section'},
+  // id:5 — Florida Mall, FL (Orlando)
+  {id:5,name:'Florida Mall',addr:'1631 Florida Mall Ave, Orlando, FL 32809, USA',photoGrad:'linear-gradient(135deg,#004d40 0%,#f9a825 100%)',state:'FL',sub:'FL · $72.3K',income:72336,poverty:14.7,black:23.4,hisp:35.4,asian:5,white:31.2,wage:21.83,pop:334854,femalePct:51.1,under18:21.4,twoPlus:24.2,band:'lower',raceLabel:'35% H / 31% W',raceBar:[{w:35.4,c:'#E69F00'},{w:31.2,c:'#64748B'},{w:24.2,c:'#CC79A7'},{w:23.4,c:'#0072B2'}],priority:'warn',priorityText:'Bilingual + Black Beauty',pColor:'var(--warning)',store:'Florida Mall, FL',bannerLabel:'Lower-Mid Income',msg:'"Your neighborhood BeautyMaster — serving every community with quality beauty essentials."',stats:['$72,336','14.7%','23.4%','$21.83','334,854','51.1%','21.4%','24.2%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Bilingual signage & Latin brands'],['done','Value bundles & bulk packs'],['pend','Seasonal promo (Pending)']],act1:'Deploy Bilingual Campaign',act2:'Update Store Shelf Displays'},
+  // id:6 — Greenbriar, GA (Atlanta)
+  {id:6,name:'Greenbriar',addr:'2841 Greenbriar Pkwy SW #A4, Atlanta, GA 30331, USA',photoGrad:'linear-gradient(135deg,#1b5e20 0%,#9c27b0 100%)',state:'GA',sub:'GA · $85.7K',income:85652,poverty:16.9,black:46,hisp:6.3,asian:5.3,white:38.1,wage:23.93,pop:520070,femalePct:51,under18:16.6,twoPlus:7.2,band:'mid',raceLabel:'46% B / 38% W',raceBar:[{w:46,c:'#0072B2'},{w:38.1,c:'#64748B'},{w:7.2,c:'#CC79A7'},{w:6.3,c:'#E69F00'},{w:5.3,c:'#009E73'}],priority:'',priorityText:'Black Beauty Focus',pColor:'var(--success)',store:'Greenbriar, GA',bannerLabel:'Mid Income',msg:'"Your neighborhood BeautyMaster — serving every community with quality beauty essentials."',stats:['$85,652','16.9%','46.0%','$23.93','520,070','51.0%','16.6%','7.2%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Black hair & protective styles'],['done','Premium skincare shelf'],['pend','Seasonal promo (Pending)']],act1:'Run Local Awareness Campaign',act2:'Update Store Shelf Displays'},
+  // id:7 — Headland, GA (Atlanta)
+  {id:7,name:'Headland',addr:'3031 Headland Dr, Atlanta, GA 30311, USA',photoGrad:'linear-gradient(135deg,#b71c1c 0%,#212121 100%)',state:'GA',sub:'GA · $85.7K',income:85652,poverty:16.9,black:46,hisp:6.3,asian:5.3,white:38.1,wage:23.93,pop:520070,femalePct:51,under18:16.6,twoPlus:7.2,band:'mid',raceLabel:'46% B / 38% W',raceBar:[{w:46,c:'#0072B2'},{w:38.1,c:'#64748B'},{w:7.2,c:'#CC79A7'},{w:6.3,c:'#E69F00'},{w:5.3,c:'#009E73'}],priority:'',priorityText:'Black Beauty Focus',pColor:'var(--success)',store:'Headland, GA',bannerLabel:'Mid Income',msg:'"Your neighborhood BeautyMaster — serving every community with quality beauty essentials."',stats:['$85,652','16.9%','46.0%','$23.93','520,070','51.0%','16.6%','7.2%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Black hair & protective styles'],['done','Premium skincare shelf'],['pend','Seasonal promo (Pending)']],act1:'Run Local Awareness Campaign',act2:'Update Store Shelf Displays'},
+  // id:8 — Miami Gardens, FL
+  {id:8,name:'Miami Gardens',addr:'19410 NW 27th Ave, Miami Gardens, FL 33056, USA',photoGrad:'linear-gradient(135deg,#37474f 0%,#e81d25 100%)',state:'FL',sub:'FL · $63.6K',income:63627,poverty:13.6,black:60.3,hisp:36.3,asian:0.3,white:2.4,wage:23.04,pop:116173,femalePct:50.7,under18:22.7,twoPlus:24.5,band:'lower',raceLabel:'60% B / 36% H',raceBar:[{w:60.3,c:'#0072B2'},{w:36.3,c:'#E69F00'},{w:24.5,c:'#CC79A7'}],priority:'accent',priorityText:'Black Hair Essentials',pColor:'var(--accent)',store:'Miami Gardens, FL',bannerLabel:'Lower-Mid Income',msg:'"Beauty for every culture — Black hair care, bilingual beauty, and more."',stats:['$63,627','13.6%','60.3%','$23.04','116,173','50.7%','22.7%','24.5%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Black hair & protective styles'],['done','Bilingual signage & Latin brands'],['done','Value bundles & bulk packs'],['pend','Seasonal promo (Pending)']],act1:'Deploy Bilingual Campaign',act2:'Update Store Shelf Displays'},
+  // id:9 — Morrow, GA
+  {id:9,name:'Morrow',addr:'1400 Mt Zion Rd, Morrow, GA 30260, USA',photoGrad:'linear-gradient(135deg,#01579b 0%,#00897b 100%)',state:'GA',sub:'GA · $73.7K',income:73693,poverty:19.1,black:32.5,hisp:30,asian:29.2,white:8.7,wage:23.93,pop:6262,femalePct:55.3,under18:29.3,twoPlus:6.8,band:'mid',raceLabel:'33% B / 30% H',raceBar:[{w:32.5,c:'#0072B2'},{w:30,c:'#E69F00'},{w:29.2,c:'#009E73'},{w:8.7,c:'#64748B'},{w:6.8,c:'#CC79A7'}],priority:'info',priorityText:'K-Beauty + Multicultural',pColor:'var(--info)',store:'Morrow, GA',bannerLabel:'Mid Income',msg:'"Elevated beauty at Morrow — K-Beauty, premium skincare, diverse essentials."',stats:['$73,693','19.1%','32.5%','$23.93','6,262','55.3%','29.3%','6.8%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Bilingual signage & Latin brands'],['done','K-Beauty & Asian hair care'],['pend','Seasonal promo (Pending)']],act1:'Deploy Bilingual Campaign',act2:'Expand K-Beauty Section'},
+  // id:10 — Old National, GA (Atlanta)
+  {id:10,name:'Old National',addr:'6385 Old National Hwy Suite #270, Atlanta, GA 30349, USA',photoGrad:'linear-gradient(135deg,#880e4f 0%,#f57f17 100%)',state:'GA',sub:'GA · $85.7K',income:85652,poverty:16.9,black:46,hisp:6.3,asian:5.3,white:38.1,wage:23.93,pop:520070,femalePct:51,under18:16.6,twoPlus:7.2,band:'mid',raceLabel:'46% B / 38% W',raceBar:[{w:46,c:'#0072B2'},{w:38.1,c:'#64748B'},{w:7.2,c:'#CC79A7'},{w:6.3,c:'#E69F00'},{w:5.3,c:'#009E73'}],priority:'',priorityText:'Black Beauty Focus',pColor:'var(--success)',store:'Old National, GA',bannerLabel:'Mid Income',msg:'"Your neighborhood BeautyMaster — serving every community with quality beauty essentials."',stats:['$85,652','16.9%','46.0%','$23.93','520,070','51.0%','16.6%','7.2%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Black hair & protective styles'],['done','Premium skincare shelf'],['pend','Seasonal promo (Pending)']],act1:'Run Local Awareness Campaign',act2:'Update Store Shelf Displays'},
+  // id:11 — Orlando, FL
+  {id:11,name:'Orlando',addr:'7175 W Colonial Dr, Orlando, FL 32818, USA',photoGrad:'linear-gradient(135deg,#263238 0%,#4caf50 100%)',state:'FL',sub:'FL · $72.3K',income:72336,poverty:14.7,black:23.4,hisp:35.4,asian:5,white:31.2,wage:21.83,pop:334854,femalePct:51.1,under18:21.4,twoPlus:24.2,band:'lower',raceLabel:'35% H / 31% W',raceBar:[{w:35.4,c:'#E69F00'},{w:31.2,c:'#64748B'},{w:24.2,c:'#CC79A7'},{w:23.4,c:'#0072B2'}],priority:'warn',priorityText:'Bilingual + Black Beauty',pColor:'var(--warning)',store:'Orlando, FL',bannerLabel:'Lower-Mid Income',msg:'"Your neighborhood BeautyMaster — serving every community with quality beauty essentials."',stats:['$72,336','14.7%','23.4%','$21.83','334,854','51.1%','21.4%','24.2%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Bilingual signage & Latin brands'],['done','Value bundles & bulk packs'],['pend','Seasonal promo (Pending)']],act1:'Deploy Bilingual Campaign',act2:'Update Store Shelf Displays'},
+  // id:12 — Riverdale, GA
+  {id:12,name:'Riverdale',addr:'7055 GA-85 c, Riverdale, GA 30274, USA',photoGrad:'linear-gradient(135deg,#4e342e 0%,#7986cb 100%)',state:'GA',sub:'GA · $63.5K',income:63455,poverty:12.4,black:74,hisp:12.9,asian:7.3,white:3.4,wage:23.93,pop:14586,femalePct:50.4,under18:22.2,twoPlus:7.2,band:'lower',raceLabel:'74% B / 13% H',raceBar:[{w:74,c:'#0072B2'},{w:12.9,c:'#E69F00'},{w:7.3,c:'#009E73'},{w:7.2,c:'#CC79A7'}],priority:'accent',priorityText:'Black Hair Essentials',pColor:'var(--accent)',store:'Riverdale, GA',bannerLabel:'Lower-Mid Income',msg:'"Everyday beauty essentials nearby. Shop the Black hair care brands you trust."',stats:['$63,455','12.4%','74.0%','$23.93','14,586','50.4%','22.2%','7.2%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Black hair & protective styles'],['done','Value bundles & bulk packs'],['pend','Seasonal promo (Pending)']],act1:'Launch Black Beauty Campaign',act2:'Update Store Shelf Displays'},
+  // id:13 — Tamarac, FL
+  {id:13,name:'Tamarac',addr:'7019 N University Dr, Tamarac, FL 33321, USA',photoGrad:'linear-gradient(135deg,#006064 0%,#ef9a9a 100%)',state:'FL',sub:'FL · $61.7K',income:61718,poverty:13,black:36.9,hisp:31.5,asian:3,white:26.2,wage:23.04,pop:75147,femalePct:54.7,under18:17.7,twoPlus:21,band:'lower',raceLabel:'37% B / 32% H',raceBar:[{w:36.9,c:'#0072B2'},{w:31.5,c:'#E69F00'},{w:26.2,c:'#64748B'},{w:21,c:'#CC79A7'}],priority:'warn',priorityText:'Bilingual + Black Beauty',pColor:'var(--warning)',store:'Tamarac, FL',bannerLabel:'Lower-Mid Income',msg:'"Beauty for every culture — Black hair care, bilingual beauty, and more."',stats:['$61,718','13.0%','36.9%','$23.04','75,147','54.7%','17.7%','21.0%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Bilingual signage & Latin brands'],['done','Value bundles & bulk packs'],['pend','Seasonal promo (Pending)']],act1:'Deploy Bilingual Campaign',act2:'Update Store Shelf Displays'},
+  // id:14 — Union City, GA
+  {id:14,name:'Union City',addr:'6851 Shannon Pkwy, Union City, GA 30291, USA',photoGrad:'linear-gradient(135deg,#311b92 0%,#00bcd4 100%)',state:'GA',sub:'GA · $49.5K',income:49549,poverty:14.2,black:81.9,hisp:9.8,asian:0,white:3.6,wage:23.93,pop:28195,femalePct:56.3,under18:27.7,twoPlus:5.6,band:'lower',raceLabel:'82% B',raceBar:[{w:81.9,c:'#0072B2'},{w:9.8,c:'#E69F00'},{w:5.6,c:'#CC79A7'}],priority:'accent',priorityText:'Black Hair Essentials',pColor:'var(--accent)',store:'Union City, GA',bannerLabel:'Lower-Mid Income',msg:'"Everyday beauty essentials nearby. Shop the Black hair care brands you trust."',stats:['$49,549','14.2%','81.9%','$23.93','28,195','56.3%','27.7%','5.6%'],statLabels:['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'],merch:[['done','Black hair & protective styles'],['done','Value bundles & bulk packs'],['pend','Seasonal promo (Pending)']],act1:'Launch Black Beauty Campaign',act2:'Update Store Shelf Displays'},
 ];
 // Sort each static store's raceBar by value descending at init time
 STORES.forEach(s => s.raceBar.sort((a, b) => b.w - a.w));
@@ -137,7 +167,6 @@ function renderTable() {
   };
   body.innerHTML = data.map(s => {
     const sortedRaceBar = [...s.raceBar].sort((a, b) => Number(b.w) - Number(a.w));
-    console.log(`[demo sort] ${s.name}:`, sortedRaceBar.map(r => `${Math.round(r.w)}% ${COLOR_LABEL[r.c]||'?'}`));
     const demoLegend = sortedRaceBar
       .filter(r => r.w >= 5)
       .map(r => `<span class="dl-item"><span class="dl-dot" style="background:${r.c}"></span>${Math.round(r.w)}% ${COLOR_LABEL[r.c] || 'Other'}</span>`)
@@ -145,8 +174,8 @@ function renderTable() {
     return `
     <div class="tbl-row ${s.id===selectedId?'selected':''}" onclick="selectStore(${s.id})">
       <div class="tbl-cell">
-        <div class="store-name">${s.name}</div>
-        <div class="store-sub">${s.sub}</div>
+        <div class="store-name">${esc(s.name)}</div>
+        <div class="store-sub">${esc(s.sub)}</div>
       </div>
       <div class="tbl-cell">${getBandBadge(s.band)}</div>
       <div class="tbl-cell">
@@ -806,7 +835,7 @@ function restoreDashboard() {
   if (audStats) audStats.innerHTML = `
     <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:var(--text-primary)">${blackStores.length}</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
     <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--text-primary)">${hispStores.length}</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
-    <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s=>`${s.name} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
+    <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s=>`${esc(s.name)} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
   const audList = document.getElementById('audience-seg-list');
   if (audList) {
     const segs = [
@@ -816,14 +845,14 @@ function restoreDashboard() {
       { name:'Value / Budget-Conscious', color:'var(--border-strong)', stores: STORES.filter(s=>s.income<65000) },
       { name:'General / Mixed Market', color:'var(--border-strong)', stores: STORES.filter(s=>s.black<40&&s.hisp<20&&s.asian<15&&s.income>=65000) },
     ].filter(seg=>seg.stores.length>0);
-    audList.innerHTML = segs.map(seg=>`<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s=>s.name).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length>1?'s':''}</div></div>`).join('');
+    audList.innerHTML = segs.map(seg=>`<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s=>esc(s.name)).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length>1?'s':''}</div></div>`).join('');
   }
   const gaC = STORES.filter(s=>s.state==='GA').length;
   const flC = STORES.filter(s=>s.state==='FL').length;
   const locMap = document.getElementById('locator-map-ph');
   if (locMap) locMap.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Map View — GA (${gaC}) · FL (${flC}) Locations`;
   const locList = document.getElementById('locator-list');
-  if (locList) locList.innerHTML = STORES.map(s=>`<div class="dist-item"><div><div class="dist-name">${s.name}</div><div class="dist-sub">${s.addr}</div></div><span class="badge ${s.state==='GA'?'badge-green':'badge-blue'}">${s.state}</span></div>`).join('');
+  if (locList) locList.innerHTML = STORES.map(s=>`<div class="dist-item"><div><div class="dist-name">${esc(s.name)}</div><div class="dist-sub">${esc(s.addr)}</div></div><span class="badge ${s.state==='GA'?'badge-green':'badge-blue'}">${esc(s.state)}</span></div>`).join('');
 }
 
 function syncDatasetState() {
@@ -851,6 +880,9 @@ function closeRemoveModal(e) {
 }
 function confirmRemoveDataset() {
   datasetExists = false;
+  localStorage.removeItem('bm_csvRaw');
+  localStorage.removeItem('bm_csvFilename');
+  localStorage.removeItem('bm_csvDate');
   document.getElementById('remove-modal').classList.remove('open');
   syncDatasetState();
   clearDashboard();
@@ -1031,7 +1063,7 @@ function computeKPIsFromStores(stores) {
     income:    { val: `$${(avgInc/1000).toFixed(1)}K`, meta: `$${(minInc/1000).toFixed(0)}K – $${(maxInc/1000).toFixed(0)}K range`, color: 'var(--text-secondary)', barW: `${Math.round(avgInc/maxInc*100)}%`, barC: '#CBD5E1' },
     black:     { val: String(blackMaj.length), meta: 'stores >50% Black',    color: 'var(--text-secondary)', barW: `${Math.round(blackMaj.length/n*100)}%`, barC: '#CBD5E1' },
     hispanic:  { val: String(hispFocus.length),meta: 'stores >25% Hispanic', color: 'var(--text-secondary)', barW: `${Math.round(hispFocus.length/n*100)}%`, barC: '#CBD5E1' },
-    premium:   { val: String(premium.length),  meta: premium.length > 0 ? `${premium[0].name} · $${(premium[0].income/1000).toFixed(1)}K` : 'None', color: 'var(--text-secondary)', barW: `${Math.round(premium.length/n*100)}%`, barC: '#CBD5E1' },
+    premium:   { val: String(premium.length),  meta: premium.length > 0 ? `${esc(premium[0].name)} · $${(premium[0].income/1000).toFixed(1)}K` : 'None', color: 'var(--text-secondary)', barW: `${Math.round(premium.length/n*100)}%`, barC: '#CBD5E1' },
     lowincome: { val: String(lowInc.length),   meta: 'stores <$65K',         color: 'var(--text-secondary)', barW: `${Math.round(lowInc.length/n*100)}%`, barC: '#CBD5E1' },
     asian:     { val: String(asianHigh.length),meta: 'stores >20% Asian',    color: 'var(--text-secondary)', barW: `${Math.round(asianHigh.length/n*100)}%`, barC: '#CBD5E1' },
   };
@@ -1095,7 +1127,7 @@ function applyCSVText(csvText, filename, mode) {
       if (audStats) audStats.innerHTML = `
         <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:var(--text-primary)">${blackStores.length}</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
         <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--text-primary)">${hispStores.length}</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
-        <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s => `${s.name} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
+        <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s => `${esc(s.name)} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
 
       const audList = document.getElementById('audience-seg-list');
       if (audList) {
@@ -1107,7 +1139,7 @@ function applyCSVText(csvText, filename, mode) {
           { name: 'General / Mixed Market', color: 'var(--border-strong)', stores: STORES.filter(s => s.black < 40 && s.hisp < 20 && s.asian < 15 && s.income >= 65000) },
         ].filter(seg => seg.stores.length > 0);
         audList.innerHTML = segments.map(seg =>
-          `<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s => s.name).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length > 1 ? 's' : ''}</div></div>`
+          `<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s => esc(s.name)).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length > 1 ? 's' : ''}</div></div>`
         ).join('');
       }
 
@@ -1118,7 +1150,7 @@ function applyCSVText(csvText, filename, mode) {
       if (locMap) locMap.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Map View — GA (${gaC}) · FL (${flC}) Locations`;
       const locList = document.getElementById('locator-list');
       if (locList) locList.innerHTML = STORES.map(s =>
-        `<div class="dist-item"><div><div class="dist-name">${s.name}</div><div class="dist-sub">${s.addr}</div></div><span class="badge ${s.state === 'GA' ? 'badge-green' : 'badge-blue'}">${s.state}</span></div>`
+        `<div class="dist-item"><div><div class="dist-name">${esc(s.name)}</div><div class="dist-sub">${esc(s.addr)}</div></div><span class="badge ${s.state === 'GA' ? 'badge-green' : 'badge-blue'}">${esc(s.state)}</span></div>`
       ).join('');
 
       // Run field mapping & data health check
@@ -1141,6 +1173,7 @@ function handleCSVUpload(event, mode) {
   const file = event.target.files[0];
   if (!file) return;
   if (!file.name.endsWith('.csv')) { showToast('Please upload a .csv file only.'); return; }
+  if (file.size > 10 * 1024 * 1024) { showToast('File too large. Please upload a CSV under 10 MB.'); return; }
   applyCSVData(file, mode);
   event.target.value = '';
 }
@@ -1236,7 +1269,7 @@ function runDataHealth(headers, rows) {
       icon = SVG_CHECK; cls = 'fh-ok';
       if (f.required) tag = `<span class="fh-ftag required">Required</span>`;
     }
-    return `<div class="fh-field ${cls}">${icon}<span class="fh-fname">${f.csvCol || f.key}</span>${tag}</div>`;
+    return `<div class="fh-field ${cls}">${icon}<span class="fh-fname">${esc(f.csvCol || f.key)}</span>${tag}</div>`;
   }).join('') + (extraCols.length
     ? `<div class="fh-field fh-extra" style="opacity:.5">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;flex-shrink:0;color:var(--text-tertiary)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
@@ -1257,7 +1290,7 @@ function runDataHealth(headers, rows) {
       if (f.status === 'missing') {
         return `<div class="fh-warn-msg">${SVG_WARN_SM} <strong>${f.key}</strong> 컬럼을 찾을 수 없습니다. ${f.required ? 'CSV에 해당 컬럼이 필요합니다.' : '선택적 컬럼이지만 일부 기능이 제한됩니다.'}</div>`;
       }
-      return `<div class="fh-warn-msg">${SVG_WARN_SM} <strong>${f.csvCol}</strong>에서 ${f.invalidMsg}. 해당 행은 계산에서 제외됩니다.</div>`;
+      return `<div class="fh-warn-msg">${SVG_WARN_SM} <strong>${esc(f.csvCol)}</strong>에서 ${f.invalidMsg}. 해당 행은 계산에서 제외됩니다.</div>`;
     }).join('');
   }
 
@@ -1293,6 +1326,7 @@ function uploadZoneDrop(e) {
   const file = e.dataTransfer.files[0];
   if (!file) return;
   if (!file.name.endsWith('.csv')) { showToast('Please drop a .csv file only.'); return; }
+  if (file.size > 10 * 1024 * 1024) { showToast('File too large. Please upload a CSV under 10 MB.'); return; }
   applyCSVData(file, 'upload');
 }
 
@@ -1312,14 +1346,6 @@ function showToast(msg) {
 
 syncDatasetState();
 
-// Restore CSV from localStorage — must run after datasetExists and all
-// settings functions are declared, and after the initial renderTable().
-(function restoreCSV() {
-  const saved = localStorage.getItem('bm_csvRaw');
-  if (!saved) return;
-  const filename = localStorage.getItem('bm_csvFilename') || 'dataset.csv';
-  applyCSVText(saved, filename, 'upload');
-})();
 
 // ══════════════════════════════════════════
 // THEME (Dark / Light Mode)
