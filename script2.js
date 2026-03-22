@@ -171,7 +171,7 @@ function renderTable() {
     const segments = sortedRaceBar.map(r => ({ ...r, orig: r.w, w: total > 0 ? (r.w / total) * 100 : 0 }));
     const demoLegend = sortedRaceBar
       .filter(r => r.w > 0)
-      .map(r => `<span class="dl-item"><span class="dl-dot" style="background:${r.c}"></span>${r.w}% ${COLOR_LABEL[r.c] || 'Other'}</span>`)
+      .map(r => { const count=s.pop>0?Math.round(r.w/100*s.pop):0; const label=COLOR_LABEL[r.c]||'Other'; return `<span class="dl-item" data-tip="${label}: ${r.w}% · ~${count.toLocaleString()} people"><span class="dl-dot" style="background:${r.c}"></span>${r.w}% ${label}</span>`; })
       .join('');
     return `
     <div class="tbl-row ${s.id===selectedId?'selected':''}" onclick="selectStore(${s.id})">
@@ -705,9 +705,9 @@ function initRaceTip() {
   tip.id = 'race-tip';
   document.body.appendChild(tip);
   document.addEventListener('mouseover', e => {
-    const seg = e.target.closest('.race-seg[data-tip]');
-    if (!seg) return;
-    tip.textContent = seg.dataset.tip;
+    const el = e.target.closest('.race-seg[data-tip], .dl-item[data-tip]');
+    if (!el) return;
+    tip.textContent = el.dataset.tip;
     tip.style.display = 'block';
   });
   document.addEventListener('mousemove', e => {
@@ -716,7 +716,7 @@ function initRaceTip() {
     tip.style.top  = (e.clientY - 34) + 'px';
   });
   document.addEventListener('mouseout', e => {
-    if (e.target.closest('.race-seg[data-tip]')) tip.style.display = 'none';
+    if (e.target.closest('.race-seg[data-tip], .dl-item[data-tip]')) tip.style.display = 'none';
   });
 }
 
