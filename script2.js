@@ -729,6 +729,7 @@ initRaceTip();
 initColResize();
 refreshAddBtn();
 updatePhotoPanel(STORES[0]);
+selectStore(0);
 initRpResize();
 
 // Force right panel reflow on initial render.
