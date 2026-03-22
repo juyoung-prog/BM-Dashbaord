@@ -604,7 +604,7 @@ svg { display: block; }
 .race-track {
   height: 5px;
   border-radius: 3px;
-  background: var(--bg-base);
+  background: transparent;
   overflow: hidden;
   display: flex;
 }

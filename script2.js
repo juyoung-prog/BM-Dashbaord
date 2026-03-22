@@ -168,7 +168,7 @@ function renderTable() {
   body.innerHTML = data.map(s => {
     const sortedRaceBar = [...s.raceBar].sort((a, b) => Number(b.w) - Number(a.w));
     const demoLegend = sortedRaceBar
-      .filter(r => r.w >= 5)
+      .filter(r => r.w >= 3)
       .map(r => `<span class="dl-item"><span class="dl-dot" style="background:${r.c}"></span>${Math.round(r.w)}% ${COLOR_LABEL[r.c] || 'Other'}</span>`)
       .join('');
     return `
