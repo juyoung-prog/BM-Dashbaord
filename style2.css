@@ -1695,7 +1695,7 @@ svg { display: block; }
 .kpi-card--overview .kpi-value { font-size: 30px; }
 
 /* ═══════ DEMO LEGEND — race bar color labels ═══════ */
-.race-track { height: 7px !important; border-radius: 4px !important; }
+.race-track { height: 7px !important; border-radius: 4px !important; background: transparent !important; }
 .race-label { display: none; }
 .demo-legend {
   display: flex;
