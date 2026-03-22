@@ -1,6 +1,4 @@
 
-console.log('[BM script] v4 loaded — ' + new Date().toISOString());
-
 // ══════════════════════════════════════════
 // XSS ESCAPE HELPER — use on ALL CSV-derived values in innerHTML
 // ══════════════════════════════════════════
@@ -149,7 +147,6 @@ function renderTable() {
   };
   body.innerHTML = data.map(s => {
     const sortedRaceBar = [...s.raceBar].sort((a, b) => Number(b.w) - Number(a.w));
-    console.log(`[demo sort] ${s.name}:`, sortedRaceBar.map(r => `${Math.round(r.w)}% ${COLOR_LABEL[r.c]||'?'}`));
     const demoLegend = sortedRaceBar
       .filter(r => r.w >= 5)
       .map(r => `<span class="dl-item"><span class="dl-dot" style="background:${r.c}"></span>${Math.round(r.w)}% ${COLOR_LABEL[r.c] || 'Other'}</span>`)
@@ -863,6 +860,9 @@ function closeRemoveModal(e) {
 }
 function confirmRemoveDataset() {
   datasetExists = false;
+  localStorage.removeItem('bm_csvRaw');
+  localStorage.removeItem('bm_csvFilename');
+  localStorage.removeItem('bm_csvDate');
   document.getElementById('remove-modal').classList.remove('open');
   syncDatasetState();
   clearDashboard();
@@ -1153,6 +1153,7 @@ function handleCSVUpload(event, mode) {
   const file = event.target.files[0];
   if (!file) return;
   if (!file.name.endsWith('.csv')) { showToast('Please upload a .csv file only.'); return; }
+  if (file.size > 10 * 1024 * 1024) { showToast('File too large. Please upload a CSV under 10 MB.'); return; }
   applyCSVData(file, mode);
   event.target.value = '';
 }
