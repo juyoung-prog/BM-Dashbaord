@@ -167,6 +167,8 @@ function renderTable() {
   };
   body.innerHTML = data.map(s => {
     const sortedRaceBar = [...s.raceBar].sort((a, b) => Number(b.w) - Number(a.w));
+    const total = sortedRaceBar.reduce((sum, r) => sum + r.w, 0);
+    const segments = sortedRaceBar.map(r => ({ ...r, w: total > 0 ? (r.w / total) * 100 : 0 }));
     const demoLegend = sortedRaceBar
       .filter(r => r.w >= 3)
       .map(r => `<span class="dl-item"><span class="dl-dot" style="background:${r.c}"></span>${Math.round(r.w)}% ${COLOR_LABEL[r.c] || 'Other'}</span>`)
@@ -183,7 +185,7 @@ function renderTable() {
       </div>
       <div class="tbl-cell">
         <div class="race-wrap">
-          <div class="race-track">${s.raceBar.map(r=>`<div class="race-seg" style="width:${r.w}%;background:${r.c}"></div>`).join('')}</div>
+          <div class="race-track">${segments.map(r=>`<div class="race-seg" style="width:${r.w}%;background:${r.c}"></div>`).join('')}</div>
           <div class="demo-legend">${demoLegend}</div>
         </div>
       </div>
