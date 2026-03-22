@@ -1796,5 +1796,5 @@ svg { display: block; }
 }
 .rp-htag--state  { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
 .rp-htag--fl     { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
-.rp-htag--band   { background: var(--bg-subtle); border-color: var(--border-default); color: var(--text-secondary); }
-.rp-htag--type   { background: var(--bg-subtle); color: #334155; border-color: var(--border-default); }
+.rp-htag--band   { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
+.rp-htag--type   { background: var(--bg-subtle); color: #1E293B; border-color: var(--border-strong); font-weight: 600; }
