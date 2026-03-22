@@ -1043,7 +1043,7 @@ function computeKPIsFromStores(stores) {
     income:    { val: `$${(avgInc/1000).toFixed(1)}K`, meta: `$${(minInc/1000).toFixed(0)}K – $${(maxInc/1000).toFixed(0)}K range`, color: 'var(--text-secondary)', barW: `${Math.round(avgInc/maxInc*100)}%`, barC: '#CBD5E1' },
     black:     { val: String(blackMaj.length), meta: 'stores >50% Black',    color: 'var(--text-secondary)', barW: `${Math.round(blackMaj.length/n*100)}%`, barC: '#CBD5E1' },
     hispanic:  { val: String(hispFocus.length),meta: 'stores >25% Hispanic', color: 'var(--text-secondary)', barW: `${Math.round(hispFocus.length/n*100)}%`, barC: '#CBD5E1' },
-    premium:   { val: String(premium.length),  meta: premium.length > 0 ? `${premium[0].name} · $${(premium[0].income/1000).toFixed(1)}K` : 'None', color: 'var(--text-secondary)', barW: `${Math.round(premium.length/n*100)}%`, barC: '#CBD5E1' },
+    premium:   { val: String(premium.length),  meta: premium.length > 0 ? `${esc(premium[0].name)} · $${(premium[0].income/1000).toFixed(1)}K` : 'None', color: 'var(--text-secondary)', barW: `${Math.round(premium.length/n*100)}%`, barC: '#CBD5E1' },
     lowincome: { val: String(lowInc.length),   meta: 'stores <$65K',         color: 'var(--text-secondary)', barW: `${Math.round(lowInc.length/n*100)}%`, barC: '#CBD5E1' },
     asian:     { val: String(asianHigh.length),meta: 'stores >20% Asian',    color: 'var(--text-secondary)', barW: `${Math.round(asianHigh.length/n*100)}%`, barC: '#CBD5E1' },
   };
@@ -1248,7 +1248,7 @@ function runDataHealth(headers, rows) {
       icon = SVG_CHECK; cls = 'fh-ok';
       if (f.required) tag = `<span class="fh-ftag required">Required</span>`;
     }
-    return `<div class="fh-field ${cls}">${icon}<span class="fh-fname">${f.csvCol || f.key}</span>${tag}</div>`;
+    return `<div class="fh-field ${cls}">${icon}<span class="fh-fname">${esc(f.csvCol || f.key)}</span>${tag}</div>`;
   }).join('') + (extraCols.length
     ? `<div class="fh-field fh-extra" style="opacity:.5">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;flex-shrink:0;color:var(--text-tertiary)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
@@ -1269,7 +1269,7 @@ function runDataHealth(headers, rows) {
       if (f.status === 'missing') {
         return `<div class="fh-warn-msg">${SVG_WARN_SM} <strong>${f.key}</strong> 컬럼을 찾을 수 없습니다. ${f.required ? 'CSV에 해당 컬럼이 필요합니다.' : '선택적 컬럼이지만 일부 기능이 제한됩니다.'}</div>`;
       }
-      return `<div class="fh-warn-msg">${SVG_WARN_SM} <strong>${f.csvCol}</strong>에서 ${f.invalidMsg}. 해당 행은 계산에서 제외됩니다.</div>`;
+      return `<div class="fh-warn-msg">${SVG_WARN_SM} <strong>${esc(f.csvCol)}</strong>에서 ${f.invalidMsg}. 해당 행은 계산에서 제외됩니다.</div>`;
     }).join('');
   }
 
