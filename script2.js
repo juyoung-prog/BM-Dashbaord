@@ -501,6 +501,7 @@ function openDemoSort(e) {
 
 function sortByDemo(field, e) {
   e.stopPropagation();
+  storeSortField = null;
   const dd = document.getElementById('cf-demo');
   if (dd) dd.classList.remove('open');
 
