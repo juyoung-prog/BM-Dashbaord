@@ -1619,6 +1619,21 @@ svg { display: block; }
 }
 .validate-toast.show { opacity: 1; }
 
+/* ═══════ RACE BAR TOOLTIP ═══════ */
+#race-tip {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  background: rgba(15,23,42,0.85);
+  color: #fff;
+  font-size: 11px;
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+.race-seg { cursor: default; }
+
 /* ═══════ TOPBAR — dark override ═══════ */
 [data-theme="dark"] .topbar { background: rgba(28,28,30,.88); }
 

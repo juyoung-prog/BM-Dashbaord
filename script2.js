@@ -168,7 +168,7 @@ function renderTable() {
   body.innerHTML = data.map(s => {
     const sortedRaceBar = [...s.raceBar].sort((a, b) => Number(b.w) - Number(a.w));
     const total = sortedRaceBar.reduce((sum, r) => sum + r.w, 0);
-    const segments = sortedRaceBar.map(r => ({ ...r, w: total > 0 ? (r.w / total) * 100 : 0 }));
+    const segments = sortedRaceBar.map(r => ({ ...r, orig: r.w, w: total > 0 ? (r.w / total) * 100 : 0 }));
     const demoLegend = sortedRaceBar
       .filter(r => r.w > 0)
       .map(r => `<span class="dl-item"><span class="dl-dot" style="background:${r.c}"></span>${r.w}% ${COLOR_LABEL[r.c] || 'Other'}</span>`)
@@ -185,7 +185,7 @@ function renderTable() {
       </div>
       <div class="tbl-cell">
         <div class="race-wrap">
-          <div class="race-track">${segments.map(r=>`<div class="race-seg" style="width:${r.w}%;background:${r.c}"></div>`).join('')}</div>
+          <div class="race-track">${segments.map(r=>{const count=s.pop>0?Math.round(r.orig/100*s.pop):0;const label=COLOR_LABEL[r.c]||'Other';return`<div class="race-seg" style="width:${r.w}%;background:${r.c}" data-tip="${label}: ${r.orig}% · ~${count.toLocaleString()} people"></div>`;}).join('')}</div>
           <div class="demo-legend">${demoLegend}</div>
         </div>
       </div>
@@ -698,10 +698,34 @@ function initRpResize() {
 }
 
 // ══════════════════════════════════════════
+// RACE BAR TOOLTIP
+// ══════════════════════════════════════════
+function initRaceTip() {
+  const tip = document.createElement('div');
+  tip.id = 'race-tip';
+  document.body.appendChild(tip);
+  document.addEventListener('mouseover', e => {
+    const seg = e.target.closest('.race-seg[data-tip]');
+    if (!seg) return;
+    tip.textContent = seg.dataset.tip;
+    tip.style.display = 'block';
+  });
+  document.addEventListener('mousemove', e => {
+    if (tip.style.display !== 'block') return;
+    tip.style.left = (e.clientX + 12) + 'px';
+    tip.style.top  = (e.clientY - 34) + 'px';
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest('.race-seg[data-tip]')) tip.style.display = 'none';
+  });
+}
+
+// ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
 renderTable();
 initKPIDrag();
+initRaceTip();
 initColResize();
 refreshAddBtn();
 updatePhotoPanel(STORES[0]);
