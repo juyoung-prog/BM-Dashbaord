@@ -80,20 +80,22 @@
    DARK MODE TOKENS
    ═══════════════════════════════════════════ */
 [data-theme="dark"] {
-  --bg-base:      #0F0F10;
+  --bg-base:      #111113;
   --bg-surface:   #1C1C1E;
-  --bg-elevated:  #2C2C2E;
-  --bg-subtle:    #1C1C1E;
-  --bg-overlay:   rgba(255,255,255,.06);
+  --bg-elevated:  #28282A;
+  --bg-subtle:    #222224;
+  --bg-overlay:   rgba(255,255,255,.05);
 
-  --text-primary:   #F5F5F7;
-  --text-secondary: #A1A1A6;
-  --text-tertiary:  #6E6E73;
+  /* Issue 4: tuned text hierarchy — secondary lifted for small-text readability */
+  --text-primary:   #F2F2F4;
+  --text-secondary: #AEAEB2;
+  --text-tertiary:  #7A7A80;
   --text-inverse:   #1D1D1F;
 
-  --border-default: rgba(255,255,255,.10);
-  --border-subtle:  rgba(255,255,255,.06);
-  --border-strong:  rgba(255,255,255,.18);
+  /* Issue 3: border tones calibrated for table row separation */
+  --border-default: rgba(255,255,255,.09);
+  --border-subtle:  rgba(255,255,255,.055);
+  --border-strong:  rgba(255,255,255,.16);
 
   --shadow-1: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
   --shadow-2: 0 4px 16px rgba(0,0,0,.4), 0 1px 4px rgba(0,0,0,.3);
@@ -1877,3 +1879,107 @@ svg { display: block; }
 .rp-htag--fl     { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
 .rp-htag--band   { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
 .rp-htag--type   { background: #F1F5F9; color: #334155; border: 1px solid #E2E8F0; font-weight: 500; }
+
+/* ═══════════════════════════════════════════
+   DARK MODE REFINEMENTS
+   ═══════════════════════════════════════════ */
+
+/* ── Issue 1: Priority pills — quieter, embedded feel ── */
+[data-theme="dark"] .priority-badge {
+  background: rgba(255,255,255,.06);
+  color: var(--text-secondary);
+  border-color: rgba(255,255,255,.09);
+  box-shadow: none;
+}
+[data-theme="dark"] .rp-aud-priority {
+  background: rgba(255,255,255,.06);
+  color: var(--text-secondary);
+  border-color: rgba(255,255,255,.09);
+}
+[data-theme="dark"] .rp-htag--type {
+  background: rgba(255,255,255,.06);
+  color: var(--text-secondary);
+  border-color: rgba(255,255,255,.09);
+}
+[data-theme="dark"] .badge-red {
+  background: rgba(220,38,38,.12);
+  color: #F87171;
+  border-color: rgba(220,38,38,.22);
+}
+[data-theme="dark"] .badge-neutral {
+  background: rgba(255,255,255,.05);
+  color: var(--text-secondary);
+  border-color: rgba(255,255,255,.09);
+}
+
+/* ── Issue 2: Right panel — unified, less blocky ── */
+[data-theme="dark"] .right-panel {
+  border-left-color: rgba(255,255,255,.07);
+}
+[data-theme="dark"] .rp-section {
+  border-bottom-color: rgba(255,255,255,.05);
+}
+[data-theme="dark"] .rp-header {
+  border-bottom-color: rgba(255,255,255,.07);
+}
+[data-theme="dark"] .rp-stat {
+  background: rgba(255,255,255,.04);
+  border-radius: var(--r-sm);
+}
+[data-theme="dark"] .rp-msg {
+  background: rgba(255,255,255,.03);
+  border-left-color: rgba(255,255,255,.14);
+  color: var(--text-secondary);
+}
+[data-theme="dark"] .rp-hero {
+  background: #1A1A1C;
+  border-color: rgba(255,255,255,.10);
+}
+
+/* ── Issue 3: Table row separation — legible without loud dividers ── */
+[data-theme="dark"] .tbl-head {
+  border-bottom-color: rgba(255,255,255,.08);
+}
+[data-theme="dark"] .tbl-row {
+  border-bottom-color: rgba(255,255,255,.05);
+}
+[data-theme="dark"] .tbl-row:hover {
+  background: rgba(255,255,255,.03);
+}
+[data-theme="dark"] .tbl-row.selected {
+  background: rgba(255,255,255,.05);
+}
+[data-theme="dark"] .tbl-head .th:nth-child(5),
+[data-theme="dark"] .tbl-row .tbl-cell:nth-child(5) {
+  border-left-color: rgba(255,255,255,.06);
+}
+
+/* ── Issue 4: Small text / typography hierarchy ── */
+[data-theme="dark"] .store-sub {
+  color: #86868B;
+}
+[data-theme="dark"] .rp-store-sub {
+  color: #86868B;
+}
+[data-theme="dark"] .rp-eyebrow {
+  color: #636366;
+}
+[data-theme="dark"] .rp-section-label {
+  color: #636366;
+}
+[data-theme="dark"] .sb-section-label {
+  color: #636366;
+}
+[data-theme="dark"] .mini-label {
+  color: #636366;
+}
+[data-theme="dark"] .rp-stat-label {
+  color: #86868B;
+}
+[data-theme="dark"] .th {
+  color: #86868B;
+}
+[data-theme="dark"] .th.th-active,
+[data-theme="dark"] .th.sorted {
+  color: var(--accent);
+}
