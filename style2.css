@@ -2043,3 +2043,63 @@ svg { display: block; }
   box-shadow: none;
   border-color: rgba(255,255,255,.065);
 }
+
+/* ═══════════════════════════════════════════
+   DARK MODE FINAL POLISH PASS 3
+   ═══════════════════════════════════════════ */
+
+/* ── 1. Upload placeholder — integrated, not highlighted ── */
+[data-theme="dark"] .rp-hero {
+  background: rgba(255,255,255,.03);
+  border: 1.5px dashed rgba(255,255,255,.12);
+}
+[data-theme="dark"] .rp-hero-upload-hint {
+  color: #636366;
+}
+[data-theme="dark"] .rp-hero-upload-hint svg {
+  opacity: .5;
+}
+
+/* ── 2. Market lens pill — softly present, not bright chip ── */
+[data-theme="dark"] .rp-hero-lens {
+  background: rgba(255,255,255,.07);
+  color: #AEAEB2;
+  border-color: rgba(255,255,255,.11);
+}
+
+/* ── 3. Table headers — slightly more confident, still quiet ── */
+[data-theme="dark"] .th {
+  color: #96969C;
+}
+[data-theme="dark"] .store-name {
+  color: #E8E8EA;
+}
+[data-theme="dark"] .store-sub {
+  color: #7A7A80;
+}
+
+/* ── 4. Final balance — harmonise remaining surfaces ── */
+[data-theme="dark"] .rp-hero-name {
+  color: #EDEDEF;
+}
+[data-theme="dark"] .rp-hero-location {
+  color: #AEAEB2;
+}
+[data-theme="dark"] .rp-aud-demographics {
+  color: #DEDEDF;
+}
+[data-theme="dark"] .rp-aud-band {
+  color: #96969C;
+}
+[data-theme="dark"] .sb-item {
+  color: #9A9AA0;
+}
+[data-theme="dark"] .merch-done {
+  background: rgba(255,255,255,.05);
+  border-color: rgba(255,255,255,.09);
+  color: #7A7A80;
+}
+[data-theme="dark"] .merch-pend {
+  background: transparent;
+  border-color: rgba(255,255,255,.12);
+}
