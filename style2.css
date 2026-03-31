@@ -1923,12 +1923,12 @@ svg { display: block; }
   border-bottom-color: rgba(255,255,255,.07);
 }
 [data-theme="dark"] .rp-stat {
-  background: rgba(255,255,255,.04);
+  background: rgba(255,255,255,.028);
   border-radius: var(--r-sm);
 }
 [data-theme="dark"] .rp-msg {
-  background: rgba(255,255,255,.03);
-  border-left-color: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.025);
+  border-left-color: rgba(255,255,255,.10);
   color: var(--text-secondary);
 }
 [data-theme="dark"] .rp-hero {
@@ -1982,4 +1982,64 @@ svg { display: block; }
 [data-theme="dark"] .th.th-active,
 [data-theme="dark"] .th.sorted {
   color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════
+   DARK MODE POLISH PASS 2
+   ═══════════════════════════════════════════ */
+
+/* ── 1. Snapshot cards — inset surfaces, not tile islands ── */
+[data-theme="dark"] .rp-stats-grid {
+  gap: var(--s1);
+}
+[data-theme="dark"] .rp-stat {
+  background: rgba(255,255,255,.028);
+  box-shadow: none;
+  border: 1px solid rgba(255,255,255,.045);
+}
+[data-theme="dark"] .rp-stat-value {
+  color: #E8E8EA;
+}
+
+/* ── 2. Messaging box — calm annotation, not heavy card ── */
+[data-theme="dark"] .rp-msg {
+  background: rgba(255,255,255,.022);
+  border-left: 2px solid rgba(255,255,255,.10);
+  color: #9A9AA0;
+}
+
+/* ── 3. Table — subtle alternating tint for easier row scanning ── */
+[data-theme="dark"] .tbl-row:nth-child(even) {
+  background: rgba(255,255,255,.016);
+}
+[data-theme="dark"] .tbl-row:nth-child(even):hover,
+[data-theme="dark"] .tbl-row:nth-child(odd):hover {
+  background: rgba(255,255,255,.038);
+}
+[data-theme="dark"] .tbl-row.selected {
+  background: rgba(255,255,255,.052) !important;
+}
+[data-theme="dark"] .tbl-row {
+  border-bottom-color: rgba(255,255,255,.042);
+}
+
+/* ── 4. KPI cards — surface-based, not border-defined ── */
+[data-theme="dark"] .kpi-card {
+  background: #1E1E20;
+  border-color: rgba(255,255,255,.065);
+  box-shadow: 0 1px 3px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.04);
+}
+[data-theme="dark"] .kpi-card:hover {
+  border-color: rgba(255,255,255,.11);
+  box-shadow: 0 2px 8px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.05);
+  transform: translateY(-1px);
+}
+[data-theme="dark"] .kpi-card.active {
+  background: #242426;
+  border-color: rgba(255,255,255,.11);
+  box-shadow: 0 1px 3px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+}
+[data-theme="dark"] .kpi-overview-strip {
+  box-shadow: none;
+  border-color: rgba(255,255,255,.065);
 }
