@@ -2103,3 +2103,52 @@ svg { display: block; }
   background: transparent;
   border-color: rgba(255,255,255,.12);
 }
+
+/* ═══════════════════════════════════════════
+   DARK MODE MICRO-POLISH PASS 4
+   ═══════════════════════════════════════════ */
+
+/* ── 1. Priority pills — one step quieter ── */
+[data-theme="dark"] .priority-badge {
+  background: rgba(255,255,255,.045);
+  color: #86868B;
+  border-color: rgba(255,255,255,.07);
+  font-weight: 450;
+}
+
+/* ── 2. Messaging box — fully integrated ── */
+[data-theme="dark"] .rp-msg {
+  background: transparent;
+  border-left: 1.5px solid rgba(255,255,255,.09);
+  padding-left: var(--s3);
+  color: #86868B;
+}
+
+/* ── 3. Active nav — dark-native, not light chip ── */
+[data-theme="dark"] .sb-item.active {
+  background: rgba(232,29,37,.12);
+  color: #FF6B6E;
+}
+[data-theme="dark"] .sb-item:hover {
+  background: rgba(255,255,255,.05);
+  color: #C8C8CA;
+}
+
+/* ── 4. System balance micro-trims ── */
+[data-theme="dark"] .rp-htag--state,
+[data-theme="dark"] .rp-htag--fl,
+[data-theme="dark"] .rp-htag--band {
+  background: rgba(255,255,255,.045);
+  border-color: rgba(255,255,255,.07);
+  color: #86868B;
+}
+[data-theme="dark"] .filter-pill {
+  border-color: rgba(255,255,255,.09);
+  color: #96969C;
+}
+[data-theme="dark"] .p-text {
+  color: #86868B;
+}
+[data-theme="dark"] .p-text.accent { color: #FF6B6E; }
+[data-theme="dark"] .p-text.info   { color: #5BA8FF; }
+[data-theme="dark"] .p-text.warn   { color: #FFB340; }
