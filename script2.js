@@ -100,10 +100,11 @@ function getFiltered() {
   return d;
 }
 
-function getBandBadge(band) {
-  if (band==='upper') return '<span class="badge badge-blue">Upper-Mid</span>';
-  if (band==='lower') return '<span class="badge badge-red">Lower-Mid</span>';
-  return '<span class="badge badge-green">Mid Income</span>';
+function getBandBadge(band, income) {
+  const tip = income ? ` data-tip="Median Income: $${income.toLocaleString()}"` : '';
+  if (band==='upper') return `<span class="badge badge-blue"${tip}>Upper-Mid</span>`;
+  if (band==='lower') return `<span class="badge badge-red"${tip}>Lower-Mid</span>`;
+  return `<span class="badge badge-green"${tip}>Mid Income</span>`;
 }
 
 
@@ -179,7 +180,7 @@ function renderTable() {
         <div class="store-name">${esc(s.name)}</div>
         <div class="store-sub">${esc(s.sub)}</div>
       </div>
-      <div class="tbl-cell">${getBandBadge(s.band)}</div>
+      <div class="tbl-cell">${getBandBadge(s.band, s.income)}</div>
       <div class="tbl-cell">
         <div class="store-name" style="font-size:12px">${s.pop > 0 ? s.pop.toLocaleString() : '—'}</div>
       </div>
@@ -706,7 +707,7 @@ function initRaceTip() {
   tip.id = 'race-tip';
   document.body.appendChild(tip);
   document.addEventListener('mouseover', e => {
-    const el = e.target.closest('.race-seg[data-tip], .dl-item[data-tip]');
+    const el = e.target.closest('.race-seg[data-tip], .dl-item[data-tip], .badge[data-tip]');
     if (!el) return;
     tip.textContent = el.dataset.tip;
     tip.style.display = 'block';
@@ -717,7 +718,7 @@ function initRaceTip() {
     tip.style.top  = (e.clientY - 34) + 'px';
   });
   document.addEventListener('mouseout', e => {
-    if (e.target.closest('.race-seg[data-tip], .dl-item[data-tip]')) tip.style.display = 'none';
+    if (e.target.closest('.race-seg[data-tip], .dl-item[data-tip], .badge[data-tip]')) tip.style.display = 'none';
   });
 }
 
