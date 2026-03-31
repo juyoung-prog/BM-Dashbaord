@@ -1394,6 +1394,8 @@ function _applyThemeIcon(theme) {
   if (sun)  sun.style.display  = isDark ? '' : 'none';
   if (moon) moon.style.display = isDark ? 'none' : '';
   if (lbl)  lbl.textContent    = isDark ? 'Light Mode' : 'Dark Mode';
+  const logo = document.querySelector('.sb-logo img');
+  if (logo) logo.src = isDark ? 'bm_logo_white.png' : 'bm_logo.png';
 }
 
 // Restore saved theme on load
