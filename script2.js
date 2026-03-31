@@ -484,7 +484,7 @@ function sortByCol(col, e) {
   });
   const idMap = { name:'sort-name', income:'sort-band', pop:'sort-pop' };
   const el = document.getElementById(idMap[col]);
-  if (el) el.textContent = sortAsc ? '↑' : '↓';
+  if (el) el.textContent = sortAsc ? '↓' : '↑';
 
   document.querySelectorAll('.th').forEach(t => t.classList.remove('th-active'));
   const thMap = { name:'th-name', income:'th-band', pop:'th-pop' };
