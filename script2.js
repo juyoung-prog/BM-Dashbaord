@@ -473,8 +473,9 @@ function sortByCol(col, e) {
   if (demoEl) demoEl.textContent = '↕';
   document.getElementById('th-demo').classList.remove('th-active');
 
+  const defaultDesc = ['income', 'pop'];
   if (sortField === col) sortAsc = !sortAsc;
-  else { sortField = col; sortAsc = true; }
+  else { sortField = col; sortAsc = !defaultDesc.includes(col); }
 
   // Update all sort indicators
   ['name','band','demo'].forEach(k => {
