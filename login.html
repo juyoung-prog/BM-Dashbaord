@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로그인 — BeautyMaster Ops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --accent:       #E81D25;
+    --accent-hover: #C8171E;
+    --accent-dim:   rgba(232,29,37,.10);
+    --error:        #FF3B30;
+    --success:      #34C759;
+    --text-primary: #0F172A;
+    --text-secondary:#475569;
+    --text-tertiary: #94A3B8;
+    --border:       #E2E8F0;
+    --bg-base:      #F8FAFC;
+    --r-sm: 8px;
+    --r-lg: 16px;
+    --r-xl: 20px;
+  }
+
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    padding: 24px;
+  }
+
+  /* ── Card ── */
+  .auth-card {
+    background: #fff;
+    border-radius: var(--r-xl);
+    box-shadow: 0 32px 80px rgba(0,0,0,.32);
+    width: 100%;
+    max-width: 420px;
+    padding: 48px 40px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* ── Logo ── */
+  .auth-logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .auth-logo-img {
+    height: 28px;
+    width: auto;
+    filter: invert(1) brightness(0);
+  }
+  .auth-logo-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -.2px;
+  }
+
+  /* ── Title ── */
+  .auth-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -.4px;
+    margin-top: 4px;
+  }
+  .auth-subtitle {
+    font-size: 14px;
+    color: var(--text-tertiary);
+    margin-bottom: 20px;
+  }
+
+  /* ── Form ── */
+  .auth-form { display: flex; flex-direction: column; gap: 14px; }
+
+  .auth-field { display: flex; flex-direction: column; gap: 5px; }
+  .auth-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: .3px;
+  }
+  .auth-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-base);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .auth-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  /* ── Message ── */
+  .auth-msg {
+    font-size: 12.5px;
+    min-height: 18px;
+    color: transparent;
+    transition: color .15s;
+  }
+  .auth-msg.error   { color: var(--error); }
+  .auth-msg.success { color: var(--success); }
+
+  /* ── Submit btn ── */
+  .auth-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background .15s, opacity .15s;
+    margin-top: 2px;
+  }
+  .auth-btn:hover:not(:disabled) { background: var(--accent-hover); }
+  .auth-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── Toggle ── */
+  .auth-toggle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 16px;
+  }
+  .auth-toggle-link {
+    color: var(--accent);
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 4px;
+    text-decoration: none;
+  }
+  .auth-toggle-link:hover { text-decoration: underline; }
+
+  /* ── Divider ── */
+  .auth-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 8px 0 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="auth-card">
+  <!-- Logo -->
+  <div class="auth-logo-wrap">
+    <img src="bm_logo.png" alt="BeautyMaster" class="auth-logo-img">
+    <span class="auth-logo-name">BeautyMaster</span>
+  </div>
+
+  <h1 id="auth-title" class="auth-title">로그인</h1>
+  <p class="auth-subtitle">Operations Hub에 오신 것을 환영합니다</p>
+
+  <div class="auth-form">
+    <div class="auth-field">
+      <label class="auth-label" for="auth-email">이메일</label>
+      <input id="auth-email" class="auth-input" type="email"
+             placeholder="your@email.com" autocomplete="email"
+             onkeydown="onAuthKeydown(event)">
+    </div>
+    <div class="auth-field">
+      <label class="auth-label" for="auth-password">비밀번호</label>
+      <input id="auth-password" class="auth-input" type="password"
+             placeholder="••••••••" autocomplete="current-password"
+             onkeydown="onAuthKeydown(event)">
+    </div>
+    <p id="auth-msg" class="auth-msg"></p>
+    <button id="auth-submit-btn" class="auth-btn" onclick="handleSignIn()">로그인</button>
+  </div>
+
+  <hr class="auth-divider">
+
+  <p class="auth-toggle">
+    <span id="auth-toggle-text">계정이 없으신가요?</span>
+    <a id="auth-toggle-link" class="auth-toggle-link" onclick="toggleAuthMode()">회원가입</a>
+  </p>
+</div>
+
+<script src="auth.js"></script>
+</body>
+</html>
