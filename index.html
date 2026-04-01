@@ -7,8 +7,43 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style2.css">
+<!-- Supabase JS (UMD) — exposes window.supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
-<body>
+<body class="auth-pending">
+
+<!-- ══════════════════ AUTH OVERLAY ══════════════════ -->
+<div id="auth-overlay" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo-wrap">
+      <img src="bm_logo.png" alt="BeautyMaster" class="auth-logo-img">
+    </div>
+    <h1 id="auth-title" class="auth-title">로그인</h1>
+    <p class="auth-subtitle">Operations Hub에 오신 것을 환영합니다</p>
+
+    <div class="auth-form">
+      <div class="auth-field">
+        <label class="auth-label" for="auth-email">이메일</label>
+        <input id="auth-email" class="auth-input" type="email"
+               placeholder="your@email.com" autocomplete="email"
+               onkeydown="onAuthKeydown(event)">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label" for="auth-password">비밀번호</label>
+        <input id="auth-password" class="auth-input" type="password"
+               placeholder="••••••••" autocomplete="current-password"
+               onkeydown="onAuthKeydown(event)">
+      </div>
+      <p id="auth-error" class="auth-error"></p>
+      <button id="auth-submit-btn" class="auth-btn" onclick="handleSignIn()">로그인</button>
+    </div>
+
+    <p class="auth-toggle">
+      <span id="auth-toggle-text">계정이 없으신가요?</span>
+      <a id="auth-toggle-link" class="auth-toggle-link" onclick="toggleAuthMode()">회원가입</a>
+    </p>
+  </div>
+</div>
 
 <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" id="mobile-menu-btn">
   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -44,6 +79,16 @@
     </div>
   </nav>
   <div class="sb-footer">
+    <!-- User info + logout -->
+    <div class="sb-user">
+      <div class="sb-user-avatar">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="sb-user-details">
+        <div id="sb-user-email" class="sb-user-email">—</div>
+        <button class="sb-logout-btn" onclick="handleSignOut()">로그아웃</button>
+      </div>
+    </div>
     <div class="sb-status">
       <div class="live-dot"></div>
       <span>Live data &nbsp;·&nbsp; <strong>Census 2024</strong></span>
@@ -556,5 +601,6 @@
 </div><!-- /layout -->
 
 <script src="script2.js"></script>
+<script src="auth.js"></script>
 </body>
 </html>
