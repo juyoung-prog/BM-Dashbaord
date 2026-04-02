@@ -20,11 +20,30 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ── Page detection ───────────────────────────
 const IS_LOGIN_PAGE = window.location.pathname.endsWith('login.html');
 
+// ── Parse URL hash into key/value pairs ──────
+// Used to detect #type=invite after Supabase redirects back here.
+function getHashParams() {
+  return Object.fromEntries(new URLSearchParams(window.location.hash.slice(1)));
+}
+
 // ── Init ─────────────────────────────────────
 async function initAuth() {
   const { data: { session } } = await sb.auth.getSession();
 
   if (IS_LOGIN_PAGE) {
+    // Check for invite acceptance: Supabase redirects to
+    // login.html#access_token=...&type=invite after the user clicks the email link.
+    const params = getHashParams();
+    if (params.type === 'invite') {
+      // SDK has already exchanged the hash for a session.
+      if (session) {
+        showSetPasswordView();
+      } else {
+        showMsg('초대 링크가 만료되었거나 유효하지 않습니다. 관리자에게 다시 요청해주세요.', 'error');
+      }
+      return;
+    }
+
     // 이미 로그인된 상태면 대시보드로
     if (session) {
       window.location.replace('index.html');
@@ -143,6 +162,46 @@ function toKorean(msg) {
   if (msg.includes('Password should be'))        return '비밀번호는 6자 이상이어야 합니다.';
   if (msg.includes('Unable to validate'))        return 'Supabase 설정을 확인해주세요 (URL / Key).';
   return msg;
+}
+
+// ── Invite acceptance: set password ──────────────────────────────────────
+function showSetPasswordView() {
+  document.getElementById('login-section').style.display = 'none';
+  document.getElementById('set-password-section').style.display = '';
+  // Clean the hash from the URL so it isn't re-processed on refresh
+  if (window.history.replaceState) {
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+}
+
+async function handleSetPassword() {
+  const pw    = document.getElementById('set-pw-input').value;
+  const msgEl = document.getElementById('set-pw-msg');
+  const btn   = document.getElementById('set-pw-btn');
+
+  if (!pw || pw.length < 6) {
+    msgEl.textContent = '비밀번호는 6자 이상이어야 합니다.';
+    msgEl.className = 'auth-msg error';
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = '처리 중...';
+  msgEl.textContent = '';
+  msgEl.className = 'auth-msg';
+
+  const { error } = await sb.auth.updateUser({ password: pw });
+
+  if (error) {
+    msgEl.textContent = toKorean(error.message);
+    msgEl.className = 'auth-msg error';
+    btn.disabled    = false;
+    btn.textContent = '비밀번호 설정';
+  } else {
+    msgEl.textContent = '비밀번호가 설정되었습니다. 대시보드로 이동합니다...';
+    msgEl.className = 'auth-msg success';
+    setTimeout(() => window.location.replace('index.html'), 1500);
+  }
 }
 
 // ── Invite User (admin only) ──────────────────────────────────────────────
