@@ -13,44 +13,47 @@ const ADMIN_EMAILS = [
   'juyoung@beautymaster.com',
 ];
 
+// ── Page detection ───────────────────────────
+const IS_LOGIN_PAGE = window.location.pathname.endsWith('login.html');
+
+// ── Invite flow detection ─────────────────────────────────────────────────
+// Must be read synchronously here, BEFORE createClient() starts its async
+// hash processing. supabase-js v2 clears window.location.hash during the
+// getSession() call inside initAuth(). If we wait until then to read it,
+// the hash is already gone and the invite check silently fails.
+const IS_INVITE_FLOW = IS_LOGIN_PAGE &&
+  new URLSearchParams(window.location.hash.slice(1)).get('type') === 'invite';
+
 // ── Client init ─────────────────────────────
 const { createClient } = supabase; // from CDN (window.supabase)
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ── Page detection ───────────────────────────
-const IS_LOGIN_PAGE = window.location.pathname.endsWith('login.html');
-
-// ── Parse URL hash into key/value pairs ──────
-// Used to detect #type=invite after Supabase redirects back here.
-function getHashParams() {
-  return Object.fromEntries(new URLSearchParams(window.location.hash.slice(1)));
-}
-
 // ── Init ─────────────────────────────────────
 async function initAuth() {
-  const { data: { session } } = await sb.auth.getSession();
-
   if (IS_LOGIN_PAGE) {
-    // Check for invite acceptance: Supabase redirects to
-    // login.html#access_token=...&type=invite after the user clicks the email link.
-    const params = getHashParams();
-    if (params.type === 'invite') {
-      // SDK has already exchanged the hash for a session.
+    if (IS_INVITE_FLOW) {
+      // getSession() exchanges the hash tokens for a real session.
+      // We captured IS_INVITE_FLOW above before the hash was cleared.
+      const { data: { session } } = await sb.auth.getSession();
       if (session) {
         showSetPasswordView();
       } else {
         showMsg('초대 링크가 만료되었거나 유효하지 않습니다. 관리자에게 다시 요청해주세요.', 'error');
       }
+      // Return without registering onAuthStateChange — the password form owns
+      // the flow from here. Without this return, onAuthStateChange would fire
+      // with the newly created session and redirect to index.html immediately.
       return;
     }
 
-    // 이미 로그인된 상태면 대시보드로
+    const { data: { session } } = await sb.auth.getSession();
     if (session) {
       window.location.replace('index.html');
       return;
     }
   } else {
     // 대시보드 페이지 — 세션 없으면 로그인 페이지로
+    const { data: { session } } = await sb.auth.getSession();
     if (!session) {
       window.location.replace('login.html');
       return;
@@ -58,7 +61,7 @@ async function initAuth() {
     showDashboard(session.user);
   }
 
-  // 인증 상태 변화 감지
+  // 인증 상태 변화 감지 (invite flow는 위에서 return하므로 여기 도달 안 함)
   sb.auth.onAuthStateChange((_event, session) => {
     if (IS_LOGIN_PAGE) {
       if (session) window.location.replace('index.html');
