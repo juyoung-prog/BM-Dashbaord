@@ -1,20 +1,35 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // ─── Admin allowlist ────────────────────────────────────────────────────────
-// Add your admin email(s) here. This is the only authorization gate.
-// Alternatively, store this in an Edge Function secret (ADMIN_EMAILS=a@b.com,c@d.com)
-// and parse with: Deno.env.get('ADMIN_EMAILS')!.split(',')
 const ADMIN_EMAILS: string[] = [
-  'your-admin@email.com', // ← replace with your actual admin email
+  'juyoung@beautymaster.com',
 ];
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://juyoung-prog.github.io',
-  'Access-Control-Allow-Headers': 'authorization, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+// ─── CORS ────────────────────────────────────────────────────────────────────
+// List every origin that is allowed to call this function.
+// Add localhost variants here so local dev works without redeploying.
+const ALLOWED_ORIGINS = [
+  'https://juyoung-prog.github.io',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+];
 
-function json(body: unknown, status = 200) {
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  // Reflect the request origin back if it is in the allowlist;
+  // otherwise fall back to the production origin (safe default).
+  const allowed = origin && ALLOWED_ORIGINS.includes(origin)
+    ? origin
+    : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin':  allowed,
+    'Access-Control-Allow-Headers': 'authorization, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
+
+function json(body: unknown, status: number, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -22,22 +37,24 @@ function json(body: unknown, status = 200) {
 }
 
 Deno.serve(async (req) => {
+  const origin      = req.headers.get('Origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   // CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   if (req.method !== 'POST') {
-    return json({ error: 'Method not allowed' }, 405);
+    return json({ error: 'Method not allowed' }, 405, corsHeaders);
   }
 
-  // ── 1. Verify JWT (Supabase validates this automatically when --no-verify-jwt is NOT used)
-  //       Extract the caller's identity from the Authorization header.
+  // ── 1. Verify JWT — extract the caller's identity from the Authorization header
   const authHeader = req.headers.get('Authorization') ?? '';
   const callerJwt  = authHeader.replace(/^Bearer\s+/i, '');
 
   if (!callerJwt) {
-    return json({ error: 'Missing authorization token' }, 401);
+    return json({ error: 'Missing authorization token' }, 401, corsHeaders);
   }
 
   // Use anon key to verify the caller's JWT and fetch their profile
@@ -50,12 +67,12 @@ Deno.serve(async (req) => {
   const { data: { user: caller }, error: callerErr } = await supabaseAnon.auth.getUser();
 
   if (callerErr || !caller) {
-    return json({ error: 'Invalid or expired token' }, 401);
+    return json({ error: 'Invalid or expired token' }, 401, corsHeaders);
   }
 
   // ── 2. Admin check — reject non-admin callers early
   if (!ADMIN_EMAILS.includes(caller.email!)) {
-    return json({ error: 'Forbidden' }, 403);
+    return json({ error: 'Forbidden' }, 403, corsHeaders);
   }
 
   // ── 3. Parse and validate the target email from request body
@@ -64,16 +81,16 @@ Deno.serve(async (req) => {
     const body = await req.json();
     targetEmail = (body?.email ?? '').trim();
   } catch {
-    return json({ error: 'Invalid JSON body' }, 400);
+    return json({ error: 'Invalid JSON body' }, 400, corsHeaders);
   }
 
   if (!targetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)) {
-    return json({ error: 'Valid target email is required' }, 400);
+    return json({ error: 'Valid target email is required' }, 400, corsHeaders);
   }
 
   // Prevent inviting another admin by accident (optional, remove if not needed)
   if (ADMIN_EMAILS.includes(targetEmail)) {
-    return json({ error: 'Cannot invite an admin email' }, 400);
+    return json({ error: 'Cannot invite an admin email' }, 400, corsHeaders);
   }
 
   // ── 4. Send invite using service role key (server-side only, never exposed to client)
@@ -88,8 +105,8 @@ Deno.serve(async (req) => {
   });
 
   if (error) {
-    return json({ error: error.message }, 400);
+    return json({ error: error.message }, 400, corsHeaders);
   }
 
-  return json({ success: true, invited: targetEmail, user_id: data.user.id });
+  return json({ success: true, invited: targetEmail, user_id: data.user.id }, 200, corsHeaders);
 });

@@ -5,6 +5,14 @@
 const SUPABASE_URL      = 'https://rnzwuimzxydmhsdizyug.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_8vghQGAW4hfR7x3KV9qj6Q_kUq4MTTc'; // Publishable key (구 anon key)
 
+// ── Admin allowlist (UI gate) ─────────────────────────────────────────────
+// Controls who sees the "Invite User" button.
+// The real security check is enforced server-side in the Edge Function.
+// To add an admin: append their email to this array and redeploy.
+const ADMIN_EMAILS = [
+  'juyoung@beautymaster.com',
+];
+
 // ── Client init ─────────────────────────────
 const { createClient } = supabase; // from CDN (window.supabase)
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -47,6 +55,12 @@ function showDashboard(user) {
   document.body.classList.remove('auth-pending');
   const emailEl = document.getElementById('sb-user-email');
   if (emailEl) emailEl.textContent = user.email;
+
+  // Show invite button only for admin users
+  const inviteBtn = document.getElementById('invite-user-btn');
+  if (inviteBtn && ADMIN_EMAILS.includes(user.email)) {
+    inviteBtn.style.display = '';
+  }
 }
 
 // ── Sign In ───────────────────────────────────
@@ -129,6 +143,77 @@ function toKorean(msg) {
   if (msg.includes('Password should be'))        return '비밀번호는 6자 이상이어야 합니다.';
   if (msg.includes('Unable to validate'))        return 'Supabase 설정을 확인해주세요 (URL / Key).';
   return msg;
+}
+
+// ── Invite User (admin only) ──────────────────────────────────────────────
+function openInviteModal() {
+  const modal = document.getElementById('invite-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  document.getElementById('invite-email').value = '';
+  const msgEl = document.getElementById('invite-msg');
+  msgEl.textContent = '';
+  msgEl.className = 'invite-msg';
+}
+
+function closeInviteModal() {
+  const modal = document.getElementById('invite-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function sendInvite() {
+  const emailInput = document.getElementById('invite-email');
+  const msgEl      = document.getElementById('invite-msg');
+  const btn        = document.getElementById('invite-send-btn');
+  const email      = emailInput.value.trim();
+
+  if (!email) {
+    msgEl.textContent = '이메일을 입력해주세요.';
+    msgEl.className = 'invite-msg invite-error';
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = '전송 중...';
+  msgEl.textContent = '';
+  msgEl.className = 'invite-msg';
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    msgEl.textContent = '세션이 만료되었습니다. 다시 로그인해주세요.';
+    msgEl.className = 'invite-msg invite-error';
+    btn.disabled    = false;
+    btn.textContent = '초대 전송';
+    return;
+  }
+
+  try {
+    const res  = await fetch(`${SUPABASE_URL}/functions/v1/invite-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      msgEl.textContent = data.error || '초대 전송에 실패했습니다.';
+      msgEl.className = 'invite-msg invite-error';
+    } else {
+      msgEl.textContent = `✓ ${email} 으로 초대가 전송되었습니다.`;
+      msgEl.className = 'invite-msg invite-success';
+      emailInput.value = '';
+    }
+  } catch (err) {
+    console.error('[invite-user] fetch failed:', err);
+    msgEl.textContent = `네트워크 오류: ${err?.message ?? err}`;
+    msgEl.className = 'invite-msg invite-error';
+  }
+
+  btn.disabled    = false;
+  btn.textContent = '초대 전송';
 }
 
 // ── Boot ──────────────────────────────────────
