@@ -99,23 +99,13 @@ async function handleSignOut() {
 }
 
 // ── Toggle login ↔ signup ─────────────────────
-let authMode = 'login';
 function toggleAuthMode() {
-  authMode = authMode === 'login' ? 'signup' : 'login';
-  const isLogin = authMode === 'login';
-
-  document.getElementById('auth-title').textContent       = isLogin ? '로그인'  : '회원가입';
-  document.getElementById('auth-submit-btn').textContent  = isLogin ? '로그인'  : '회원가입';
-  document.getElementById('auth-submit-btn').onclick      = isLogin ? handleSignIn : handleSignUp;
-  document.getElementById('auth-toggle-text').textContent = isLogin ? '계정이 없으신가요?' : '이미 계정이 있으신가요?';
-  document.getElementById('auth-toggle-link').textContent = isLogin ? '회원가입' : '로그인';
-  document.getElementById('auth-password').autocomplete   = isLogin ? 'current-password' : 'new-password';
-  clearMsg();
+  showMsg('계정이 필요하면 관리자에게 요청하세요.', 'error');
 }
 
 // ── Enter key ─────────────────────────────────
 function onAuthKeydown(e) {
-  if (e.key === 'Enter') authMode === 'login' ? handleSignIn() : handleSignUp();
+  if (e.key === 'Enter') handleSignIn();
 }
 
 // ── UI helpers ────────────────────────────────
