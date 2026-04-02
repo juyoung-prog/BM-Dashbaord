@@ -17,12 +17,17 @@ const ADMIN_EMAILS = [
 const IS_LOGIN_PAGE = window.location.pathname.endsWith('login.html');
 
 // ── Invite flow detection ─────────────────────────────────────────────────
-// Must be read synchronously here, BEFORE createClient() starts its async
-// hash processing. supabase-js v2 clears window.location.hash during the
-// getSession() call inside initAuth(). If we wait until then to read it,
-// the hash is already gone and the invite check silently fails.
-const IS_INVITE_FLOW = IS_LOGIN_PAGE &&
-  new URLSearchParams(window.location.hash.slice(1)).get('type') === 'invite';
+// Must be captured synchronously here, BEFORE createClient() starts its async
+// URL processing. supabase-js v2 clears the URL after exchanging tokens, so
+// by the time getSession() resolves the params are already gone.
+//
+// Two flows to cover:
+//   Implicit flow (older projects): login.html#access_token=...&type=invite
+//   PKCE flow    (newer projects):  login.html?code=xxx&type=invite
+const _inviteHashType  = new URLSearchParams(window.location.hash.slice(1)).get('type');
+const _inviteQueryType = new URLSearchParams(window.location.search).get('type');
+const IS_INVITE_FLOW   = IS_LOGIN_PAGE &&
+  (_inviteHashType === 'invite' || _inviteQueryType === 'invite');
 
 // ── Client init ─────────────────────────────
 const { createClient } = supabase; // from CDN (window.supabase)
