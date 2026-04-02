@@ -57,17 +57,19 @@ Deno.serve(async (req) => {
     return json({ error: 'Missing authorization token' }, 401, corsHeaders);
   }
 
-  // Use anon key to verify the caller's JWT and fetch their profile
+  // Verify the caller's JWT by passing it explicitly to getUser().
+  // auth.getUser(token) calls /auth/v1/user with the token — correct for server-side use.
+  // auth.getUser() without args looks for a browser session that doesn't exist in Deno.
   const supabaseAnon = createClient(
     Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_ANON_KEY')!,
-    { global: { headers: { Authorization: `Bearer ${callerJwt}` } } }
+    Deno.env.get('SUPABASE_ANON_KEY')!
   );
 
-  const { data: { user: caller }, error: callerErr } = await supabaseAnon.auth.getUser();
+  const { data: { user: caller }, error: callerErr } = await supabaseAnon.auth.getUser(callerJwt);
 
   if (callerErr || !caller) {
-    return json({ error: 'Invalid or expired token' }, 401, corsHeaders);
+    const reason = callerErr?.message ?? 'user is null';
+    return json({ error: 'Invalid or expired token', detail: reason }, 401, corsHeaders);
   }
 
   // ── 2. Admin check — reject non-admin callers early
