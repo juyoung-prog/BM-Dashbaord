@@ -54,6 +54,7 @@
       <div class="sb-user-details">
         <div id="sb-user-email" class="sb-user-email">—</div>
         <button class="sb-logout-btn" onclick="handleSignOut()">로그아웃</button>
+        <button id="invite-user-btn" class="sb-logout-btn" onclick="openInviteModal()" style="display:none; margin-top:4px; color:var(--accent);">+ Invite User</button>
       </div>
     </div>
     <div class="sb-status">
@@ -566,6 +567,156 @@
   </aside>
 
 </div><!-- /layout -->
+
+<!-- ══ INVITE USER MODAL (admin only — hidden by default) ══ -->
+<div id="invite-modal" class="invite-overlay" onclick="if(event.target===this) closeInviteModal()">
+  <div class="invite-card">
+    <div class="invite-header">
+      <h2 class="invite-title">Invite User</h2>
+      <button class="invite-close" onclick="closeInviteModal()">&times;</button>
+    </div>
+    <p class="invite-desc">An invitation email will be sent. Invited users are regular users by default — admin access requires adding their email to the allowlist in <code>auth.js</code>.</p>
+    <label class="invite-label">Email address</label>
+    <input id="invite-email" class="invite-input" type="email" placeholder="user@example.com"
+           onkeydown="if(event.key==='Enter') sendInvite()">
+    <div id="invite-msg" class="invite-msg"></div>
+    <div class="invite-actions">
+      <button class="invite-btn-cancel" onclick="closeInviteModal()">Cancel</button>
+      <button id="invite-send-btn" class="invite-btn-send" onclick="sendInvite()">초대 전송</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── Invite modal overlay ─────────────────── */
+  .invite-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  /* ── Modal card ───────────────────────────── */
+  .invite-card {
+    background: var(--bg-surface);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, .25);
+    box-sizing: border-box;
+  }
+
+  .invite-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .invite-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+  }
+
+  .invite-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--text-tertiary);
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .invite-close:hover { color: var(--text-primary); background: var(--bg-overlay); }
+
+  .invite-desc {
+    font-size: .82rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 0 0 20px;
+  }
+  .invite-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: .78rem;
+    background: var(--bg-subtle);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  .invite-label {
+    display: block;
+    font-size: .8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .invite-input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-size: .88rem;
+    font-family: inherit;
+    outline: none;
+  }
+  .invite-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+
+  .invite-msg {
+    min-height: 20px;
+    margin-top: 8px;
+    font-size: .82rem;
+    color: var(--text-secondary);
+  }
+  .invite-msg.invite-success { color: #22c55e; }
+  .invite-msg.invite-error   { color: #ef4444; }
+
+  /* ── Action buttons ───────────────────────── */
+  .invite-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  .invite-btn-cancel {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border-default);
+    background: none;
+    cursor: pointer;
+    font-size: .84rem;
+    font-family: inherit;
+    color: var(--text-secondary);
+  }
+  .invite-btn-cancel:hover { background: var(--bg-overlay); color: var(--text-primary); }
+
+  .invite-btn-send {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    font-size: .84rem;
+    font-family: inherit;
+    font-weight: 500;
+  }
+  .invite-btn-send:hover   { background: var(--accent-hover); }
+  .invite-btn-send:disabled { opacity: .6; cursor: not-allowed; }
+</style>
 
 <script src="script2.js"></script>
 <script src="auth.js"></script>
