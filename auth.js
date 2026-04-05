@@ -3,7 +3,7 @@
 // ══════════════════════════════════════════
 
 const SUPABASE_URL      = 'https://rnzwuimzxydmhsdizyug.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_8vghQGAW4hfR7x3KV9qj6Q_kUq4MTTc'; // Publishable key (구 anon key)
+const SUPABASE_ANON_KEY = 'sb_publishable_8vghQGAW4hfR7x3KV9qj6Q_kUq4MTTc'; // Publishable key
 
 // ── Page detection ───────────────────────────
 const IS_LOGIN_PAGE = window.location.pathname.endsWith('login.html');
@@ -35,7 +35,7 @@ async function initAuth() {
       if (session) {
         showSetPasswordView();
       } else {
-        showMsg('초대 링크가 만료되었거나 유효하지 않습니다. 관리자에게 다시 요청해주세요.', 'error');
+        showMsg('Invite link has expired or is invalid. Please request a new invite from your admin.', 'error');
       }
       // Return without registering onAuthStateChange — the password form owns
       // the flow from here. Without this return, onAuthStateChange would fire
@@ -49,7 +49,7 @@ async function initAuth() {
       return;
     }
   } else {
-    // 대시보드 페이지 — 세션 없으면 로그인 페이지로
+    // Dashboard page — redirect to login if no session
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {
       window.location.replace('login.html');
@@ -58,7 +58,7 @@ async function initAuth() {
     await showDashboard(session.user);
   }
 
-  // 인증 상태 변화 감지 (invite flow는 위에서 return하므로 여기 도달 안 함)
+  // Listen for auth state changes (invite flow returns early above)
   sb.auth.onAuthStateChange((_event, session) => {
     if (IS_LOGIN_PAGE) {
       if (session) window.location.replace('index.html');
@@ -69,7 +69,7 @@ async function initAuth() {
   });
 }
 
-// ── Dashboard: 인증 완료 후 표시 ─────────────
+// ── Dashboard: show after auth ─────────────
 async function showDashboard(user) {
   document.body.classList.remove('auth-pending');
   const emailEl = document.getElementById('sb-user-email');
@@ -88,30 +88,30 @@ async function handleSignIn() {
   const email    = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
 
-  if (!email || !password) { showMsg('이메일과 비밀번호를 입력해주세요.', 'error'); return; }
+  if (!email || !password) { showMsg('Please enter your email and password.', 'error'); return; }
 
   const btn = document.getElementById('auth-submit-btn');
-  setLoading(btn, '로그인 중...');
+  setLoading(btn, 'Signing in...');
   clearMsg();
 
   const { error } = await sb.auth.signInWithPassword({ email, password });
 
   if (error) {
-    showMsg(toKorean(error.message), 'error');
-    resetBtn(btn, '로그인');
+    showMsg(toEnglish(error.message), 'error');
+    resetBtn(btn, 'Sign In');
   }
-  // 성공 시 onAuthStateChange → index.html 리다이렉트
+  // On success onAuthStateChange redirects to index.html
 }
 
 // ── Sign Out ──────────────────────────────────
 async function handleSignOut() {
   await sb.auth.signOut();
-  // onAuthStateChange → login.html 리다이렉트
+  // onAuthStateChange redirects to login.html
 }
 
 // ── Toggle login ↔ signup ─────────────────────
 function toggleAuthMode() {
-  showMsg('계정이 필요하면 관리자에게 요청하세요.', 'error');
+  showMsg('Account access is by invitation only. Please contact your admin.', 'error');
 }
 
 // ── Enter key ─────────────────────────────────
@@ -133,13 +133,13 @@ function clearMsg() {
 function setLoading(btn, text) { btn.disabled = true;  btn.textContent = text; }
 function resetBtn(btn, text)   { btn.disabled = false; btn.textContent = text; }
 
-function toKorean(msg) {
-  if (msg.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 올바르지 않습니다.';
-  if (msg.includes('Email not confirmed'))       return '이메일 인증이 필요합니다. 메일함을 확인해주세요.';
-  if (msg.includes('User already registered'))   return '이미 가입된 이메일입니다.';
-  if (msg.includes('Password should be'))        return '비밀번호는 6자 이상이어야 합니다.';
-  if (msg.includes('Unable to validate'))        return 'Supabase 설정을 확인해주세요 (URL / Key).';
-  return '오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+function toEnglish(msg) {
+  if (msg.includes('Invalid login credentials')) return 'Incorrect email or password.';
+  if (msg.includes('Email not confirmed'))       return 'Please verify your email before signing in.';
+  if (msg.includes('User already registered'))   return 'An account with this email already exists.';
+  if (msg.includes('Password should be'))        return 'Password must be at least 6 characters.';
+  if (msg.includes('Unable to validate'))        return 'Authentication configuration error. Please contact your admin.';
+  return 'Something went wrong. Please try again.';
 }
 
 // ── Invite acceptance: set password ──────────────────────────────────────
@@ -158,25 +158,25 @@ async function handleSetPassword() {
   const btn   = document.getElementById('set-pw-btn');
 
   if (!pw || pw.length < 6) {
-    msgEl.textContent = '비밀번호는 6자 이상이어야 합니다.';
+    msgEl.textContent = 'Password must be at least 6 characters.';
     msgEl.className = 'auth-msg error';
     return;
   }
 
   btn.disabled    = true;
-  btn.textContent = '처리 중...';
+  btn.textContent = 'Saving...';
   msgEl.textContent = '';
   msgEl.className = 'auth-msg';
 
   const { error } = await sb.auth.updateUser({ password: pw });
 
   if (error) {
-    msgEl.textContent = toKorean(error.message);
+    msgEl.textContent = toEnglish(error.message);
     msgEl.className = 'auth-msg error';
     btn.disabled    = false;
-    btn.textContent = '비밀번호 설정';
+    btn.textContent = 'Set Password';
   } else {
-    msgEl.textContent = '비밀번호가 설정되었습니다. 대시보드로 이동합니다...';
+    msgEl.textContent = 'Password set successfully. Redirecting to dashboard...';
     msgEl.className = 'auth-msg success';
     setTimeout(() => window.location.replace('index.html'), 1500);
   }
@@ -205,22 +205,22 @@ async function sendInvite() {
   const email      = emailInput.value.trim();
 
   if (!email) {
-    msgEl.textContent = '이메일을 입력해주세요.';
+    msgEl.textContent = 'Please enter an email address.';
     msgEl.className = 'invite-msg invite-error';
     return;
   }
 
   btn.disabled    = true;
-  btn.textContent = '전송 중...';
+  btn.textContent = 'Sending...';
   msgEl.textContent = '';
   msgEl.className = 'invite-msg';
 
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
-    msgEl.textContent = '세션이 만료되었습니다. 다시 로그인해주세요.';
+    msgEl.textContent = 'Your session has expired. Please sign in again.';
     msgEl.className = 'invite-msg invite-error';
     btn.disabled    = false;
-    btn.textContent = '초대 전송';
+    btn.textContent = 'Send Invite';
     return;
   }
 
@@ -236,21 +236,21 @@ async function sendInvite() {
     const data = await res.json();
 
     if (!res.ok) {
-      msgEl.textContent = data.error || '초대 전송에 실패했습니다.';
+      msgEl.textContent = data.error || 'Failed to send invite.';
       msgEl.className = 'invite-msg invite-error';
     } else {
-      msgEl.textContent = `✓ ${email} 으로 초대가 전송되었습니다.`;
+      msgEl.textContent = `✓ Invite sent to ${email}.`;
       msgEl.className = 'invite-msg invite-success';
       emailInput.value = '';
     }
   } catch (err) {
     console.error('[invite-user] fetch failed:', err);
-    msgEl.textContent = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    msgEl.textContent = 'A network error occurred. Please try again.';
     msgEl.className = 'invite-msg invite-error';
   }
 
   btn.disabled    = false;
-  btn.textContent = '초대 전송';
+  btn.textContent = 'Send Invite';
 }
 
 // ── Boot ──────────────────────────────────────

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>로그인 — BeautyMaster Ops</title>
+<title>Sign In — BeautyMaster Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -172,48 +172,48 @@
 
   <!-- ── Normal login form ── -->
   <div id="login-section">
-    <h1 class="auth-title">로그인</h1>
-    <p class="auth-subtitle">Operations Hub에 오신 것을 환영합니다</p>
+    <h1 class="auth-title">Sign In</h1>
+    <p class="auth-subtitle">Welcome to the Operations Hub</p>
 
     <div class="auth-form">
       <div class="auth-field">
-        <label class="auth-label" for="auth-email">이메일</label>
+        <label class="auth-label" for="auth-email">Email</label>
         <input id="auth-email" class="auth-input" type="email"
                placeholder="your@email.com" autocomplete="email"
                onkeydown="onAuthKeydown(event)">
       </div>
       <div class="auth-field">
-        <label class="auth-label" for="auth-password">비밀번호</label>
+        <label class="auth-label" for="auth-password">Password</label>
         <input id="auth-password" class="auth-input" type="password"
                placeholder="••••••••" autocomplete="current-password"
                onkeydown="onAuthKeydown(event)">
       </div>
       <p id="auth-msg" class="auth-msg"></p>
-      <button id="auth-submit-btn" class="auth-btn" onclick="handleSignIn()">로그인</button>
+      <button id="auth-submit-btn" class="auth-btn" onclick="handleSignIn()">Sign In</button>
     </div>
 
     <hr class="auth-divider">
 
     <p class="auth-toggle">
-      <span id="auth-toggle-text">계정이 없으신가요?</span>
-      <a id="auth-toggle-link" class="auth-toggle-link" onclick="toggleAuthMode()">회원가입</a>
+      <span id="auth-toggle-text">Don't have an account?</span>
+      <a id="auth-toggle-link" class="auth-toggle-link" onclick="toggleAuthMode()">Sign Up</a>
     </p>
   </div>
 
   <!-- ── Invite acceptance: set password form (shown when #type=invite) ── -->
   <div id="set-password-section" style="display:none">
-    <h1 class="auth-title">비밀번호 설정</h1>
-    <p class="auth-subtitle">초대를 수락하셨습니다. 사용할 비밀번호를 설정해주세요.</p>
+    <h1 class="auth-title">Set Password</h1>
+    <p class="auth-subtitle">You've accepted your invite. Please set a password to continue.</p>
 
     <div class="auth-form">
       <div class="auth-field">
-        <label class="auth-label" for="set-pw-input">새 비밀번호</label>
+        <label class="auth-label" for="set-pw-input">New Password</label>
         <input id="set-pw-input" class="auth-input" type="password"
-               placeholder="6자 이상" autocomplete="new-password"
+               placeholder="At least 6 characters" autocomplete="new-password"
                onkeydown="if(event.key==='Enter') handleSetPassword()">
       </div>
       <p id="set-pw-msg" class="auth-msg"></p>
-      <button id="set-pw-btn" class="auth-btn" onclick="handleSetPassword()">비밀번호 설정</button>
+      <button id="set-pw-btn" class="auth-btn" onclick="handleSetPassword()">Set Password</button>
     </div>
   </div>
 </div>
