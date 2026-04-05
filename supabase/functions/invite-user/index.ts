@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
 
   const redirectTo = Deno.env.get('INVITE_REDIRECT_URL') ?? 'https://juyoung-prog.github.io/BM-Dashbaord/login.html';
 
-  const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(targetEmail, {
+  const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(targetEmail, {
     redirectTo,
   });
 
