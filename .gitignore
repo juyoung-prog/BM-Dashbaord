@@ -30,3 +30,12 @@ Thumbs.db
 # Local dev
 .idx/
 admin-invite.html
+
+# Claude Code local settings (may contain access tokens)
+.claude/
+
+# Supabase CLI temp files
+supabase/.temp/
+
+# Project zip exports
+*.zip

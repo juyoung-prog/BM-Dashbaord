@@ -103,29 +103,6 @@ async function handleSignIn() {
   // 성공 시 onAuthStateChange → index.html 리다이렉트
 }
 
-// ── Sign Up ───────────────────────────────────
-async function handleSignUp() {
-  const email    = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value;
-
-  if (!email || !password) { showMsg('이메일과 비밀번호를 입력해주세요.', 'error'); return; }
-  if (password.length < 6)  { showMsg('비밀번호는 6자 이상이어야 합니다.', 'error'); return; }
-
-  const btn = document.getElementById('auth-submit-btn');
-  setLoading(btn, '가입 중...');
-  clearMsg();
-
-  const { error } = await sb.auth.signUp({ email, password });
-
-  if (error) {
-    showMsg(toKorean(error.message), 'error');
-    resetBtn(btn, '회원가입');
-  } else {
-    showMsg('이메일을 확인하여 인증을 완료해주세요.', 'success');
-    resetBtn(btn, '회원가입');
-  }
-}
-
 // ── Sign Out ──────────────────────────────────
 async function handleSignOut() {
   await sb.auth.signOut();

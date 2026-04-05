@@ -48,14 +48,14 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get('Authorization') ?? '';
 
   if (!authHeader.toLowerCase().startsWith('bearer ')) {
-    return json({ error: 'Missing authorization token', detail: 'Authorization header missing or not Bearer' }, 401, corsHeaders);
+    return json({ error: 'Missing authorization token' }, 401, corsHeaders);
   }
 
   // Slice off exactly "Bearer " (7 chars) to get the raw token
   const callerJwt = authHeader.slice(7).trim();
 
   if (!callerJwt) {
-    return json({ error: 'Missing authorization token', detail: 'Token is empty after Bearer prefix' }, 401, corsHeaders);
+    return json({ error: 'Missing authorization token' }, 401, corsHeaders);
   }
 
   // Verify the caller's JWT by passing it explicitly to getUser().
@@ -69,8 +69,8 @@ Deno.serve(async (req) => {
   const { data: { user: caller }, error: callerErr } = await supabaseAnon.auth.getUser(callerJwt);
 
   if (callerErr || !caller) {
-    const reason = callerErr?.message ?? 'user is null';
-    return json({ error: 'Invalid or expired token', detail: reason }, 401, corsHeaders);
+    console.error('[invite-user] token verification failed:', callerErr?.message ?? 'user is null');
+    return json({ error: 'Invalid or expired token' }, 401, corsHeaders);
   }
 
   // ── 2. Create service-role client (used for admin table lookups + invite)
@@ -88,7 +88,8 @@ Deno.serve(async (req) => {
     .maybeSingle();
 
   if (callerAdminErr) {
-    return json({ error: 'Admin lookup failed', detail: callerAdminErr.message }, 500, corsHeaders);
+    console.error('[invite-user] admin lookup error:', callerAdminErr.message);
+    return json({ error: 'Internal server error' }, 500, corsHeaders);
   }
   if (!callerAdminRow) {
     return json({ error: 'Forbidden' }, 403, corsHeaders);
@@ -120,12 +121,15 @@ Deno.serve(async (req) => {
 
   // ── 5. Send invite using service role key (server-side only, never exposed to client)
 
+  const redirectTo = Deno.env.get('INVITE_REDIRECT_URL') ?? 'https://juyoung-prog.github.io/BM-Dashbaord/login.html';
+
   const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(targetEmail, {
-    redirectTo: 'https://juyoung-prog.github.io/BM-Dashbaord/login.html',
+    redirectTo,
   });
 
   if (error) {
-    return json({ error: error.message }, 400, corsHeaders);
+    console.error('[invite-user] inviteUserByEmail error:', error.message);
+    return json({ error: '초대 전송에 실패했습니다.' }, 400, corsHeaders);
   }
 
   return json({ success: true, invited: targetEmail, user_id: data.user.id }, 200, corsHeaders);
