@@ -139,7 +139,7 @@ function toKorean(msg) {
   if (msg.includes('User already registered'))   return '이미 가입된 이메일입니다.';
   if (msg.includes('Password should be'))        return '비밀번호는 6자 이상이어야 합니다.';
   if (msg.includes('Unable to validate'))        return 'Supabase 설정을 확인해주세요 (URL / Key).';
-  return msg;
+  return '오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
 }
 
 // ── Invite acceptance: set password ──────────────────────────────────────
@@ -245,7 +245,7 @@ async function sendInvite() {
     }
   } catch (err) {
     console.error('[invite-user] fetch failed:', err);
-    msgEl.textContent = `네트워크 오류: ${err?.message ?? err}`;
+    msgEl.textContent = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
     msgEl.className = 'invite-msg invite-error';
   }
 

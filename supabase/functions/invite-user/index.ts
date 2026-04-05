@@ -132,5 +132,5 @@ Deno.serve(async (req) => {
     return json({ error: '초대 전송에 실패했습니다.' }, 400, corsHeaders);
   }
 
-  return json({ success: true, invited: targetEmail, user_id: data.user.id }, 200, corsHeaders);
+  return json({ success: true, invited: targetEmail }, 200, corsHeaders);
 });
