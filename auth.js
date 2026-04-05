@@ -5,14 +5,6 @@
 const SUPABASE_URL      = 'https://rnzwuimzxydmhsdizyug.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_8vghQGAW4hfR7x3KV9qj6Q_kUq4MTTc'; // Publishable key (구 anon key)
 
-// ── Admin allowlist (UI gate) ─────────────────────────────────────────────
-// Controls who sees the "Invite User" button.
-// The real security check is enforced server-side in the Edge Function.
-// To add an admin: append their email to this array and redeploy.
-const ADMIN_EMAILS = [
-  'juyoung@beautymaster.com',
-];
-
 // ── Page detection ───────────────────────────
 const IS_LOGIN_PAGE = window.location.pathname.endsWith('login.html');
 
@@ -63,7 +55,7 @@ async function initAuth() {
       window.location.replace('login.html');
       return;
     }
-    showDashboard(session.user);
+    await showDashboard(session.user);
   }
 
   // 인증 상태 변화 감지 (invite flow는 위에서 return하므로 여기 도달 안 함)
@@ -78,15 +70,16 @@ async function initAuth() {
 }
 
 // ── Dashboard: 인증 완료 후 표시 ─────────────
-function showDashboard(user) {
+async function showDashboard(user) {
   document.body.classList.remove('auth-pending');
   const emailEl = document.getElementById('sb-user-email');
   if (emailEl) emailEl.textContent = user.email;
 
-  // Show invite button only for admin users
+  // Show invite button only for admin users (checked against public.admins table)
   const inviteBtn = document.getElementById('invite-user-btn');
-  if (inviteBtn && ADMIN_EMAILS.includes(user.email)) {
-    inviteBtn.style.display = '';
+  if (inviteBtn) {
+    const { data } = await sb.from('admins').select('email').eq('email', user.email).maybeSingle();
+    if (data) inviteBtn.style.display = '';
   }
 }
 

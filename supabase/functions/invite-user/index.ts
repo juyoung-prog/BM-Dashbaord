@@ -1,10 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// ─── Admin allowlist ────────────────────────────────────────────────────────
-const ADMIN_EMAILS: string[] = [
-  'juyoung@beautymaster.com',
-];
-
 // ─── CORS ────────────────────────────────────────────────────────────────────
 // List every origin that is allowed to call this function.
 // Add localhost variants here so local dev works without redeploying.
@@ -49,12 +44,18 @@ Deno.serve(async (req) => {
     return json({ error: 'Method not allowed' }, 405, corsHeaders);
   }
 
-  // ── 1. Verify JWT — extract the caller's identity from the Authorization header
+  // ── 1. Extract JWT from Authorization header
   const authHeader = req.headers.get('Authorization') ?? '';
-  const callerJwt  = authHeader.replace(/^Bearer\s+/i, '');
+
+  if (!authHeader.toLowerCase().startsWith('bearer ')) {
+    return json({ error: 'Missing authorization token', detail: 'Authorization header missing or not Bearer' }, 401, corsHeaders);
+  }
+
+  // Slice off exactly "Bearer " (7 chars) to get the raw token
+  const callerJwt = authHeader.slice(7).trim();
 
   if (!callerJwt) {
-    return json({ error: 'Missing authorization token' }, 401, corsHeaders);
+    return json({ error: 'Missing authorization token', detail: 'Token is empty after Bearer prefix' }, 401, corsHeaders);
   }
 
   // Verify the caller's JWT by passing it explicitly to getUser().
@@ -72,12 +73,28 @@ Deno.serve(async (req) => {
     return json({ error: 'Invalid or expired token', detail: reason }, 401, corsHeaders);
   }
 
-  // ── 2. Admin check — reject non-admin callers early
-  if (!ADMIN_EMAILS.includes(caller.email!)) {
+  // ── 2. Create service-role client (used for admin table lookups + invite)
+  const supabaseAdmin = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+
+  // ── 3. Admin check — query public.admins table
+  const { data: callerAdminRow, error: callerAdminErr } = await supabaseAdmin
+    .from('admins')
+    .select('email')
+    .eq('email', caller.email!)
+    .maybeSingle();
+
+  if (callerAdminErr) {
+    return json({ error: 'Admin lookup failed', detail: callerAdminErr.message }, 500, corsHeaders);
+  }
+  if (!callerAdminRow) {
     return json({ error: 'Forbidden' }, 403, corsHeaders);
   }
 
-  // ── 3. Parse and validate the target email from request body
+  // ── 4. Parse and validate the target email from request body
   let targetEmail: string;
   try {
     const body = await req.json();
@@ -90,17 +107,18 @@ Deno.serve(async (req) => {
     return json({ error: 'Valid target email is required' }, 400, corsHeaders);
   }
 
-  // Prevent inviting another admin by accident (optional, remove if not needed)
-  if (ADMIN_EMAILS.includes(targetEmail)) {
+  // Prevent inviting another admin by accident
+  const { data: targetAdminRow } = await supabaseAdmin
+    .from('admins')
+    .select('email')
+    .eq('email', targetEmail)
+    .maybeSingle();
+
+  if (targetAdminRow) {
     return json({ error: 'Cannot invite an admin email' }, 400, corsHeaders);
   }
 
-  // ── 4. Send invite using service role key (server-side only, never exposed to client)
-  const supabaseAdmin = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+  // ── 5. Send invite using service role key (server-side only, never exposed to client)
 
   const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(targetEmail, {
     redirectTo: 'https://juyoung-prog.github.io/BM-Dashbaord/login.html',
