@@ -1253,7 +1253,7 @@ function runDataHealth(headers, rows) {
         const v = parseFloat(r[f.csvCol]);
         if (r[f.csvCol] !== '' && (isNaN(v) || v < 0 || v > 100)) invalidCount++;
       });
-      if (invalidCount) msgs.push(`${invalidCount}개 행의 값이 0–100 범위를 벗어남`);
+      if (invalidCount) msgs.push(`${invalidCount} rows out of range (0–100)`);
     } else if (f.type === 'number') {
       rows.forEach(r => {
         const v = parseFloat(r[f.csvCol]);
@@ -1261,10 +1261,10 @@ function runDataHealth(headers, rows) {
         else if (f.min !== undefined && v < f.min) invalidCount++;
         else if (f.max !== undefined && v > f.max) invalidCount++;
       });
-      if (invalidCount) msgs.push(`${invalidCount}개 행에 유효하지 않은 숫자값`);
+      if (invalidCount) msgs.push(`${invalidCount} rows with invalid numeric value`);
     } else if (f.type === 'string') {
       rows.forEach(r => { if (!r[f.csvCol] || r[f.csvCol].trim() === '') invalidCount++; });
-      if (invalidCount) msgs.push(`${invalidCount}개 행에 빈 값`);
+      if (invalidCount) msgs.push(`${invalidCount} rows with empty value`);
     }
     const status = invalidCount > 0 ? 'warn' : 'ok';
     return { ...f, status, invalidCount, invalidMsg: msgs.join(', ') };
@@ -1291,7 +1291,7 @@ function runDataHealth(headers, rows) {
     let icon, cls, tag = '';
     if (f.status === 'missing') {
       icon = SVG_MISS; cls = 'fh-miss';
-      tag = `<span class="fh-ftag ${f.required ? 'required' : 'warn'}">${f.required ? 'Required — 누락됨' : '누락됨'}</span>`;
+      tag = `<span class="fh-ftag ${f.required ? 'required' : 'warn'}">${f.required ? 'Required — Missing' : 'Missing'}</span>`;
     } else if (f.status === 'warn') {
       icon = SVG_WARN; cls = 'fh-warn';
       tag = `<span class="fh-ftag warn">${f.invalidMsg}</span>`;
@@ -1303,7 +1303,7 @@ function runDataHealth(headers, rows) {
   }).join('') + (extraCols.length
     ? `<div class="fh-field fh-extra" style="opacity:.5">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;flex-shrink:0;color:var(--text-tertiary)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        <span class="fh-fname" style="color:var(--text-tertiary)">+ ${extraCols.length}개 추가 컬럼 (미사용)</span>
+        <span class="fh-fname" style="color:var(--text-tertiary)">+ ${extraCols.length} extra column${extraCols.length > 1 ? 's' : ''} (unused)</span>
       </div>`
     : '');
 
@@ -1313,14 +1313,14 @@ function runDataHealth(headers, rows) {
   if (warnFields.length === 0) {
     footer.innerHTML = `<div class="fh-warn-msg" style="background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.2);color:var(--success)">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
-      모든 필드가 정상입니다. 데이터 검증 완료.
+      All fields validated successfully.
     </div>`;
   } else {
     footer.innerHTML = warnFields.map(f => {
       if (f.status === 'missing') {
-        return `<div class="fh-warn-msg">${SVG_WARN_SM} <strong>${f.key}</strong> 컬럼을 찾을 수 없습니다. ${f.required ? 'CSV에 해당 컬럼이 필요합니다.' : '선택적 컬럼이지만 일부 기능이 제한됩니다.'}</div>`;
+        return `<div class="fh-warn-msg">${SVG_WARN_SM} Column <strong>${f.key}</strong> not found. ${f.required ? 'This column is required in the CSV.' : 'This is an optional column but some features may be limited.'}</div>`;
       }
-      return `<div class="fh-warn-msg">${SVG_WARN_SM} <strong>${esc(f.csvCol)}</strong>에서 ${f.invalidMsg}. 해당 행은 계산에서 제외됩니다.</div>`;
+      return `<div class="fh-warn-msg">${SVG_WARN_SM} <strong>${esc(f.csvCol)}</strong>: ${f.invalidMsg}. Affected rows will be excluded from calculations.</div>`;
     }).join('');
   }
 
