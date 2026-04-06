@@ -2374,6 +2374,9 @@ body.auth-pending .sidebar-overlay {
   text-align: left;
 }
 .sb-logout-btn:hover { color: #475569; }
+#invite-user-btn { color: #64748B; }
+#invite-user-btn:hover { color: #334155; text-decoration: underline; text-underline-offset: 2px; }
+#invite-user-btn:focus-visible { outline: 2px solid #94A3B8; outline-offset: 2px; border-radius: 2px; }
 
 /* ── Dark mode overrides ─────────────────── */
 [data-theme="dark"] .auth-card {
