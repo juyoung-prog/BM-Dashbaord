@@ -2296,7 +2296,7 @@ body.auth-pending .sidebar-overlay {
 .auth-btn {
   width: 100%;
   padding: 11px;
-  background: var(--accent);
+  background: #1E293B;
   color: #fff;
   font-size: 14px;
   font-weight: 600;
@@ -2307,7 +2307,7 @@ body.auth-pending .sidebar-overlay {
   transition: background .15s, opacity .15s;
   margin-top: var(--s1);
 }
-.auth-btn:hover:not(:disabled) { background: var(--accent-hover); }
+.auth-btn:hover:not(:disabled) { background: #334155; }
 .auth-btn:disabled {
   opacity: .55;
   cursor: not-allowed;
