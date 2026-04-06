@@ -601,6 +601,11 @@ svg { display: block; }
 .badge-amber   { background: var(--bg-subtle); color: var(--text-secondary); border-color: var(--border-default); }
 .badge-neutral { background: var(--bg-subtle); color: #334155;               border: 1px solid var(--border-default); }
 
+/* Income Band — classification only, not status */
+.badge-band-lower { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
+.badge-band-mid   { background: #EEF2F7; color: #64748B; border: 1px solid #E2E8F0; }
+.badge-band-upper { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+
 /* RACE BAR */
 .race-wrap { display: flex; flex-direction: column; gap: 3px; }
 .race-track {
@@ -1910,6 +1915,21 @@ svg { display: block; }
   background: rgba(255,255,255,.05);
   color: var(--text-secondary);
   border-color: rgba(255,255,255,.09);
+}
+[data-theme="dark"] .badge-band-lower {
+  background: rgba(255,255,255,.05);
+  color: #9CA3AF;
+  border-color: rgba(255,255,255,.09);
+}
+[data-theme="dark"] .badge-band-mid {
+  background: rgba(255,255,255,.06);
+  color: #94A3B8;
+  border-color: rgba(255,255,255,.10);
+}
+[data-theme="dark"] .badge-band-upper {
+  background: rgba(255,255,255,.08);
+  color: #7C8FA3;
+  border-color: rgba(255,255,255,.11);
 }
 
 /* ── Issue 2: Right panel — unified, less blocky ── */
