@@ -2269,8 +2269,12 @@ body.auth-pending .sidebar-overlay {
   box-sizing: border-box;
 }
 .auth-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+  border-color: #475569;
+  box-shadow: 0 0 0 3px rgba(71,85,105,.12);
+}
+.auth-input.is-error {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(255,59,48,.12);
 }
 
 /* Error / success message */
@@ -2317,13 +2321,13 @@ body.auth-pending .sidebar-overlay {
   margin: var(--s2) 0 0;
 }
 .auth-toggle-link {
-  color: var(--accent);
+  color: #475569;
   font-weight: 600;
   cursor: pointer;
   margin-left: 4px;
   text-decoration: none;
 }
-.auth-toggle-link:hover { text-decoration: underline; }
+.auth-toggle-link:hover { color: #334155; text-decoration: underline; }
 
 /* ── Sidebar user block ───────────────────── */
 .sb-user {
@@ -2392,8 +2396,12 @@ body.auth-pending .sidebar-overlay {
   color: #F2F2F7;
 }
 [data-theme="dark"] .auth-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(232,29,37,.2);
+  border-color: #64748B;
+  box-shadow: 0 0 0 3px rgba(100,116,139,.18);
+}
+[data-theme="dark"] .auth-input.is-error {
+  border-color: #F87171;
+  box-shadow: 0 0 0 3px rgba(248,113,113,.15);
 }
 [data-theme="dark"] .auth-toggle   { color: #AEAEB2; }
 [data-theme="dark"] .auth-logo-img { filter: none; }
