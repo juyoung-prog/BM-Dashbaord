@@ -2341,11 +2341,11 @@ body.auth-pending .sidebar-overlay {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--accent-dim);
+  background: #F1F5F9;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent);
+  color: #64748B;
 }
 .sb-user-avatar svg { width: 16px; height: 16px; }
 .sb-user-details {
@@ -2357,7 +2357,7 @@ body.auth-pending .sidebar-overlay {
 .sb-user-email {
   font-size: 11px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #0F172A;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2373,7 +2373,7 @@ body.auth-pending .sidebar-overlay {
   cursor: pointer;
   text-align: left;
 }
-.sb-logout-btn:hover { color: var(--accent); }
+.sb-logout-btn:hover { color: #475569; }
 
 /* ── Dark mode overrides ─────────────────── */
 [data-theme="dark"] .auth-card {
@@ -2394,5 +2394,6 @@ body.auth-pending .sidebar-overlay {
 }
 [data-theme="dark"] .auth-toggle   { color: #AEAEB2; }
 [data-theme="dark"] .auth-logo-img { filter: none; }
-[data-theme="dark"] .sb-user       { background: rgba(255,255,255,.05); }
-[data-theme="dark"] .sb-user-email { color: #AEAEB2; }
+[data-theme="dark"] .sb-user        { background: rgba(255,255,255,.05); }
+[data-theme="dark"] .sb-user-avatar { background: rgba(255,255,255,.08); color: #94A3B8; }
+[data-theme="dark"] .sb-user-email  { color: #F1F5F9; }
