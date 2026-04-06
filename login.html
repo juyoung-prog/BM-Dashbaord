@@ -105,8 +105,12 @@
     transition: border-color .15s, box-shadow .15s;
   }
   .auth-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-dim);
+    border-color: #475569;
+    box-shadow: 0 0 0 3px rgba(71,85,105,.12);
+  }
+  .auth-input.is-error {
+    border-color: var(--error);
+    box-shadow: 0 0 0 3px rgba(255,59,48,.12);
   }
 
   /* ── Message ── */
@@ -145,13 +149,13 @@
     margin-top: 16px;
   }
   .auth-toggle-link {
-    color: var(--accent);
+    color: #475569;
     font-weight: 600;
     cursor: pointer;
     margin-left: 4px;
     text-decoration: none;
   }
-  .auth-toggle-link:hover { text-decoration: underline; }
+  .auth-toggle-link:hover { color: #334155; text-decoration: underline; }
 
   /* ── Divider ── */
   .auth-divider {
