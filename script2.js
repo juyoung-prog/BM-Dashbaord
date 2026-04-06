@@ -102,9 +102,9 @@ function getFiltered() {
 
 function getBandBadge(band, income) {
   const tip = income ? ` data-tip="Median Income: $${income.toLocaleString()}"` : '';
-  if (band==='upper') return `<span class="badge badge-blue"${tip}>Upper-Mid</span>`;
-  if (band==='lower') return `<span class="badge badge-red"${tip}>Lower-Mid</span>`;
-  return `<span class="badge badge-green"${tip}>Mid Income</span>`;
+  if (band==='upper') return `<span class="badge badge-band-upper"${tip}>Upper-Mid</span>`;
+  if (band==='lower') return `<span class="badge badge-band-lower"${tip}>Lower-Mid</span>`;
+  return `<span class="badge badge-band-mid"${tip}>Mid Income</span>`;
 }
 
 
