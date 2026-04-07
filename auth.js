@@ -168,18 +168,49 @@ async function handleSetPassword() {
   msgEl.textContent = '';
   msgEl.className = 'auth-msg';
 
-  const { error } = await sb.auth.updateUser({ password: pw });
+  const { error: pwError } = await sb.auth.updateUser({ password: pw });
 
-  if (error) {
-    msgEl.textContent = toEnglish(error.message);
+  if (pwError) {
+    msgEl.textContent = toEnglish(pwError.message);
     msgEl.className = 'auth-msg error';
     btn.disabled    = false;
     btn.textContent = 'Set Password';
-  } else {
-    msgEl.textContent = 'Password set successfully. Redirecting to dashboard...';
-    msgEl.className = 'auth-msg success';
-    setTimeout(() => window.location.replace('index.html'), 1500);
+    return;
   }
+
+  // ── Invalidate the invitation token immediately (one-time use) ────────────
+  // If the invitation is no longer valid (expired, already used, or missing),
+  // revoke the session and block access.
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/accept-invite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        // Revoke session — this invite was not valid
+        await sb.auth.signOut();
+        msgEl.textContent = data.error || '유효한 초대가 없습니다. 관리자에게 문의하세요.';
+        msgEl.className = 'auth-msg error';
+        btn.disabled    = false;
+        btn.textContent = 'Set Password';
+        return;
+      }
+    } catch (err) {
+      console.error('[accept-invite] fetch failed:', err);
+      // Non-blocking: network error should not prevent the user from proceeding
+      // if they already have a valid session. Log and continue.
+    }
+  }
+
+  msgEl.textContent = '비밀번호가 설정되었습니다. 대시보드로 이동합니다...';
+  msgEl.className = 'auth-msg success';
+  setTimeout(() => window.location.replace('index.html'), 1500);
 }
 
 // ── Invite User (admin only) ──────────────────────────────────────────────
