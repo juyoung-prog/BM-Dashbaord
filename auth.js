@@ -182,17 +182,27 @@ async function handleSetPassword() {
   // If the invitation is no longer valid (expired, already used, or missing),
   // revoke the session and block access.
   const { data: { session } } = await sb.auth.getSession();
-  if (session) {
+
+  if (!session) {
+    // Session disappeared after updateUser — log clearly so it shows in DevTools.
+    console.error('[accept-invite] no session after updateUser; skipping invalidation');
+  } else {
     try {
+      // No Content-Type / body — sending either with no body can cause the Edge
+      // Function runtime to reject the request before our code runs, which
+      // produces a network-level error that would be swallowed below.
       const res = await fetch(`${SUPABASE_URL}/functions/v1/accept-invite`, {
         method: 'POST',
         headers: {
-          'Content-Type':  'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
       });
+
+      console.log('[accept-invite] response status:', res.status);
+
       if (!res.ok) {
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
+        console.error('[accept-invite] rejected:', res.status, data);
         // Revoke session — this invite was not valid
         await sb.auth.signOut();
         msgEl.textContent = data.error || '유효한 초대가 없습니다. 관리자에게 문의하세요.';
@@ -201,10 +211,12 @@ async function handleSetPassword() {
         btn.textContent = 'Set Password';
         return;
       }
+
+      console.log('[accept-invite] invitation consumed successfully');
     } catch (err) {
-      console.error('[accept-invite] fetch failed:', err);
-      // Non-blocking: network error should not prevent the user from proceeding
-      // if they already have a valid session. Log and continue.
+      // True network failure (offline, DNS, CORS preflight blocked).
+      // Password is already set so do NOT block the user, but log visibly.
+      console.error('[accept-invite] network error — row may not be marked used:', err);
     }
   }
 
