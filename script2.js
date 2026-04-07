@@ -1124,7 +1124,7 @@ function applyCSVText(csvText, filename, mode) {
 
     datasetExists = true;
     document.getElementById('ds-filename').textContent = filename || 'dataset.csv';
-    document.getElementById('ds-updated').textContent = localStorage.getItem('bm_csvDate') || new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    document.getElementById('ds-updated').textContent = 'March 2025';
       syncDatasetState();
 
       // Re-render everything from new STORES
