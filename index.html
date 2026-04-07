@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style2.css">
+<link rel="stylesheet" href="influencer/influencer.css">
 <!-- Supabase JS (UMD) — exposes window.supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -38,6 +39,10 @@
     <div class="sb-item" onclick="navTo('locator',this)">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
       Store Locator
+    </div>
+    <div class="sb-item" onclick="navTo('influencers',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Influencers
     </div>
     <div class="sb-section-label">System</div>
     <div class="sb-item" onclick="navTo('settings',this)">
@@ -267,6 +272,26 @@
           <div class="dist-item" style="border:none"><div class="dist-sub" style="font-size:12px">+ 6 more: Douglasville · Greenbriar · Headland · Old National · Orlando · Tamarac</div></div>
         </div>
       </div>
+    </div>
+
+    <!-- ══ PAGE: INFLUENCERS ══ -->
+    <div id="page-influencers" class="page">
+      <div class="page-header">
+        <div class="ph-title-group">
+          <div class="ph-eyebrow">Marketing</div>
+          <div class="ph-title">Influencer Hub</div>
+          <div class="ph-subtitle">Manage partnerships across all 15 BeautyMaster locations</div>
+        </div>
+        <div id="inf-page-actions" style="display:flex;gap:8px;align-items:center"></div>
+      </div>
+      <div class="inf-tab-bar">
+        <button class="inf-tab active" onclick="infSetTab('influencers',this)" id="inf-tab-influencers">Influencers</button>
+        <button class="inf-tab" onclick="infSetTab('videos',this)" id="inf-tab-videos">Video Tracker</button>
+        <button class="inf-tab" onclick="infSetTab('credits',this)" id="inf-tab-credits">Store Credits</button>
+      </div>
+      <div id="inf-panel-influencers"></div>
+      <div id="inf-panel-videos" style="display:none"></div>
+      <div id="inf-panel-credits" style="display:none"></div>
     </div>
 
     <!-- ══ PAGE: SETTINGS ══ -->
@@ -719,6 +744,7 @@
 </style>
 
 <script src="script2.js"></script>
+<script src="influencer/influencer.js"></script>
 <script src="auth.js"></script>
 </body>
 </html>
