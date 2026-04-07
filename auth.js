@@ -168,18 +168,61 @@ async function handleSetPassword() {
   msgEl.textContent = '';
   msgEl.className = 'auth-msg';
 
-  const { error } = await sb.auth.updateUser({ password: pw });
+  const { error: pwError } = await sb.auth.updateUser({ password: pw });
 
-  if (error) {
-    msgEl.textContent = toEnglish(error.message);
+  if (pwError) {
+    msgEl.textContent = toEnglish(pwError.message);
     msgEl.className = 'auth-msg error';
     btn.disabled    = false;
     btn.textContent = 'Set Password';
-  } else {
-    msgEl.textContent = 'Password set successfully. Redirecting to dashboard...';
-    msgEl.className = 'auth-msg success';
-    setTimeout(() => window.location.replace('index.html'), 1500);
+    return;
   }
+
+  // ── Invalidate the invitation token immediately (one-time use) ────────────
+  // If the invitation is no longer valid (expired, already used, or missing),
+  // revoke the session and block access.
+  const { data: { session } } = await sb.auth.getSession();
+
+  if (!session) {
+    // Session disappeared after updateUser — log clearly so it shows in DevTools.
+    console.error('[accept-invite] no session after updateUser; skipping invalidation');
+  } else {
+    try {
+      // No Content-Type / body — sending either with no body can cause the Edge
+      // Function runtime to reject the request before our code runs, which
+      // produces a network-level error that would be swallowed below.
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/accept-invite`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      console.log('[accept-invite] response status:', res.status);
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.error('[accept-invite] rejected:', res.status, data);
+        // Revoke session — this invite was not valid
+        await sb.auth.signOut();
+        msgEl.textContent = data.error || '유효한 초대가 없습니다. 관리자에게 문의하세요.';
+        msgEl.className = 'auth-msg error';
+        btn.disabled    = false;
+        btn.textContent = 'Set Password';
+        return;
+      }
+
+      console.log('[accept-invite] invitation consumed successfully');
+    } catch (err) {
+      // True network failure (offline, DNS, CORS preflight blocked).
+      // Password is already set so do NOT block the user, but log visibly.
+      console.error('[accept-invite] network error — row may not be marked used:', err);
+    }
+  }
+
+  msgEl.textContent = '비밀번호가 설정되었습니다. 대시보드로 이동합니다...';
+  msgEl.className = 'auth-msg success';
+  setTimeout(() => window.location.replace('index.html'), 1500);
 }
 
 // ── Invite User (admin only) ──────────────────────────────────────────────

@@ -33,6 +33,28 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 - **Authentication → URL Configuration** 에서 Site URL 및 Redirect URLs 설정 필요
 - 로컬 개발: `http://localhost` 또는 `http://127.0.0.1:5500` 등 추가
 
+## 6. 초대 보안 설정 (필수)
+
+### 6-1. 공개 회원가입 비활성화
+초대 없이 직접 계정 생성을 차단하려면 반드시 비활성화해야 합니다.
+
+**Authentication → Settings → User Signups**  
+→ **"Allow new users to sign up"** 를 **OFF** 로 설정
+
+### 6-2. 초대 토큰 만료 시간 설정
+**Authentication → Settings → Email Auth**  
+→ **"Invitation token expiry"** 를 **86400** (24시간, 초 단위) 이하로 설정
+
+### 6-3. `invitations` 테이블 생성
+`supabase/migrations/001_invitations.sql` 파일의 SQL을 Supabase SQL Editor에서 실행하세요.
+
+**Table Editor → SQL Editor** 에서 해당 파일 내용 붙여넣기 → Run
+
+### 6-4. `accept-invite` Edge Function 배포
+```bash
+supabase functions deploy accept-invite
+```
+
 ## 동작 방식
 
 ```
