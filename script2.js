@@ -800,21 +800,44 @@ function parseCSV(text) {
   return rows;
 }
 
-// ── Extract spreadsheet ID from any Google Sheets URL ──
-function extractSheetId(url) {
-  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-  return m ? m[1] : null;
+// ── Normalize pasted URL: strip whitespace and line breaks ──
+function normalizeUrl(raw) {
+  return raw.replace(/[\r\n\t]+/g, '').trim();
 }
 
-// ── Extract tab GID from URL (defaults to 0 = first tab) ──
-function extractGid(url) {
-  const m = url.match(/[#&?]gid=(\d+)/);
-  return m ? m[1] : '0';
+// ── Detect if URL is already a published CSV link ──
+// Published format: .../spreadsheets/d/e/{PUBLISHED_ID}/pub?output=csv
+function isPublishedCsvUrl(url) {
+  return /\/pub(\?|&|#)/.test(url) && /[?&]output=csv/.test(url);
 }
 
-// ── Build the CSV export URL for a Google Sheet ──
-function buildSheetCsvUrl(sheetId, gid) {
-  return `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/export?format=csv&gid=${gid}`;
+// ── Resolve the final fetch URL from any supported Google Sheets URL ──
+// Returns { csvUrl, urlType } or throws on unresolvable input.
+function resolveFetchUrl(raw) {
+  const url = normalizeUrl(raw);
+  console.log('[Sheets] raw input   :', raw);
+  console.log('[Sheets] normalized  :', url);
+
+  // Case 1: Already a published CSV URL — use as-is
+  if (isPublishedCsvUrl(url)) {
+    console.log('[Sheets] URL type    : published CSV (direct)');
+    return { csvUrl: url, urlType: 'published' };
+  }
+
+  // Case 2: Regular edit/view/share URL — extract sheet ID and build export URL
+  // Matches /spreadsheets/d/{ID}/ but NOT /d/e/ (published format)
+  const editMatch = url.match(/\/spreadsheets\/d\/(?!e\/)([a-zA-Z0-9-_]+)/);
+  if (editMatch) {
+    const sheetId = editMatch[1];
+    const gidMatch = url.match(/[#&?]gid=(\d+)/);
+    const gid = gidMatch ? gidMatch[1] : '0';
+    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+    console.log('[Sheets] URL type    : edit/view URL → converted to export');
+    console.log('[Sheets] sheet ID    :', sheetId, '  gid:', gid);
+    return { csvUrl, urlType: 'export' };
+  }
+
+  throw new Error('Could not resolve a fetch URL from the provided link. Paste a published CSV link or a standard Google Sheets URL.');
 }
 
 // ── Clear the entire dashboard to an empty state ──
@@ -967,20 +990,22 @@ function syncSheetState() {
   if (ssNo)  ssNo.style.display  = connected ? 'none' : '';
 }
 
-// ── Validate that a string looks like a Google Sheets URL ──
-function validateSheetUrl(url) {
-  if (!url || !url.trim()) return 'Please enter a Google Sheets URL.';
+// ── Validate that a string looks like a usable Google Sheets URL ──
+function validateSheetUrl(rawUrl) {
+  const url = normalizeUrl(rawUrl);
+  if (!url) return 'Please enter a Google Sheets URL.';
   try { new URL(url); } catch (_) { return 'This doesn\'t look like a valid URL. Check the format and try again.'; }
   if (!url.includes('docs.google.com/spreadsheets')) {
-    return 'This doesn\'t look like a valid Google Sheets URL. It should start with docs.google.com/spreadsheets.';
+    return 'This doesn\'t look like a valid Google Sheets URL. It should contain docs.google.com/spreadsheets.';
   }
+  // Both published CSV links and regular edit/view links are accepted
   return null;
 }
 
 // ── Connect from empty state input ──
 async function connectSheet() {
   const input = document.getElementById('gs-connect-url-input');
-  const url   = input ? input.value.trim() : '';
+  const url   = normalizeUrl(input ? input.value : '');
   const err   = validateSheetUrl(url);
   if (err) { showUrlError('gs-connect-url-error', err); return; }
 
@@ -1010,7 +1035,7 @@ function cancelChangeUrl() {
 // ── Apply new URL from Change URL form ──
 function confirmChangeUrl() {
   const input = document.getElementById('gs-new-url-input');
-  const url   = input ? input.value.trim() : '';
+  const url   = normalizeUrl(input ? input.value : '');
   const err   = validateSheetUrl(url);
   if (err) { showUrlError('gs-new-url-error', err); return; }
 
@@ -1070,23 +1095,44 @@ async function syncNow() {
   updateSyncResult('syncing', '● Syncing…');
 
   try {
-    const sheetId = extractSheetId(sheetUrl);
-    if (!sheetId) throw new Error('Could not extract a valid sheet ID from the URL.');
+    // Resolve the actual fetch URL (handles both published CSV and edit/view URLs)
+    const { csvUrl } = resolveFetchUrl(sheetUrl);
+    console.log('[Sheets] final fetch :', csvUrl);
 
-    const gid    = extractGid(sheetUrl);
-    const csvUrl = buildSheetCsvUrl(sheetId, gid);
-    const res    = await fetch(csvUrl);
+    let res;
+    try {
+      res = await fetch(csvUrl);
+    } catch (networkErr) {
+      throw new Error(`Network error — could not reach Google Sheets. Check your connection. (${networkErr.message})`);
+    }
 
-    if (!res.ok) throw new Error(`Server returned ${res.status}. Check that the sheet exists and is shared.`);
+    console.log('[Sheets] HTTP status :', res.status, res.statusText);
+
+    if (res.status === 404) {
+      throw new Error('404 — Sheet not found. Verify the URL is correct and the sheet is still published.');
+    }
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(`${res.status} — Access denied. Make sure the sheet is shared with "Anyone with the link — Viewer".`);
+    }
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: Unexpected error fetching the sheet.`);
+    }
 
     const text = await res.text();
+    console.log('[Sheets] response (first 200 chars):', text.slice(0, 200));
 
     // Google redirects private/inaccessible sheets to an HTML login page
     if (text.trimStart().startsWith('<')) {
-      throw new Error('Unable to read sheet data. Make sure the sheet is shared with "Anyone with the link — Viewer" access.');
+      throw new Error('Sheet returned an HTML page instead of CSV. Make sure the sheet is published: File → Share → Publish to web → CSV.');
     }
 
-    const rows = parseCSV(text);
+    let rows;
+    try {
+      rows = parseCSV(text);
+    } catch (parseErr) {
+      throw new Error(`CSV parsing failed: ${parseErr.message}`);
+    }
+
     if (!rows.length) throw new Error('The sheet appears to be empty or has no data rows.');
 
     applySheetData(rows);
@@ -1109,7 +1155,7 @@ async function syncNow() {
     if (statusRow) statusRow.style.display = 'none';
     updateSyncResult('failed', `● Sync failed: ${err.message}`);
     showToast(`Sync failed: ${err.message}`);
-    console.error('[GoogleSheets sync]', err);
+    console.error('[GoogleSheets sync] error:', err);
   }
 }
 
