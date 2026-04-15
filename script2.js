@@ -768,6 +768,55 @@ let sheetUrl = '';
 let sheetName = 'BM Market Data';
 let syncStatus = 'idle'; // 'idle' | 'syncing' | 'success' | 'failed'
 
+// ── Column alias helper — tries each key in order, returns first non-empty match ──
+function col(row, ...keys) {
+  for (const k of keys) {
+    if (row[k] !== undefined && String(row[k]).trim() !== '') return row[k];
+  }
+  return '';
+}
+
+// ── CSV parser for Google Sheets export (handles quoted fields with commas) ──
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (!lines.length) return [];
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let c = 0; c < lines[i].length; c++) {
+      const ch = lines[i][c];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur); cur = ''; }
+      else { cur += ch; }
+    }
+    cols.push(cur);
+    const row = {};
+    headers.forEach((h, idx) => { row[h] = (cols[idx] || '').replace(/^"|"$/g, '').trim(); });
+    rows.push(row);
+  }
+  return rows;
+}
+
+// ── Extract spreadsheet ID from any Google Sheets URL ──
+function extractSheetId(url) {
+  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  return m ? m[1] : null;
+}
+
+// ── Extract tab GID from URL (defaults to 0 = first tab) ──
+function extractGid(url) {
+  const m = url.match(/[#&?]gid=(\d+)/);
+  return m ? m[1] : '0';
+}
+
+// ── Build the CSV export URL for a Google Sheet ──
+function buildSheetCsvUrl(sheetId, gid) {
+  return `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/export?format=csv&gid=${gid}`;
+}
+
 // ── Clear the entire dashboard to an empty state ──
 function clearDashboard() {
   // 1. Table → empty message
@@ -929,7 +978,7 @@ function validateSheetUrl(url) {
 }
 
 // ── Connect from empty state input ──
-function connectSheet() {
+async function connectSheet() {
   const input = document.getElementById('gs-connect-url-input');
   const url   = input ? input.value.trim() : '';
   const err   = validateSheetUrl(url);
@@ -937,15 +986,12 @@ function connectSheet() {
 
   sheetUrl       = url;
   sheetConnected = true;
-  syncStatus     = 'success';
 
-  // Update meta display
   const urlEl = document.getElementById('gs-sheet-url');
   if (urlEl) urlEl.textContent = sheetUrl;
 
   syncSheetState();
-  updateSyncResult('success', 'Last sync successful · just now');
-  showToast('Sheet connected. Dashboard synced successfully.');
+  await syncNow();
 }
 
 // ── Open / cancel Change URL inline form ──
@@ -1008,32 +1054,99 @@ function confirmDisconnectSheet() {
   showToast('Sheet disconnected. Dashboard will be empty until a new sheet is connected.');
 }
 
-// ── Sync Now — simulates pull with loading state ──
-function syncNow() {
+// ── Sync Now — fetch real data from Google Sheet ──
+async function syncNow() {
   if (syncStatus === 'syncing') return;
   syncStatus = 'syncing';
 
-  const btn = document.getElementById('sync-now-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Syncing...'; }
+  const ICON_SPIN = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>';
+  const ICON_IDLE = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>';
 
+  const btn       = document.getElementById('sync-now-btn');
   const statusRow = document.getElementById('sync-status-row');
-  if (statusRow) { statusRow.style.display = ''; statusRow.textContent = '● Syncing data from Google Sheets…'; statusRow.style.color = 'var(--text-secondary)'; }
 
+  if (btn)       { btn.disabled = true; btn.innerHTML = `${ICON_SPIN}Syncing...`; }
+  if (statusRow) { statusRow.style.display = ''; statusRow.textContent = '● Syncing data from Google Sheets…'; statusRow.style.color = 'var(--text-secondary)'; }
   updateSyncResult('syncing', '● Syncing…');
 
-  setTimeout(() => {
+  try {
+    const sheetId = extractSheetId(sheetUrl);
+    if (!sheetId) throw new Error('Could not extract a valid sheet ID from the URL.');
+
+    const gid    = extractGid(sheetUrl);
+    const csvUrl = buildSheetCsvUrl(sheetId, gid);
+    const res    = await fetch(csvUrl);
+
+    if (!res.ok) throw new Error(`Server returned ${res.status}. Check that the sheet exists and is shared.`);
+
+    const text = await res.text();
+
+    // Google redirects private/inaccessible sheets to an HTML login page
+    if (text.trimStart().startsWith('<')) {
+      throw new Error('Unable to read sheet data. Make sure the sheet is shared with "Anyone with the link — Viewer" access.');
+    }
+
+    const rows = parseCSV(text);
+    if (!rows.length) throw new Error('The sheet appears to be empty or has no data rows.');
+
+    applySheetData(rows);
+
     syncStatus = 'success';
-
-    const now = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const nowLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     const lastSyncEl = document.getElementById('gs-last-synced');
-    if (lastSyncEl) lastSyncEl.textContent = now;
+    if (lastSyncEl) lastSyncEl.textContent = nowLabel;
 
-    if (btn) { btn.disabled = false; btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Sync Now'; }
-    if (statusRow) { statusRow.style.display = 'none'; }
+    if (btn)       { btn.disabled = false; btn.innerHTML = `${ICON_IDLE}Sync Now`; }
+    if (statusRow) statusRow.style.display = 'none';
 
-    updateSyncResult('success', `● Last sync successful · ${now}`);
-    showToast(`Sync complete — ${STORES.length} stores updated.`);
-  }, 1800);
+    updateSyncResult('success', `● Last sync successful · ${nowLabel}`);
+    updateSyncStats();
+    showToast(`Sync complete — ${STORES.length} store${STORES.length !== 1 ? 's' : ''} loaded.`);
+
+  } catch (err) {
+    syncStatus = 'failed';
+    if (btn)       { btn.disabled = false; btn.innerHTML = `${ICON_IDLE}Sync Now`; }
+    if (statusRow) statusRow.style.display = 'none';
+    updateSyncResult('failed', `● Sync failed: ${err.message}`);
+    showToast(`Sync failed: ${err.message}`);
+    console.error('[GoogleSheets sync]', err);
+  }
+}
+
+// ── Apply parsed sheet rows to STORES and re-render all dashboard views ──
+function applySheetData(rows) {
+  STORES.length = 0;
+  buildStoresFromCSV(rows).forEach(s => STORES.push(s));
+
+  // Update Settings page metadata
+  const nameEl = document.getElementById('gs-sheet-name');
+  if (nameEl) nameEl.textContent = sheetName;
+
+  const urlEl = document.getElementById('gs-sheet-url');
+  if (urlEl) urlEl.textContent = sheetUrl;
+
+  const gaCount = STORES.filter(s => s.state === 'GA').length;
+  const flCount = STORES.filter(s => s.state === 'FL').length;
+  const coverageEl = document.getElementById('gs-coverage');
+  if (coverageEl) {
+    const parts = [];
+    if (gaCount > 0) parts.push(`Georgia (${gaCount})`);
+    if (flCount > 0) parts.push(`Florida (${flCount})`);
+    coverageEl.textContent = parts.join(' · ') || `${STORES.length} stores`;
+  }
+  const storesEl = document.getElementById('gs-stores');
+  if (storesEl) storesEl.textContent = STORES.length;
+
+  // Re-render all main dashboard views via existing function
+  restoreDashboard();
+}
+
+// ── Update Sync Status card stats ──
+function updateSyncStats() {
+  const ssStores = document.getElementById('ss-val-stores');
+  const ssRows   = document.getElementById('ss-val-rows');
+  if (ssStores) { ssStores.textContent = STORES.length; ssStores.style.color = 'var(--success)'; }
+  if (ssRows)   ssRows.textContent = STORES.length;
 }
 
 // ── Update the Sync Status card result block ──
@@ -1075,17 +1188,17 @@ const PHOTO_GRADS = [
 ];
 
 function rowToStore(row, id) {
-  const inc   = parseFloat(row.median_household_income) || 0;
-  const pov   = parseFloat(row.poverty_pct) || 0;
-  const black = parseFloat(row.black_pct) || 0;
-  const hisp  = parseFloat(row.hispanic_pct) || 0;
-  const asian = parseFloat(row.asian_pct) || 0;
-  const white = parseFloat(row.white_non_hispanic_pct) || parseFloat(row.white_pct) || 0;
-  const wage  = parseFloat(row.bls_area_mean_hourly_wage_all_occupations) || 0;
-  const state = (row.state_abbr || '').trim();
-  const name  = (row.store_name || row.name || '').replace(/^BeautyMaster\s*/i, '').replace(/^Beauty Master\s*/i, '');
-  const addr  = row.address || '';
-  const rawBand = (row.income_band || '').toLowerCase();
+  const inc   = parseFloat(col(row, 'median_household_income', 'income', 'median_income', 'household_income')) || 0;
+  const pov   = parseFloat(col(row, 'poverty_pct', 'poverty_rate', 'poverty', 'pct_poverty')) || 0;
+  const black = parseFloat(col(row, 'black_pct', 'pct_black', 'black', 'black_pop_pct')) || 0;
+  const hisp  = parseFloat(col(row, 'hispanic_pct', 'pct_hispanic', 'hispanic', 'hisp')) || 0;
+  const asian = parseFloat(col(row, 'asian_pct', 'pct_asian', 'asian')) || 0;
+  const white = parseFloat(col(row, 'white_non_hispanic_pct', 'white_pct', 'white', 'pct_white')) || 0;
+  const wage  = parseFloat(col(row, 'bls_area_mean_hourly_wage_all_occupations', 'avg_wage', 'wage', 'hourly_wage', 'mean_wage')) || 0;
+  const state = (col(row, 'state_abbr', 'state', 'state_code') || '').trim().toUpperCase();
+  const name  = (col(row, 'store_name', 'name', 'store', 'location_name') || '').replace(/^BeautyMaster\s*/i, '').replace(/^Beauty Master\s*/i, '').trim();
+  const addr  = col(row, 'address', 'addr', 'store_address', 'full_address');
+  const rawBand = (col(row, 'income_band', 'band', 'income_tier') || '').toLowerCase();
 
   // Band classification
   let band = 'mid';
@@ -1148,10 +1261,10 @@ function rowToStore(row, id) {
     ? `"Elevated beauty at ${name} — K-Beauty, premium skincare, diverse essentials."`
     : `"Your neighborhood BeautyMaster — serving every community with quality beauty essentials."`;
 
-  const pop       = parseFloat(row.population_total) || 0;
-  const femalePct = parseFloat(row.female_pct) || 0;
-  const under18   = parseFloat(row.under_18_pct) || 0;
-  const twoPlus   = parseFloat(row.two_or_more_races_pct) || 0;
+  const pop       = parseFloat(col(row, 'population_total', 'population', 'pop', 'total_population')) || 0;
+  const femalePct = parseFloat(col(row, 'female_pct', 'pct_female', 'female', 'female_population_pct')) || 0;
+  const under18   = parseFloat(col(row, 'under_18_pct', 'pct_under18', 'under18', 'under_18_population_pct')) || 0;
+  const twoPlus   = parseFloat(col(row, 'two_or_more_races_pct', 'two_plus_races_pct', 'twoPlus', 'two_or_more_pct')) || 0;
   if (twoPlus > 3) raceBar.push({ w: twoPlus, c: '#CC79A7' });
   raceBar.sort((a, b) => b.w - a.w);
 
