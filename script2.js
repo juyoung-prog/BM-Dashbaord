@@ -763,13 +763,16 @@ requestAnimationFrame(() => {
 // ══════════════════════════════════════════
 // SETTINGS PAGE
 // ══════════════════════════════════════════
-let datasetExists = true;
+let sheetConnected = true;
+let sheetUrl = '';
+let sheetName = 'BM Market Data';
+let syncStatus = 'idle'; // 'idle' | 'syncing' | 'success' | 'failed'
 
 // ── Clear the entire dashboard to an empty state ──
 function clearDashboard() {
   // 1. Table → empty message
   const body = document.getElementById('tbl-body');
-  if (body) body.innerHTML = '<div class="no-results" style="padding:var(--s10) var(--s6);text-align:center;color:var(--text-tertiary);">No dataset loaded. Upload a CSV in Settings to populate this view.</div>';
+  if (body) body.innerHTML = '<div class="no-results" style="padding:var(--s10) var(--s6);text-align:center;color:var(--text-tertiary);">No sheet connected. Connect a Google Sheet in Settings to populate this view.</div>';
 
   // 2. KPI cards → zero out values, remove bars
   const kpiDefs = {
@@ -804,7 +807,7 @@ function clearDashboard() {
   const rpPhotoAddr = document.getElementById('rp-photo-addr');
   if (rpName)  rpName.textContent  = '—';
   if (rpSub)   rpSub.textContent   = 'No store selected';
-  if (rpMsg)   rpMsg.textContent   = 'Upload a dataset to view store intelligence.';
+  if (rpMsg)   rpMsg.textContent   = 'Connect a Google Sheet to view store intelligence.';
   if (rpStats) rpStats.innerHTML = ['Median Income','Poverty Rate','Black Pop.','Avg Wage/hr','Population','Female','Under 18','Two+ Races'].map(l => `<div class="rp-stat"><div class="rp-stat-label">${l}</div><div class="rp-stat-value">—</div></div>`).join('');
   if (rpMerch) rpMerch.innerHTML   = '<div class="merch-item" style="color:var(--text-tertiary)">No data available.</div>';
   if (rpAct1)  rpAct1.textContent  = 'No actions available';
@@ -822,7 +825,7 @@ function clearDashboard() {
 
   // 5. Sidebar status dot → grey / "No data"
   const sbStatus = document.querySelector('.sb-status');
-  if (sbStatus) sbStatus.innerHTML = '<div class="live-dot" style="background:var(--text-tertiary);animation:none"></div><span>No dataset loaded</span>';
+  if (sbStatus) sbStatus.innerHTML = '<div class="live-dot" style="background:var(--text-tertiary);animation:none"></div><span>No sheet connected</span>';
 
   // 6. Audience Segments → empty state
   const audStats = document.getElementById('audience-stats-grid');
@@ -831,13 +834,13 @@ function clearDashboard() {
     <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--text-tertiary)">—</div><div class="stat-sub">No data</div></div>
     <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-tertiary)">—</div><div class="stat-sub">No data</div></div>`;
   const audList = document.getElementById('audience-seg-list');
-  if (audList) audList.innerHTML = `<div style="padding:var(--s8) var(--s4);text-align:center;color:var(--text-tertiary);font-size:13px;">No dataset loaded. Upload a CSV in Settings to populate segment data.</div>`;
+  if (audList) audList.innerHTML = `<div style="padding:var(--s8) var(--s4);text-align:center;color:var(--text-tertiary);font-size:13px;">No sheet connected. Connect a Google Sheet in Settings to populate segment data.</div>`;
 
   // 7. Store Locator → empty state
   const locMap = document.getElementById('locator-map-ph');
   if (locMap) locMap.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>No dataset — map unavailable`;
   const locList = document.getElementById('locator-list');
-  if (locList) locList.innerHTML = `<div style="padding:var(--s8) var(--s4);text-align:center;color:var(--text-tertiary);font-size:13px;">No dataset loaded. Upload a CSV in Settings to populate store locations.</div>`;
+  if (locList) locList.innerHTML = `<div style="padding:var(--s8) var(--s4);text-align:center;color:var(--text-tertiary);font-size:13px;">No sheet connected. Connect a Google Sheet in Settings to populate store locations.</div>`;
 }
 
 // ── Restore dashboard from current STORES data ──
@@ -857,7 +860,7 @@ function restoreDashboard() {
     if (barEl && d.barW) { barEl.style.width = d.barW; barEl.style.background = d.barC; }
   });
   const sbStatus = document.querySelector('.sb-status');
-  if (sbStatus) sbStatus.innerHTML = '<div class="live-dot"></div><span>Live data &nbsp;·&nbsp; <strong>Census 2024</strong></span>';
+  if (sbStatus) sbStatus.innerHTML = '<div class="live-dot"></div><span>Live data &nbsp;·&nbsp; <strong>Google Sheets</strong></span>';
   const blackStores = STORES.filter(s => s.black >= 30);
   const hispStores  = STORES.filter(s => s.hisp >= 20);
   const asianStores = STORES.filter(s => s.asian >= 15);
@@ -885,64 +888,172 @@ function restoreDashboard() {
   if (locList) locList.innerHTML = STORES.map(s=>`<div class="dist-item"><div><div class="dist-name">${esc(s.name)}</div><div class="dist-sub">${esc(s.addr)}</div></div><span class="badge ${s.state==='GA'?'badge-green':'badge-blue'}">${esc(s.state)}</span></div>`).join('');
 }
 
-function syncDatasetState() {
-  document.getElementById('ds-meta-grid').style.display   = datasetExists ? '' : 'none';
-  document.getElementById('ds-empty-state').style.display = datasetExists ? 'none' : '';
-  document.getElementById('actions-has-data').style.display = datasetExists ? '' : 'none';
-  document.getElementById('actions-no-data').style.display  = datasetExists ? 'none' : '';
-  if (!datasetExists) {
-    document.getElementById('fh-has-data').style.display = 'none';
-    document.getElementById('fh-no-data').style.display  = '';
-  }
-  const badge = document.getElementById('ds-status-badge');
+// ── Sync all Settings UI to current sheet connection state ──
+function syncSheetState() {
+  const connected = sheetConnected;
+
+  // Connection card
+  const connectedState = document.getElementById('gs-connected-state');
+  const emptyState     = document.getElementById('gs-empty-state');
+  if (connectedState) connectedState.style.display = connected ? '' : 'none';
+  if (emptyState)     emptyState.style.display     = connected ? 'none' : '';
+
+  // Status badge
+  const badge = document.getElementById('gs-status-badge');
   if (badge) {
-    badge.textContent = datasetExists ? '● Active' : '○ No Data';
-    badge.className = 'badge ' + (datasetExists ? 'badge-green' : 'badge-red');
+    badge.textContent = connected ? '● Connected' : '○ Not Connected';
+    badge.className   = 'badge ' + (connected ? 'badge-green' : 'badge-red');
   }
+
+  // Sync Controls
+  const syncHas = document.getElementById('sync-has-connection');
+  const syncNo  = document.getElementById('sync-no-connection');
+  if (syncHas) syncHas.style.display = connected ? '' : 'none';
+  if (syncNo)  syncNo.style.display  = connected ? 'none' : '';
+
+  // Sync Status card
+  const ssHas = document.getElementById('ss-has-data');
+  const ssNo  = document.getElementById('ss-no-data');
+  if (ssHas) ssHas.style.display = connected ? '' : 'none';
+  if (ssNo)  ssNo.style.display  = connected ? 'none' : '';
 }
 
-function openRemoveModal() {
-  document.getElementById('remove-modal').classList.add('open');
+// ── Validate that a string looks like a Google Sheets URL ──
+function validateSheetUrl(url) {
+  if (!url || !url.trim()) return 'Please enter a Google Sheets URL.';
+  try { new URL(url); } catch (_) { return 'This doesn\'t look like a valid URL. Check the format and try again.'; }
+  if (!url.includes('docs.google.com/spreadsheets')) {
+    return 'This doesn\'t look like a valid Google Sheets URL. It should start with docs.google.com/spreadsheets.';
+  }
+  return null;
 }
-function closeRemoveModal(e) {
-  if (e && e.target !== document.getElementById('remove-modal')) return;
-  document.getElementById('remove-modal').classList.remove('open');
+
+// ── Connect from empty state input ──
+function connectSheet() {
+  const input = document.getElementById('gs-connect-url-input');
+  const url   = input ? input.value.trim() : '';
+  const err   = validateSheetUrl(url);
+  if (err) { showUrlError('gs-connect-url-error', err); return; }
+
+  sheetUrl       = url;
+  sheetConnected = true;
+  syncStatus     = 'success';
+
+  // Update meta display
+  const urlEl = document.getElementById('gs-sheet-url');
+  if (urlEl) urlEl.textContent = sheetUrl;
+
+  syncSheetState();
+  updateSyncResult('success', 'Last sync successful · just now');
+  showToast('Sheet connected. Dashboard synced successfully.');
 }
-function confirmRemoveDataset() {
-  datasetExists = false;
-  localStorage.removeItem('bm_csvRaw');
-  localStorage.removeItem('bm_csvFilename');
-  localStorage.removeItem('bm_csvDate');
-  document.getElementById('remove-modal').classList.remove('open');
-  syncDatasetState();
+
+// ── Open / cancel Change URL inline form ──
+function openChangeUrl() {
+  document.getElementById('gs-change-url-form').style.display    = '';
+  document.getElementById('gs-change-url-trigger').style.display = 'none';
+  const input = document.getElementById('gs-new-url-input');
+  if (input) { input.value = ''; input.focus(); }
+}
+function cancelChangeUrl() {
+  document.getElementById('gs-change-url-form').style.display    = 'none';
+  document.getElementById('gs-change-url-trigger').style.display = '';
+  clearUrlError('gs-new-url-error');
+}
+
+// ── Apply new URL from Change URL form ──
+function confirmChangeUrl() {
+  const input = document.getElementById('gs-new-url-input');
+  const url   = input ? input.value.trim() : '';
+  const err   = validateSheetUrl(url);
+  if (err) { showUrlError('gs-new-url-error', err); return; }
+
+  sheetUrl = url;
+  const urlEl = document.getElementById('gs-sheet-url');
+  if (urlEl) urlEl.textContent = sheetUrl;
+
+  cancelChangeUrl();
+  syncNow();
+}
+
+// ── URL error helpers ──
+function showUrlError(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = '';
+}
+function clearUrlError(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+// ── Disconnect modal ──
+function openDisconnectModal() {
+  const nameEl = document.getElementById('disconnect-sheet-name');
+  if (nameEl) nameEl.textContent = sheetName;
+  document.getElementById('disconnect-modal').classList.add('open');
+}
+function closeDisconnectModal(e) {
+  if (e && e.target !== document.getElementById('disconnect-modal')) return;
+  document.getElementById('disconnect-modal').classList.remove('open');
+}
+function confirmDisconnectSheet() {
+  sheetConnected = false;
+  sheetUrl       = '';
+  syncStatus     = 'idle';
+  document.getElementById('disconnect-modal').classList.remove('open');
+  syncSheetState();
   clearDashboard();
-  showToast('Dataset removed. Dashboard cleared until a new CSV is uploaded.');
+  showToast('Sheet disconnected. Dashboard will be empty until a new sheet is connected.');
 }
 
-// ══════════════════════════════════════════
-// CSV PARSER — converts BM_Market_Data.csv rows into STORES objects
-// ══════════════════════════════════════════
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    if (!lines[i].trim()) continue;
-    // Handle quoted fields with commas inside
-    const cols = [];
-    let cur = '', inQ = false;
-    for (let c = 0; c < lines[i].length; c++) {
-      const ch = lines[i][c];
-      if (ch === '"') { inQ = !inQ; }
-      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else { cur += ch; }
-    }
-    cols.push(cur.trim());
-    const row = {};
-    headers.forEach((h, idx) => { row[h] = cols[idx] !== undefined ? cols[idx].replace(/^"|"$/g, '') : ''; });
-    rows.push(row);
+// ── Sync Now — simulates pull with loading state ──
+function syncNow() {
+  if (syncStatus === 'syncing') return;
+  syncStatus = 'syncing';
+
+  const btn = document.getElementById('sync-now-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Syncing...'; }
+
+  const statusRow = document.getElementById('sync-status-row');
+  if (statusRow) { statusRow.style.display = ''; statusRow.textContent = '● Syncing data from Google Sheets…'; statusRow.style.color = 'var(--text-secondary)'; }
+
+  updateSyncResult('syncing', '● Syncing…');
+
+  setTimeout(() => {
+    syncStatus = 'success';
+
+    const now = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const lastSyncEl = document.getElementById('gs-last-synced');
+    if (lastSyncEl) lastSyncEl.textContent = now;
+
+    if (btn) { btn.disabled = false; btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Sync Now'; }
+    if (statusRow) { statusRow.style.display = 'none'; }
+
+    updateSyncResult('success', `● Last sync successful · ${now}`);
+    showToast(`Sync complete — ${STORES.length} stores updated.`);
+  }, 1800);
+}
+
+// ── Update the Sync Status card result block ──
+function updateSyncResult(status, msg) {
+  const el = document.getElementById('ss-sync-result');
+  if (!el) return;
+  if (status === 'success') {
+    el.style.background = 'rgba(16,185,129,.06)';
+    el.style.borderColor = 'rgba(16,185,129,.2)';
+    el.style.color = 'var(--success)';
+  } else if (status === 'failed') {
+    el.style.background = 'rgba(255,59,48,.05)';
+    el.style.borderColor = 'rgba(255,59,48,.2)';
+    el.style.color = 'var(--error)';
+  } else {
+    el.style.background = 'var(--bg-subtle)';
+    el.style.borderColor = 'var(--border)';
+    el.style.color = 'var(--text-secondary)';
   }
-  return rows;
+  el.textContent = msg;
 }
 
 const PHOTO_GRADS = [
@@ -1099,265 +1210,11 @@ function computeKPIsFromStores(stores) {
   };
 }
 
-function applyCSVText(csvText, filename, mode) {
-  try {
-    const rows = parseCSV(csvText);
-    if (!rows.length) { showToast('CSV appears empty. Please check the file.'); return; }
-
-    // Persist CSV for reload survival
-    try {
-      localStorage.setItem('bm_csvRaw', csvText);
-      localStorage.setItem('bm_csvFilename', filename || 'dataset.csv');
-      localStorage.setItem('bm_csvDate', new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
-    } catch(e) { /* quota exceeded — skip */ }
-
-    // Replace global STORES
-    STORES.length = 0;
-    buildStoresFromCSV(rows).forEach(s => {
-      s.raceBar.sort((a, b) => b.w - a.w);
-      STORES.push(s);
-    });
-
-    // Update ALL_KPI_DEFS
-    const kpis = computeKPIsFromStores(STORES);
-    Object.keys(kpis).forEach(k => { if (ALL_KPI_DEFS[k]) Object.assign(ALL_KPI_DEFS[k], { value: kpis[k].val, meta: kpis[k].meta }); });
-
-    datasetExists = true;
-    document.getElementById('ds-filename').textContent = filename || 'dataset.csv';
-    document.getElementById('ds-updated').textContent = 'March 2025';
-      syncDatasetState();
-
-      // Re-render everything from new STORES
-      activeFilter = 'all'; sortField = null; sortAsc = true; colFilters = { name: '', band: '', demo: '' };
-      renderTable();
-      selectedId = 0;
-      selectStore(0);
-
-      // KPI cards
-      Object.entries(kpis).forEach(([id, d]) => {
-        const card = document.getElementById('kpi-' + id);
-        if (!card) return;
-        const valEl = card.querySelector('.kpi-value');
-        const metaEl = card.querySelector('.kpi-meta');
-        const barEl  = card.querySelector('.kpi-bar-fill');
-        if (valEl)  valEl.textContent = d.val;
-        if (metaEl) metaEl.innerHTML = `<span class="kpi-trend trend-neu" style="color:${d.color}">${d.meta}</span>`;
-        if (barEl && d.barW) { barEl.style.width = d.barW; barEl.style.background = d.barC; }
-      });
-
-      // Sidebar status
-      const sbStatus = document.querySelector('.sb-status');
-      if (sbStatus) sbStatus.innerHTML = '<div class="live-dot"></div><span>Live data &nbsp;·&nbsp; <strong>CSV Upload</strong></span>';
-
-      // Audience segments
-      const blackStores = STORES.filter(s => s.black >= 30);
-      const hispStores  = STORES.filter(s => s.hisp >= 20);
-      const asianStores = STORES.filter(s => s.asian >= 15);
-      const audStats = document.getElementById('audience-stats-grid');
-      if (audStats) audStats.innerHTML = `
-        <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:var(--text-primary)">${blackStores.length}</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
-        <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--text-primary)">${hispStores.length}</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
-        <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s => `${esc(s.name)} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
-
-      const audList = document.getElementById('audience-seg-list');
-      if (audList) {
-        const segments = [
-          { name: 'Black Hair Care Community', color: 'var(--border-strong)', stores: STORES.filter(s => s.black >= 40) },
-          { name: 'Hispanic / Bilingual Market', color: 'var(--border-strong)', stores: STORES.filter(s => s.hisp >= 20) },
-          { name: 'Premium / K-Beauty Shopper', color: 'var(--border-strong)', stores: STORES.filter(s => s.asian >= 15 || s.income >= 85000) },
-          { name: 'Value / Budget-Conscious', color: 'var(--border-strong)', stores: STORES.filter(s => s.income < 65000) },
-          { name: 'General / Mixed Market', color: 'var(--border-strong)', stores: STORES.filter(s => s.black < 40 && s.hisp < 20 && s.asian < 15 && s.income >= 65000) },
-        ].filter(seg => seg.stores.length > 0);
-        audList.innerHTML = segments.map(seg =>
-          `<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s => esc(s.name)).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length > 1 ? 's' : ''}</div></div>`
-        ).join('');
-      }
-
-      // Store locator
-      const locMap = document.getElementById('locator-map-ph');
-      const gaC = STORES.filter(s => s.state === 'GA').length;
-      const flC = STORES.filter(s => s.state === 'FL').length;
-      if (locMap) locMap.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Map View — GA (${gaC}) · FL (${flC}) Locations`;
-      const locList = document.getElementById('locator-list');
-      if (locList) locList.innerHTML = STORES.map(s =>
-        `<div class="dist-item"><div><div class="dist-name">${esc(s.name)}</div><div class="dist-sub">${esc(s.addr)}</div></div><span class="badge ${s.state === 'GA' ? 'badge-green' : 'badge-blue'}">${esc(s.state)}</span></div>`
-      ).join('');
-
-      // Run field mapping & data health check
-      runDataHealth(Object.keys(rows[0]), rows);
-
-      showToast(mode === 'replace' ? `Dataset replaced — ${STORES.length} stores loaded.` : `Dataset uploaded — ${STORES.length} stores loaded.`);
-  } catch(err) {
-    showToast('Error parsing CSV. Please check the file format.');
-    console.error(err);
-  }
-}
-
-function applyCSVData(file, mode) {
-  const reader = new FileReader();
-  reader.onload = function(e) { applyCSVText(e.target.result, file.name, mode); };
-  reader.readAsText(file);
-}
-
-function handleCSVUpload(event, mode) {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (!file.name.endsWith('.csv')) { showToast('Please upload a .csv file only.'); return; }
-  if (file.size > 10 * 1024 * 1024) { showToast('File too large. Please upload a CSV under 10 MB.'); return; }
-  applyCSVData(file, mode);
-  event.target.value = '';
-}
-
-// ══════════════════════════════════════════
-// FIELD MAPPING & DATA HEALTH
-// ══════════════════════════════════════════
-
-// Required fields + their aliases from BM_Market_Data.csv
-const FIELD_SCHEMA = [
-  { key: 'store_name',  aliases: ['store_name','name','store'],                       required: true,  type: 'string' },
-  { key: 'address',     aliases: ['address','addr','store_address'],                   required: true,  type: 'string' },
-  { key: 'state_abbr',  aliases: ['state_abbr','state','state_code'],                  required: true,  type: 'string' },
-  { key: 'median_household_income', aliases: ['median_household_income','median_income','income'], required: true, type: 'number', min: 0, max: 300000 },
-  { key: 'black_pct',   aliases: ['black_pct','pct_black','black'],                    required: false, type: 'percent' },
-  { key: 'hispanic_pct',aliases: ['hispanic_pct','pct_hispanic','hispanic'],           required: false, type: 'percent' },
-  { key: 'asian_pct',   aliases: ['asian_pct','pct_asian','asian'],                    required: false, type: 'percent' },
-  { key: 'white_pct',   aliases: ['white_pct','pct_white','white_non_hispanic_pct'],   required: false, type: 'percent' },
-  { key: 'poverty_pct', aliases: ['poverty_pct','poverty_rate','pct_poverty'],         required: false, type: 'percent' },
-  { key: 'bls_area_mean_hourly_wage_all_occupations', aliases: ['bls_area_mean_hourly_wage_all_occupations','avg_wage','wage','hourly_wage'], required: false, type: 'number', min: 0, max: 200 },
-];
-
-const SVG_CHECK = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-const SVG_WARN  = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-const SVG_MISS  = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-const SVG_WARN_SM = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>`;
-
-function runDataHealth(headers, rows) {
-  // Find which CSV column maps to each schema field
-  const mappings = FIELD_SCHEMA.map(field => {
-    const matched = field.aliases.find(a => headers.includes(a)) || null;
-    return { ...field, csvCol: matched };
-  });
-
-  // Only show fields that are required OR found in CSV
-  const relevant = mappings.filter(f => f.required || f.csvCol);
-
-  // Per-field validation
-  const fieldResults = relevant.map(f => {
-    if (!f.csvCol) {
-      return { ...f, status: 'missing', invalidCount: 0, invalidMsg: '' };
-    }
-    let invalidCount = 0;
-    const msgs = [];
-    if (f.type === 'percent') {
-      rows.forEach(r => {
-        const v = parseFloat(r[f.csvCol]);
-        if (r[f.csvCol] !== '' && (isNaN(v) || v < 0 || v > 100)) invalidCount++;
-      });
-      if (invalidCount) msgs.push(`${invalidCount} rows out of range (0–100)`);
-    } else if (f.type === 'number') {
-      rows.forEach(r => {
-        const v = parseFloat(r[f.csvCol]);
-        if (r[f.csvCol] !== '' && isNaN(v)) invalidCount++;
-        else if (f.min !== undefined && v < f.min) invalidCount++;
-        else if (f.max !== undefined && v > f.max) invalidCount++;
-      });
-      if (invalidCount) msgs.push(`${invalidCount} rows with invalid numeric value`);
-    } else if (f.type === 'string') {
-      rows.forEach(r => { if (!r[f.csvCol] || r[f.csvCol].trim() === '') invalidCount++; });
-      if (invalidCount) msgs.push(`${invalidCount} rows with empty value`);
-    }
-    const status = invalidCount > 0 ? 'warn' : 'ok';
-    return { ...f, status, invalidCount, invalidMsg: msgs.join(', ') };
-  });
-
-  // Also list extra CSV columns not in schema
-  const knownAliases = FIELD_SCHEMA.flatMap(f => f.aliases);
-  const extraCols = headers.filter(h => !knownAliases.includes(h));
-
-  const warnings = fieldResults.filter(f => f.status === 'warn' || f.status === 'missing');
-  const mapped   = fieldResults.filter(f => f.status !== 'missing').length;
-
-  // Render summary
-  document.getElementById('fh-val-mapped').textContent = mapped;
-  document.getElementById('fh-val-mapped').style.color = 'var(--success)';
-  const warnEl = document.getElementById('fh-val-warnings');
-  warnEl.textContent = warnings.length;
-  warnEl.style.color = warnings.length > 0 ? 'var(--error)' : 'var(--success)';
-  document.getElementById('fh-val-rows').textContent = rows.length;
-
-  // Render field list
-  const list = document.getElementById('fh-field-list');
-  list.innerHTML = fieldResults.map(f => {
-    let icon, cls, tag = '';
-    if (f.status === 'missing') {
-      icon = SVG_MISS; cls = 'fh-miss';
-      tag = `<span class="fh-ftag ${f.required ? 'required' : 'warn'}">${f.required ? 'Required — Missing' : 'Missing'}</span>`;
-    } else if (f.status === 'warn') {
-      icon = SVG_WARN; cls = 'fh-warn';
-      tag = `<span class="fh-ftag warn">${f.invalidMsg}</span>`;
-    } else {
-      icon = SVG_CHECK; cls = 'fh-ok';
-      if (f.required) tag = `<span class="fh-ftag required">Required</span>`;
-    }
-    return `<div class="fh-field ${cls}">${icon}<span class="fh-fname">${esc(f.csvCol || f.key)}</span>${tag}</div>`;
-  }).join('') + (extraCols.length
-    ? `<div class="fh-field fh-extra" style="opacity:.5">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;flex-shrink:0;color:var(--text-tertiary)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        <span class="fh-fname" style="color:var(--text-tertiary)">+ ${extraCols.length} extra column${extraCols.length > 1 ? 's' : ''} (unused)</span>
-      </div>`
-    : '');
-
-  // Render warning messages
-  const footer = document.getElementById('fh-footer');
-  const warnFields = fieldResults.filter(f => f.status === 'warn' || f.status === 'missing');
-  if (warnFields.length === 0) {
-    footer.innerHTML = `<div class="fh-warn-msg" style="background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.2);color:var(--success)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
-      All fields validated successfully.
-    </div>`;
-  } else {
-    footer.innerHTML = warnFields.map(f => {
-      if (f.status === 'missing') {
-        return `<div class="fh-warn-msg">${SVG_WARN_SM} Column <strong>${f.key}</strong> not found. ${f.required ? 'This column is required in the CSV.' : 'This is an optional column but some features may be limited.'}</div>`;
-      }
-      return `<div class="fh-warn-msg">${SVG_WARN_SM} <strong>${esc(f.csvCol)}</strong>: ${f.invalidMsg}. Affected rows will be excluded from calculations.</div>`;
-    }).join('');
-  }
-
-  // Show the panel
-  document.getElementById('fh-has-data').style.display = '';
-  document.getElementById('fh-no-data').style.display = 'none';
-}
-
-function runValidation() {
-  showToast('Validation complete.');
-}
-function refreshData() {
-  showToast('Data refreshed. All dashboard calculations updated.');
-}
-
 function setSeg(groupId, btn) {
   const group = document.getElementById(groupId);
   if (!group) return;
   group.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-}
-
-function uploadZoneDragOver(e) {
-  e.preventDefault();
-  document.getElementById('upload-zone').classList.add('dragover');
-}
-function uploadZoneDragLeave() {
-  document.getElementById('upload-zone').classList.remove('dragover');
-}
-function uploadZoneDrop(e) {
-  e.preventDefault();
-  document.getElementById('upload-zone').classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (!file) return;
-  if (!file.name.endsWith('.csv')) { showToast('Please drop a .csv file only.'); return; }
-  if (file.size > 10 * 1024 * 1024) { showToast('File too large. Please upload a CSV under 10 MB.'); return; }
-  applyCSVData(file, 'upload');
 }
 
 let toastTimer;
@@ -1374,7 +1231,7 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-syncDatasetState();
+syncSheetState();
 
 
 // ══════════════════════════════════════════

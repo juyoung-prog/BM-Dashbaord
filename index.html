@@ -297,17 +297,17 @@
     <!-- ══ PAGE: SETTINGS ══ -->
     <div id="page-settings" class="page">
 
-      <!-- Remove Dataset Modal -->
-      <div class="modal-backdrop" id="remove-modal" onclick="closeRemoveModal(event)">
+      <!-- Disconnect Sheet Modal -->
+      <div class="modal-backdrop" id="disconnect-modal" onclick="closeDisconnectModal(event)">
         <div class="modal-box">
           <div class="modal-icon-wrap">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--error)"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
-          <div class="modal-title">Remove Dataset?</div>
-          <div class="modal-body">This will permanently remove <strong>bm_updated.csv</strong> and all associated data from the dashboard. All views will revert to an empty state until a new CSV is uploaded.<br><br>This action cannot be undone.</div>
+          <div class="modal-title">Disconnect Sheet?</div>
+          <div class="modal-body">Disconnect "<strong id="disconnect-sheet-name">BM Market Data</strong>"? The dashboard will stop updating until a new sheet is connected.<br><br>This action cannot be undone.</div>
           <div class="modal-actions">
-            <button class="btn btn-ghost" onclick="closeRemoveModal()">Cancel</button>
-            <button class="btn btn-danger" onclick="confirmRemoveDataset()">Remove Dataset</button>
+            <button class="btn btn-ghost" onclick="closeDisconnectModal()">Cancel</button>
+            <button class="btn btn-danger" onclick="confirmDisconnectSheet()">Disconnect</button>
           </div>
         </div>
       </div>
@@ -316,7 +316,7 @@
         <div class="ph-title-group">
           <div class="ph-eyebrow">System</div>
           <div class="ph-title">Settings</div>
-          <div class="ph-subtitle">Manage your dataset, dashboard defaults, and internal notes</div>
+          <div class="ph-subtitle">Manage your Google Sheets connection and sync settings</div>
         </div>
       </div>
 
@@ -325,160 +325,179 @@
         <!-- ── LEFT COLUMN ── -->
         <div class="settings-col-main">
 
-          <!-- 1. DATA SOURCE -->
+          <!-- 1. GOOGLE SHEETS CONNECTION -->
           <div class="card settings-card">
             <div class="card-header">
-              <div class="card-title">Data Source</div>
-              <span class="badge badge-green" id="ds-status-badge">● Active</span>
+              <div class="card-title">Google Sheets Connection</div>
+              <span class="badge badge-green" id="gs-status-badge">● Connected</span>
             </div>
-            <div class="settings-meta-grid" id="ds-meta-grid">
-              <div class="smeta-row">
-                <div class="smeta-label">File Name</div>
-                <div class="smeta-val mono" id="ds-filename">BM_Market_Data.csv</div>
+
+            <!-- Connected state -->
+            <div id="gs-connected-state">
+              <div class="settings-meta-grid">
+                <div class="smeta-row">
+                  <div class="smeta-label">Sheet Name</div>
+                  <div class="smeta-val" id="gs-sheet-name">BM Market Data</div>
+                </div>
+                <div class="smeta-row">
+                  <div class="smeta-label">URL</div>
+                  <div class="smeta-val mono" id="gs-sheet-url" style="font-size:11.5px;word-break:break-all;color:var(--text-secondary)">—</div>
+                </div>
+                <div class="smeta-row">
+                  <div class="smeta-label">Stores</div>
+                  <div class="smeta-val" id="gs-stores">15</div>
+                </div>
+                <div class="smeta-row">
+                  <div class="smeta-label">Last Synced</div>
+                  <div class="smeta-val" id="gs-last-synced">March 2025</div>
+                </div>
+                <div class="smeta-row">
+                  <div class="smeta-label">Coverage</div>
+                  <div class="smeta-val" id="gs-coverage">Georgia (10) · Florida (5)</div>
+                </div>
+                <div class="smeta-row" style="border:none">
+                  <div class="smeta-label">Benchmark Source</div>
+                  <div class="smeta-val" id="gs-source">BLS May 2024 · Census 2024</div>
+                </div>
+                <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--text-tertiary);line-height:1.5;">
+                  Current version uses the latest published benchmark data. Next BLS benchmark release is scheduled for May 19, 2026.
+                </div>
               </div>
-              <div class="smeta-row">
-                <div class="smeta-label">Stores</div>
-                <div class="smeta-val" id="ds-stores">15</div>
+
+              <!-- Change URL inline form (hidden by default) -->
+              <div id="gs-change-url-form" style="display:none;padding:var(--s4) var(--s5);border-top:1px solid var(--border-subtle);">
+                <div class="form-group" style="margin-bottom:var(--s3)">
+                  <label class="form-label">New Google Sheets URL</label>
+                  <div class="form-helper">Changing the source URL will trigger a full re-sync and overwrite current data.</div>
+                  <input type="url" class="form-input" id="gs-new-url-input" placeholder="https://docs.google.com/spreadsheets/d/…" oninput="clearUrlError('gs-new-url-error')">
+                  <div id="gs-new-url-error" class="gs-url-error" style="display:none;"></div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-primary" onclick="confirmChangeUrl()" style="flex:1;">Connect New Sheet</button>
+                  <button class="btn btn-ghost" onclick="cancelChangeUrl()">Cancel</button>
+                </div>
               </div>
-              <div class="smeta-row">
-                <div class="smeta-label">Last Updated</div>
-                <div class="smeta-val" id="ds-updated">March 2025</div>
-              </div>
-              <div class="smeta-row">
-                <div class="smeta-label">Coverage</div>
-                <div class="smeta-val" id="ds-coverage">Georgia (10) · Florida (5)</div>
-              </div>
-              <div class="smeta-row" style="border:none">
-                <div class="smeta-label">Source</div>
-                <div class="smeta-val" id="ds-source">BLS May 2024 · Census 2024</div>
-              </div>
-              <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--text-tertiary);line-height:1.5;">
-                Current version uses the latest published benchmark data. Next BLS benchmark release is scheduled for May 19, 2026. Census benchmark sources will be refreshed after the next ACS annual releases become available in 2026.
+
+              <!-- Change URL trigger -->
+              <div id="gs-change-url-trigger" style="padding:var(--s3) var(--s5) var(--s4);border-top:1px solid var(--border-subtle);">
+                <button class="btn btn-ghost" onclick="openChangeUrl()" data-permission="admin" style="font-size:13px;">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Change URL
+                </button>
               </div>
             </div>
-            <!-- Empty state (hidden by default) -->
-            <div class="ds-empty-state" id="ds-empty-state" style="display:none;">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-              <div class="ds-empty-title">No dataset loaded</div>
-              <div class="ds-empty-sub">Upload a CSV file to populate the dashboard. The file must include store name, address, state, and demographic columns.</div>
+
+            <!-- Not connected / empty state -->
+            <div id="gs-empty-state" style="display:none;">
+              <div class="ds-empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                <div class="ds-empty-title">No sheet connected</div>
+                <div class="ds-empty-sub">Paste a Google Sheets URL below to connect your data source. The sheet must be shared with at least view access.</div>
+              </div>
+              <div style="padding:0 var(--s5) var(--s5);">
+                <div class="form-group" style="margin-bottom:var(--s3)">
+                  <label class="form-label">Google Sheets URL</label>
+                  <div class="form-helper">Paste the full URL of your Google Sheet.</div>
+                  <input type="url" class="form-input" id="gs-connect-url-input" placeholder="https://docs.google.com/spreadsheets/d/…" oninput="clearUrlError('gs-connect-url-error')">
+                  <div id="gs-connect-url-error" class="gs-url-error" style="display:none;"></div>
+                </div>
+                <button class="btn btn-primary" onclick="connectSheet()" data-permission="admin" style="width:100%;">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                  Connect Sheet
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- 2. DATASET ACTIONS -->
+          <!-- 2. SYNC CONTROLS -->
           <div class="card settings-card">
             <div class="card-header">
-              <div class="card-title">Dataset Actions</div>
+              <div class="card-title">Sync Controls</div>
             </div>
             <div class="settings-actions-body">
 
-              <!-- When dataset EXISTS -->
-              <div id="actions-has-data">
+              <!-- When connected -->
+              <div id="sync-has-connection">
                 <div class="action-row">
                   <div class="action-info">
-                    <div class="action-label">Replace CSV</div>
-                    <div class="action-desc">Upload a new CSV file to replace the current dataset. Existing data will be overwritten.</div>
+                    <div class="action-label">Sync Now</div>
+                    <div class="action-desc">Pull the latest data from the connected Google Sheet and refresh all dashboard views.</div>
                   </div>
-                  <label class="btn btn-primary action-btn" style="cursor:pointer;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
-                    Replace CSV
-                    <input type="file" accept=".csv" style="display:none" onchange="handleCSVUpload(event,'replace')">
-                  </label>
-                </div>
-                <div class="action-divider"></div>
-                <div class="action-row">
-                  <div class="action-info">
-                    <div class="action-label">Validate Data</div>
-                    <div class="action-desc">Run a field-level check to identify missing columns, invalid values, or row errors.</div>
-                  </div>
-                  <button class="btn btn-ghost action-btn" onclick="runValidation()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-                    Validate
-                  </button>
-                </div>
-                <div class="action-divider"></div>
-                <div class="action-row">
-                  <div class="action-info">
-                    <div class="action-label">Refresh Data</div>
-                    <div class="action-desc">Re-parse the current CSV and refresh all dashboard calculations without re-uploading.</div>
-                  </div>
-                  <button class="btn btn-ghost action-btn" onclick="refreshData()">
+                  <button class="btn btn-ghost action-btn" id="sync-now-btn" onclick="syncNow()">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-                    Refresh
+                    Sync Now
                   </button>
                 </div>
+                <div id="sync-status-row" style="display:none;padding:2px var(--s5) 10px;font-size:12px;color:var(--text-secondary);"></div>
                 <div class="action-divider"></div>
                 <div class="action-row action-row-danger">
                   <div class="action-info">
-                    <div class="action-label" style="color:var(--error)">Remove Dataset</div>
-                    <div class="action-desc">Permanently delete the current dataset. Dashboard will be empty until a new file is uploaded.</div>
+                    <div class="action-label" style="color:var(--error)">Disconnect Sheet</div>
+                    <div class="action-desc">Remove the current sheet connection. The dashboard will stop updating until a new sheet is connected.</div>
                   </div>
-                  <button class="btn btn-danger-ghost action-btn" onclick="openRemoveModal()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-                    Remove
+                  <button class="btn btn-danger-ghost action-btn" onclick="openDisconnectModal()" data-permission="admin">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                    Disconnect
                   </button>
                 </div>
               </div>
 
-              <!-- When NO dataset (hidden by default) -->
-              <div id="actions-no-data" style="display:none;">
-                <div class="upload-zone" id="upload-zone"
-                  ondragover="uploadZoneDragOver(event)"
-                  ondragleave="uploadZoneDragLeave(event)"
-                  ondrop="uploadZoneDrop(event)">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
-                  <div class="upload-zone-title">Upload CSV</div>
-                  <div class="upload-zone-sub">Drag & drop your CSV file here, or click to browse</div>
-                  <label class="btn btn-primary" style="cursor:pointer;margin-top:var(--s4)">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    Choose File
-                    <input type="file" accept=".csv" style="display:none" onchange="handleCSVUpload(event,'upload')">
-                  </label>
-                  <div class="upload-zone-hint">Accepts .csv files only · UTF-8 encoding recommended</div>
+              <!-- When no connection -->
+              <div id="sync-no-connection" style="display:none;">
+                <div style="padding:var(--s6) var(--s5);display:flex;align-items:center;gap:var(--s3);color:var(--text-tertiary);font-size:13px;">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Connect a sheet first to enable sync controls.
                 </div>
               </div>
 
             </div>
           </div>
-
-
 
         </div><!-- /left col -->
 
         <!-- ── RIGHT COLUMN ── -->
         <div class="settings-col-side">
 
-          <!-- 4. FIELD MAPPING / DATA HEALTH -->
+          <!-- 3. SYNC STATUS -->
           <div class="card settings-card">
             <div class="card-header">
-              <div class="card-title">Field Mapping & Data Health</div>
+              <div class="card-title">Sync Status</div>
             </div>
-            <div id="fh-has-data" style="display:none;">
+
+            <!-- Has connection -->
+            <div id="ss-has-data">
               <div class="fh-summary-row">
                 <div class="fh-summary-item">
-                  <div class="fh-summary-val" id="fh-val-mapped" style="color:var(--success)">—</div>
-                  <div class="fh-summary-label">Mapped Fields</div>
+                  <div class="fh-summary-val" id="ss-val-stores" style="color:var(--success)">15</div>
+                  <div class="fh-summary-label">Stores</div>
                 </div>
                 <div class="fh-summary-item">
-                  <div class="fh-summary-val" id="fh-val-warnings">—</div>
-                  <div class="fh-summary-label">Warnings</div>
+                  <div class="fh-summary-val" id="ss-val-rows">15</div>
+                  <div class="fh-summary-label">Rows Pulled</div>
                 </div>
                 <div class="fh-summary-item">
-                  <div class="fh-summary-val" id="fh-val-rows">—</div>
-                  <div class="fh-summary-label">Rows</div>
+                  <div class="fh-summary-val" id="ss-val-fields">12</div>
+                  <div class="fh-summary-label">Fields</div>
                 </div>
               </div>
-              <div class="fh-field-list" id="fh-field-list"></div>
-              <div class="fh-footer" id="fh-footer"></div>
+              <div id="ss-sync-result" style="margin:var(--s4) var(--s5) 0;padding:10px 12px;border-radius:8px;font-size:12.5px;line-height:1.5;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);color:var(--success);">
+                ● Last sync successful · March 2025
+              </div>
+              <div style="padding:var(--s3) var(--s5) var(--s4);font-size:12px;color:var(--text-tertiary);border-top:1px solid var(--border-subtle);margin-top:var(--s4);">
+                Google Sheets is the single source of truth for all dashboard data.
+              </div>
             </div>
-            <div id="fh-no-data">
+
+            <!-- No connection -->
+            <div id="ss-no-data" style="display:none;">
               <div class="fh-empty">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                No dataset loaded. Upload a CSV to see field mapping and validation results.
+                No sheet connected. Connect a Google Sheet to see sync status.
               </div>
             </div>
           </div>
 
-          <!-- 5. INTERNAL NOTES -->
+          <!-- 4. INTERNAL NOTES -->
           <div class="card settings-card">
             <div class="card-header">
               <div class="card-title">Internal Notes</div>
