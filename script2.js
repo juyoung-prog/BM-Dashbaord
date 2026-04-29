@@ -630,19 +630,19 @@ async function handlePhotoUpload(event) {
     updated_at: new Date().toISOString(),
   };
   console.log('[photo-upload] DB upsert payload:', payload);
-  const { data: upsertData, error: upsertErr } = await sb.from('store_photos').upsert(
-    payload,
-    { onConflict: 'store_id' }
-  );
+  const { data: upsertData, error: upsertErr } = await sb
+    .from('store_photos')
+    .upsert(payload, { onConflict: 'store_id' })
+    .select();
+  console.log('[photo-upload] DB upsert result:', upsertData);
+  console.log('[photo-upload] DB upsert error:', upsertErr);
   if (upsertErr) {
     console.error('[photo-upload] DB upsert failed message:', upsertErr?.message);
     console.error('[photo-upload] DB upsert failed details:', upsertErr?.details);
     console.error('[photo-upload] DB upsert failed hint:',    upsertErr?.hint);
     console.error('[photo-upload] DB upsert failed code:',    upsertErr?.code);
-    console.error('[photo-upload] DB upsert payload:', payload);
     return;
   }
-  console.log('[photo-upload] DB upsert success:', upsertData);
 
   // 4. Update in-memory cache + UI (cache-bust only for immediate display)
   const displayUrl = `${publicUrl}?t=${Date.now()}`;
