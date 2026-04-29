@@ -292,6 +292,11 @@
         </div>
       </div>
 
+      <div id="settings-admin-notice" class="settings-admin-notice" style="display:none;">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Some settings require admin access. Contact your admin to make changes.
+      </div>
+
       <div class="settings-layout">
 
         <!-- ── LEFT COLUMN ── -->
@@ -352,7 +357,7 @@
 
               <!-- Change URL trigger -->
               <div id="gs-change-url-trigger" style="padding:var(--s3) var(--s5) var(--s4);border-top:1px solid var(--border-subtle);">
-                <button class="btn btn-ghost" onclick="openChangeUrl()" style="font-size:13px;">
+                <button id="change-url-btn" class="btn btn-ghost" onclick="openChangeUrl()" style="font-size:13px;">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Change URL
                 </button>
@@ -373,7 +378,7 @@
                   <input type="url" class="form-input" id="gs-connect-url-input" placeholder="https://docs.google.com/spreadsheets/d/…" oninput="clearUrlError('gs-connect-url-error')">
                   <div id="gs-connect-url-error" class="gs-url-error" style="display:none;"></div>
                 </div>
-                <button class="btn btn-primary" onclick="connectSheet()" style="width:100%;">
+                <button id="connect-sheet-btn" class="btn btn-primary" onclick="connectSheet()" style="width:100%;">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
                   Connect Sheet
                 </button>
@@ -407,7 +412,7 @@
                     <div class="action-label" style="color:var(--error)">Disconnect Sheet</div>
                     <div class="action-desc">Remove the current sheet connection. The dashboard will stop updating until a new sheet is connected.</div>
                   </div>
-                  <button class="btn btn-danger-ghost action-btn" onclick="openDisconnectModal()">
+                  <button id="disconnect-sheet-btn" class="btn btn-danger-ghost action-btn" onclick="openDisconnectModal()">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
                     Disconnect
                   </button>

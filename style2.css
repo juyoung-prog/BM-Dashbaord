@@ -1382,6 +1382,26 @@ svg { display: block; }
 }
 
 /* ═══════ SETTINGS PAGE ═══════ */
+.settings-admin-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  margin-bottom: var(--s6);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-lg);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.settings-admin-notice svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--text-tertiary); }
+
+button.admin-locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .settings-layout {
   display: grid;
   grid-template-columns: 1fr 380px;

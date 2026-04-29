@@ -8,6 +8,9 @@ const SUPABASE_ANON_KEY = 'sb_publishable_8vghQGAW4hfR7x3KV9qj6Q_kUq4MTTc'; // P
 // ── Page detection ───────────────────────────
 const IS_LOGIN_PAGE = window.location.pathname.endsWith('login.html');
 
+// ── Admin state (set after login, consumed by applyAdminRestrictions) ────────
+window.currentUserIsAdmin = false;
+
 // ── Invite flow detection ─────────────────────────────────────────────────
 // Must be captured synchronously here, BEFORE createClient() starts its async
 // URL processing. supabase-js v2 clears the URL after exchanging tokens, so
@@ -75,12 +78,29 @@ async function showDashboard(user) {
   const emailEl = document.getElementById('sb-user-email');
   if (emailEl) emailEl.textContent = user.email;
 
-  // Show invite button only for admin users (checked against public.admins table)
+  // Check admin status — controls invite button and Settings permissions
+  const { data: adminRow } = await sb.from('admins').select('email').eq('email', user.email).maybeSingle();
+  window.currentUserIsAdmin = !!adminRow;
+
   const inviteBtn = document.getElementById('invite-user-btn');
-  if (inviteBtn) {
-    const { data } = await sb.from('admins').select('email').eq('email', user.email).maybeSingle();
-    if (data) inviteBtn.style.display = '';
-  }
+  if (inviteBtn && window.currentUserIsAdmin) inviteBtn.style.display = '';
+
+  applyAdminRestrictions();
+}
+
+function applyAdminRestrictions() {
+  if (window.currentUserIsAdmin) return;
+
+  const notice = document.getElementById('settings-admin-notice');
+  if (notice) notice.style.display = '';
+
+  ['change-url-btn', 'connect-sheet-btn', 'sync-now-btn', 'disconnect-sheet-btn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.disabled = true;
+    btn.title = 'Admin access required';
+    btn.classList.add('admin-locked');
+  });
 }
 
 // ── Sign In ───────────────────────────────────
