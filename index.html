@@ -511,6 +511,25 @@
       </div>
     </div>
 
+    <!-- Crop controls (admin only, shown when store has a photo) -->
+    <div id="rp-crop-controls" class="rp-crop-controls" style="display:none;">
+      <div class="rp-crop-row">
+        <span class="rp-crop-label">Zoom</span>
+        <input type="range" id="crop-zoom" class="rp-crop-slider" min="1" max="3" step="0.05" value="1" oninput="previewCrop()">
+      </div>
+      <div class="rp-crop-row">
+        <span class="rp-crop-label">X</span>
+        <input type="range" id="crop-x" class="rp-crop-slider" min="0" max="100" step="1" value="50" oninput="previewCrop()">
+      </div>
+      <div class="rp-crop-row">
+        <span class="rp-crop-label">Y</span>
+        <input type="range" id="crop-y" class="rp-crop-slider" min="0" max="100" step="1" value="50" oninput="previewCrop()">
+      </div>
+      <div class="rp-crop-actions">
+        <button class="rp-crop-save" onclick="saveCropSettings()">Save position</button>
+      </div>
+    </div>
+
     <!-- Store Snapshot -->
     <div class="rp-section">
       <div class="rp-section-label">Store Snapshot</div>
