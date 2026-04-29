@@ -556,6 +556,7 @@ function sortTable(col) {
 // STORE PHOTOS (shared via Supabase Storage + DB)
 // ══════════════════════════════════════════
 const storePhotos = {};   // populated from DB on load; keyed by store_id
+let isEditingCrop = false;
 
 async function loadStorePhotosFromDB() {
   try {
@@ -589,6 +590,10 @@ function updatePhotoPanel(s) {
   const controls = document.getElementById('rp-crop-controls');
   if (!bg) return;
 
+  // Always reset edit mode when panel updates (store switch or refresh)
+  isEditingCrop = false;
+  if (controls) controls.style.display = 'none';
+
   const photo = storePhotos[s.id];
   if (photo) {
     const { url, zoom = 1, x = 50, y = 50 } = photo;
@@ -612,10 +617,12 @@ function updatePhotoPanel(s) {
 }
 
 function openCropMode() {
+  if (!window.currentUserIsAdmin) return;
   const photo = storePhotos[selectedId];
   if (!photo) return;
   const controls = document.getElementById('rp-crop-controls');
   if (!controls) return;
+  isEditingCrop = true;
   document.getElementById('crop-zoom').value = photo.zoom ?? 1;
   document.getElementById('crop-x').value    = photo.x    ?? 50;
   document.getElementById('crop-y').value    = photo.y    ?? 50;
@@ -623,6 +630,7 @@ function openCropMode() {
 }
 
 function closeCropMode() {
+  isEditingCrop = false;
   const controls = document.getElementById('rp-crop-controls');
   if (controls) controls.style.display = 'none';
   // Revert preview to last saved values
