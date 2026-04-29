@@ -599,12 +599,6 @@ function updatePhotoPanel(s) {
     bg.style.transformOrigin    = `${x}% ${y}%`;
     bg.style.opacity            = '1';
     if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
-    if (controls && window.currentUserIsAdmin) {
-      controls.style.display = '';
-      document.getElementById('crop-zoom').value = zoom;
-      document.getElementById('crop-x').value    = x;
-      document.getElementById('crop-y').value    = y;
-    }
   } else {
     bg.style.backgroundImage = '';
     bg.style.transform       = '';
@@ -615,6 +609,31 @@ function updatePhotoPanel(s) {
   if (capName) capName.textContent = s.name;
   if (capAddr) capAddr.textContent = s.addr;
   if (badge)   badge.textContent   = s.state;
+}
+
+function openCropMode() {
+  const photo = storePhotos[selectedId];
+  if (!photo) return;
+  const controls = document.getElementById('rp-crop-controls');
+  if (!controls) return;
+  document.getElementById('crop-zoom').value = photo.zoom ?? 1;
+  document.getElementById('crop-x').value    = photo.x    ?? 50;
+  document.getElementById('crop-y').value    = photo.y    ?? 50;
+  controls.style.display = '';
+}
+
+function closeCropMode() {
+  const controls = document.getElementById('rp-crop-controls');
+  if (controls) controls.style.display = 'none';
+  // Revert preview to last saved values
+  const photo = storePhotos[selectedId];
+  if (!photo) return;
+  const bg = document.getElementById('rp-photo-bg');
+  if (!bg) return;
+  const { zoom = 1, x = 50, y = 50 } = photo;
+  bg.style.backgroundPosition = `${x}% ${y}%`;
+  bg.style.transform          = zoom !== 1 ? `scale(${zoom})` : '';
+  bg.style.transformOrigin    = `${x}% ${y}%`;
 }
 
 function previewCrop() {
@@ -649,8 +668,7 @@ async function saveCropSettings() {
     storePhotos[selectedId].x   = x;
     storePhotos[selectedId].y   = y;
   }
-  const btn = document.querySelector('.rp-crop-save');
-  if (btn) { btn.textContent = 'Saved ✓'; setTimeout(() => { btn.textContent = 'Save position'; }, 1500); }
+  closeCropMode();
 }
 
 function triggerPhotoUpload() {
@@ -715,14 +733,6 @@ async function handlePhotoUpload(event) {
     bg.style.opacity            = '1';
   }
   if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
-  // Show crop controls with defaults
-  const controls = document.getElementById('rp-crop-controls');
-  if (controls && window.currentUserIsAdmin) {
-    controls.style.display = '';
-    document.getElementById('crop-zoom').value = 1;
-    document.getElementById('crop-x').value    = 50;
-    document.getElementById('crop-y').value    = 50;
-  }
 }
 
 // ══════════════════════════════════════════
