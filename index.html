@@ -770,6 +770,44 @@
   }
   .invite-btn-send:hover   { background: #334155; }
   .invite-btn-send:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* ── Dark mode overrides ──────────────────── */
+  [data-theme="dark"] .invite-overlay {
+    background: rgba(0,0,0,.65);
+  }
+  [data-theme="dark"] .invite-card {
+    background: #1E1E20;
+    border: 1px solid rgba(255,255,255,.09);
+    box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 8px 24px rgba(0,0,0,.4);
+  }
+  [data-theme="dark"] .invite-input {
+    background: #2A2A2C;
+    border-color: rgba(255,255,255,.13);
+  }
+  [data-theme="dark"] .invite-input::placeholder { color: #5A5A60; }
+  [data-theme="dark"] .invite-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.18);
+  }
+  [data-theme="dark"] .invite-input.error { border-color: #ef4444; }
+  [data-theme="dark"] .invite-input.error:focus {
+    box-shadow: 0 0 0 3px rgba(239,68,68,.18);
+  }
+  [data-theme="dark"] .invite-btn-send {
+    background: #E2E8F0;
+    color: #0F172A;
+  }
+  [data-theme="dark"] .invite-btn-send:hover   { background: #F8FAFC; }
+  [data-theme="dark"] .invite-btn-send:disabled { opacity: .45; }
+  [data-theme="dark"] .invite-btn-cancel {
+    border-color: rgba(255,255,255,.14);
+    color: var(--text-secondary);
+  }
+  [data-theme="dark"] .invite-btn-cancel:hover {
+    background: rgba(255,255,255,.07);
+    color: var(--text-primary);
+    border-color: rgba(255,255,255,.20);
+  }
 </style>
 
 <script src="script2.js"></script>
