@@ -635,6 +635,7 @@ function openCropMode() {
 
 function closeCropMode() {
   isEditingCrop = false;
+  if (cropDraft?.previewUrl) URL.revokeObjectURL(cropDraft.previewUrl);
   cropDraft = null;
   const controls = document.getElementById('rp-crop-controls');
   if (controls) controls.style.display = 'none';
@@ -664,17 +665,24 @@ function previewCrop() {
 
 // Triggered by "Replace photo" — preview only, no DB write
 function handlePhotoReplace(file) {
-  if (!cropDraft) return;
+  if (!file) return;
+  // Defensive init if cropDraft was somehow cleared
+  if (!cropDraft) {
+    const photo = storePhotos[selectedId];
+    if (!photo) { console.warn('[replace] no saved photo for store', selectedId); return; }
+    cropDraft = { url: photo.url, zoom: photo.zoom ?? 1, x: photo.x ?? 50, y: photo.y ?? 50, file: null };
+    console.warn('[replace] cropDraft was null — re-initialized');
+  }
   cropDraft.file = file;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    cropDraft.url = e.target.result; // data URL for preview
-    const bg   = document.getElementById('rp-photo-bg');
-    const hero = document.getElementById('rp-photo');
-    if (bg) { bg.style.backgroundImage = `url('${e.target.result}')`; bg.style.opacity = '1'; }
-    if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
-  };
-  reader.readAsDataURL(file);
+  // createObjectURL is synchronous — no async race condition
+  if (cropDraft.previewUrl) URL.revokeObjectURL(cropDraft.previewUrl);
+  const previewUrl = URL.createObjectURL(file);
+  cropDraft.previewUrl = previewUrl;
+  console.log('[replace] preview URL created for:', file.name);
+  const bg   = document.getElementById('rp-photo-bg');
+  const hero = document.getElementById('rp-photo');
+  if (bg) { bg.style.backgroundImage = `url('${previewUrl}')`; bg.style.opacity = '1'; }
+  if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
 }
 
 // Dispatcher — routes file input to replace (draft) or initial upload (persist)
@@ -682,6 +690,7 @@ function onPhotoInputChange(event) {
   const file = event.target.files[0];
   if (!file) return;
   event.target.value = '';
+  console.log('[photo-input] file selected:', file.name, '| isEditingCrop:', isEditingCrop, '| cropDraft:', cropDraft);
   if (isEditingCrop) {
     handlePhotoReplace(file);
   } else {
