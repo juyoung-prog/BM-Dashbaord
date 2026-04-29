@@ -656,21 +656,32 @@ function previewCrop() {
 }
 
 async function saveCropSettings() {
-  const zoom = parseFloat(document.getElementById('crop-zoom').value);
-  const x    = parseFloat(document.getElementById('crop-x').value);
-  const y    = parseFloat(document.getElementById('crop-y').value);
+  const zoom    = parseFloat(document.getElementById('crop-zoom').value);
+  const x       = parseFloat(document.getElementById('crop-x').value);
+  const y       = parseFloat(document.getElementById('crop-y').value);
+  const photoUrl = storePhotos[selectedId]?.url;
+
+  if (!photoUrl) { console.error('[crop] no photo_url found for store', selectedId); return; }
+
   const payload = {
     store_id:          Number(selectedId),
+    photo_url:         photoUrl,
     zoom,
     object_position_x: x,
     object_position_y: y,
+    updated_at:        new Date().toISOString(),
   };
   console.log('[crop] saving settings:', payload);
   const { data, error } = await sb.from('store_photos')
     .upsert(payload, { onConflict: 'store_id' })
     .select();
   console.log('[crop] save result:', data);
-  if (error) { console.error('[crop] save failed:', error?.message); return; }
+  console.log('[crop] save error:', error);
+  if (error) {
+    console.error('[crop] save failed message:', error?.message);
+    console.error('[crop] save failed code:',    error?.code);
+    return;  // keep panel open on failure
+  }
   if (storePhotos[selectedId]) {
     storePhotos[selectedId].zoom = zoom;
     storePhotos[selectedId].x   = x;
