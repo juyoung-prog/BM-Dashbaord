@@ -729,16 +729,17 @@ svg { display: block; }
   cursor: pointer;
 }
 .rp-hero.has-photo {
-  background: #000;
-  border: 1px solid #E2E8F0;
+  background: #111214;
+  border: 1px solid rgba(0,0,0,.12);
   border-style: solid;
   cursor: default;
 }
 .rp-hero-bg {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-size: cover;
+  background-size: contain;
   background-position: center;
+  background-repeat: no-repeat;
   opacity: 0;
   transition: transform .4s ease, opacity .3s ease;
   z-index: 1;
@@ -1969,6 +1970,10 @@ button.admin-locked {
 [data-theme="dark"] .rp-hero {
   background: #1A1A1C;
   border-color: rgba(255,255,255,.10);
+}
+[data-theme="dark"] .rp-hero.has-photo {
+  background: #0D0D0F;
+  border-color: rgba(255,255,255,.08);
 }
 
 /* ── Issue 3: Table row separation — legible without loud dividers ── */
