@@ -555,8 +555,9 @@ function sortTable(col) {
 // ══════════════════════════════════════════
 // STORE PHOTOS (shared via Supabase Storage + DB)
 // ══════════════════════════════════════════
-const storePhotos = {};   // populated from DB on load; keyed by store_id
+const storePhotos = {};   // saved state from DB: { url, zoom, x, y }
 let isEditingCrop = false;
+let cropDraft     = null; // draft state while editing: { url, zoom, x, y, file? }
 
 async function loadStorePhotosFromDB() {
   try {
@@ -592,6 +593,7 @@ function updatePhotoPanel(s) {
 
   // Always reset edit mode when panel updates (store switch or refresh)
   isEditingCrop = false;
+  cropDraft = null;
   if (controls) controls.style.display = 'none';
 
   const photo = storePhotos[s.id];
@@ -622,46 +624,94 @@ function openCropMode() {
   if (!photo) return;
   const controls = document.getElementById('rp-crop-controls');
   if (!controls) return;
+  // Initialize draft from saved state
+  cropDraft = { url: photo.url, zoom: photo.zoom ?? 1, x: photo.x ?? 50, y: photo.y ?? 50, file: null };
   isEditingCrop = true;
-  document.getElementById('crop-zoom').value = photo.zoom ?? 1;
-  document.getElementById('crop-x').value    = photo.x    ?? 50;
-  document.getElementById('crop-y').value    = photo.y    ?? 50;
+  document.getElementById('crop-zoom').value = cropDraft.zoom;
+  document.getElementById('crop-x').value    = cropDraft.x;
+  document.getElementById('crop-y').value    = cropDraft.y;
   controls.style.display = '';
 }
 
 function closeCropMode() {
   isEditingCrop = false;
+  cropDraft = null;
   const controls = document.getElementById('rp-crop-controls');
   if (controls) controls.style.display = 'none';
-  // Revert preview to last saved values
+  // Revert UI to last saved state
   const photo = storePhotos[selectedId];
   if (!photo) return;
   const bg = document.getElementById('rp-photo-bg');
   if (!bg) return;
-  const { zoom = 1, x = 50, y = 50 } = photo;
+  const { url, zoom = 1, x = 50, y = 50 } = photo;
+  bg.style.backgroundImage    = `url('${url}')`;
   bg.style.backgroundPosition = `${x}% ${y}%`;
   bg.style.transform          = zoom !== 1 ? `scale(${zoom})` : '';
   bg.style.transformOrigin    = `${x}% ${y}%`;
 }
 
 function previewCrop() {
-  const zoom = parseFloat(document.getElementById('crop-zoom').value);
-  const x    = parseFloat(document.getElementById('crop-x').value);
-  const y    = parseFloat(document.getElementById('crop-y').value);
-  const bg   = document.getElementById('rp-photo-bg');
+  if (!cropDraft) return;
+  cropDraft.zoom = parseFloat(document.getElementById('crop-zoom').value);
+  cropDraft.x    = parseFloat(document.getElementById('crop-x').value);
+  cropDraft.y    = parseFloat(document.getElementById('crop-y').value);
+  const bg = document.getElementById('rp-photo-bg');
   if (!bg) return;
-  bg.style.backgroundPosition = `${x}% ${y}%`;
-  bg.style.transform          = zoom !== 1 ? `scale(${zoom})` : '';
-  bg.style.transformOrigin    = `${x}% ${y}%`;
+  bg.style.backgroundPosition = `${cropDraft.x}% ${cropDraft.y}%`;
+  bg.style.transform          = cropDraft.zoom !== 1 ? `scale(${cropDraft.zoom})` : '';
+  bg.style.transformOrigin    = `${cropDraft.x}% ${cropDraft.y}%`;
+}
+
+// Triggered by "Replace photo" — preview only, no DB write
+function handlePhotoReplace(file) {
+  if (!cropDraft) return;
+  cropDraft.file = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    cropDraft.url = e.target.result; // data URL for preview
+    const bg   = document.getElementById('rp-photo-bg');
+    const hero = document.getElementById('rp-photo');
+    if (bg) { bg.style.backgroundImage = `url('${e.target.result}')`; bg.style.opacity = '1'; }
+    if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Dispatcher — routes file input to replace (draft) or initial upload (persist)
+function onPhotoInputChange(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+  if (isEditingCrop) {
+    handlePhotoReplace(file);
+  } else {
+    handlePhotoUpload(file);
+  }
 }
 
 async function saveCropSettings() {
-  const zoom    = parseFloat(document.getElementById('crop-zoom').value);
-  const x       = parseFloat(document.getElementById('crop-x').value);
-  const y       = parseFloat(document.getElementById('crop-y').value);
-  const photoUrl = storePhotos[selectedId]?.url;
+  if (!cropDraft) return;
+  const zoom = cropDraft.zoom;
+  const x    = cropDraft.x;
+  const y    = cropDraft.y;
+  let photoUrl = storePhotos[selectedId]?.url;
 
-  if (!photoUrl) { console.error('[crop] no photo_url found for store', selectedId); return; }
+  // If a new file was chosen via Replace, upload it first
+  if (cropDraft.file) {
+    const file = cropDraft.file;
+    const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const path = `store-${selectedId}.${ext}`;
+    console.log('[crop] uploading replaced photo:', path);
+    const { error: uploadErr } = await sb.storage
+      .from('store-photos')
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (uploadErr) { console.error('[crop] photo upload failed:', uploadErr?.message); return; }
+    const { data: urlData } = sb.storage.from('store-photos').getPublicUrl(path);
+    photoUrl = urlData?.publicUrl;
+    console.log('[crop] replaced photo URL:', photoUrl);
+  }
+
+  if (!photoUrl) { console.error('[crop] no photo_url for store', selectedId); return; }
 
   const payload = {
     store_id:          Number(selectedId),
@@ -671,7 +721,7 @@ async function saveCropSettings() {
     object_position_y: y,
     updated_at:        new Date().toISOString(),
   };
-  console.log('[crop] saving settings:', payload);
+  console.log('[crop] saving payload:', payload);
   const { data, error } = await sb.from('store_photos')
     .upsert(payload, { onConflict: 'store_id' })
     .select();
@@ -680,13 +730,10 @@ async function saveCropSettings() {
   if (error) {
     console.error('[crop] save failed message:', error?.message);
     console.error('[crop] save failed code:',    error?.code);
-    return;  // keep panel open on failure
+    return; // keep panel open on failure
   }
-  if (storePhotos[selectedId]) {
-    storePhotos[selectedId].zoom = zoom;
-    storePhotos[selectedId].x   = x;
-    storePhotos[selectedId].y   = y;
-  }
+  // Commit draft → saved state
+  storePhotos[selectedId] = { url: photoUrl, zoom, x, y };
   closeCropMode();
 }
 
@@ -695,11 +742,8 @@ function triggerPhotoUpload() {
 }
 
 
-async function handlePhotoUpload(event) {
-  if (!window.currentUserIsAdmin) return;
-  const file = event.target.files[0];
-  if (!file) return;
-  event.target.value = '';
+async function handlePhotoUpload(file) {
+  if (!window.currentUserIsAdmin || !file) return;
 
   const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
   const path = `store-${selectedId}.${ext}`;
