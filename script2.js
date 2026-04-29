@@ -624,17 +624,24 @@ async function handlePhotoUpload(event) {
   console.log('[photo-upload] public URL:', publicUrl);
 
   // 3. Upsert into store_photos table
-  const { data: { session } } = await sb.auth.getSession();
+  const payload = {
+    store_id:   Number(selectedId),
+    photo_url:  publicUrl,
+    updated_at: new Date().toISOString(),
+  };
+  console.log('[photo-upload] DB upsert payload:', payload);
   const { data: upsertData, error: upsertErr } = await sb.from('store_photos').upsert(
-    {
-      store_id:    selectedId,
-      photo_url:   publicUrl,
-      uploaded_by: session?.user?.email ?? '',
-      updated_at:  new Date().toISOString(),
-    },
+    payload,
     { onConflict: 'store_id' }
   );
-  if (upsertErr) { console.error('[photo-upload] DB upsert failed:', upsertErr); return; }
+  if (upsertErr) {
+    console.error('[photo-upload] DB upsert failed message:', upsertErr?.message);
+    console.error('[photo-upload] DB upsert failed details:', upsertErr?.details);
+    console.error('[photo-upload] DB upsert failed hint:',    upsertErr?.hint);
+    console.error('[photo-upload] DB upsert failed code:',    upsertErr?.code);
+    console.error('[photo-upload] DB upsert payload:', payload);
+    return;
+  }
   console.log('[photo-upload] DB upsert success:', upsertData);
 
   // 4. Update in-memory cache + UI (cache-bust only for immediate display)
