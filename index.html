@@ -622,7 +622,7 @@
       <h2 class="invite-title">Invite User</h2>
       <button class="invite-close" onclick="closeInviteModal()">&times;</button>
     </div>
-    <p class="invite-desc">An invitation email will be sent. Invited users are regular users by default — admin access requires adding their email to the allowlist in <code>auth.js</code>.</p>
+    <p class="invite-desc">An invitation email will be sent. Invited users are regular users by default. Admin access can be managed separately in the admins table.</p>
     <label class="invite-label">Email address</label>
     <input id="invite-email" class="invite-input" type="email" placeholder="user@example.com"
            onkeydown="if(event.key==='Enter') sendInvite()">
@@ -719,7 +719,9 @@
     font-family: inherit;
     outline: none;
   }
-  .invite-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .invite-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+  .invite-input.error { border-color: #ef4444; }
+  .invite-input.error:focus { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,.15); }
 
   .invite-msg {
     min-height: 20px;
@@ -728,7 +730,12 @@
     color: var(--text-secondary);
   }
   .invite-msg.invite-success { color: #22c55e; }
-  .invite-msg.invite-error   { color: #ef4444; }
+  .invite-msg.invite-error {
+    color: #dc2626;
+    background: rgba(239,68,68,.08);
+    border-radius: 6px;
+    padding: 6px 10px;
+  }
 
   /* ── Action buttons ───────────────────────── */
   .invite-actions {
