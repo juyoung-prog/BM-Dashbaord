@@ -899,16 +899,7 @@ function clearDashboard() {
   const sbStatus = document.querySelector('.sb-status');
   if (sbStatus) sbStatus.innerHTML = '<div class="live-dot" style="background:var(--text-tertiary);animation:none"></div><span>No sheet connected</span>';
 
-  // 6. Audience Segments → empty state
-  const audStats = document.getElementById('audience-stats-grid');
-  if (audStats) audStats.innerHTML = `
-    <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:var(--text-tertiary)">—</div><div class="stat-sub">No data</div></div>
-    <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--text-tertiary)">—</div><div class="stat-sub">No data</div></div>
-    <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-tertiary)">—</div><div class="stat-sub">No data</div></div>`;
-  const audList = document.getElementById('audience-seg-list');
-  if (audList) audList.innerHTML = `<div style="padding:var(--s8) var(--s4);text-align:center;color:var(--text-tertiary);font-size:13px;">No sheet connected. Connect a Google Sheet in Settings to populate segment data.</div>`;
-
-  // 7. Store Locator → empty state
+  // 6. Store Locator → empty state
   const locMap = document.getElementById('locator-map-ph');
   if (locMap) locMap.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>No dataset — map unavailable`;
   const locList = document.getElementById('locator-list');
@@ -933,25 +924,6 @@ function restoreDashboard() {
   });
   const sbStatus = document.querySelector('.sb-status');
   if (sbStatus) sbStatus.innerHTML = '<div class="live-dot"></div><span>Live data &nbsp;·&nbsp; <strong>Google Sheets</strong></span>';
-  const blackStores = STORES.filter(s => s.black >= 30);
-  const hispStores  = STORES.filter(s => s.hisp >= 20);
-  const asianStores = STORES.filter(s => s.asian >= 15);
-  const audStats = document.getElementById('audience-stats-grid');
-  if (audStats) audStats.innerHTML = `
-    <div class="stat-card"><h4>Black Community</h4><div class="stat-big" style="color:var(--text-primary)">${blackStores.length}</div><div class="stat-sub">stores with &gt;30% Black population</div></div>
-    <div class="stat-card"><h4>Hispanic Market</h4><div class="stat-big" style="color:var(--text-primary)">${hispStores.length}</div><div class="stat-sub">stores with &gt;20% Hispanic pop.</div></div>
-    <div class="stat-card"><h4>Asian / K-Beauty</h4><div class="stat-big" style="color:var(--text-primary)">${asianStores.length}</div><div class="stat-sub">${asianStores.map(s=>`${esc(s.name)} (${Math.round(s.asian)}%)`).join(' · ') || 'None'}</div></div>`;
-  const audList = document.getElementById('audience-seg-list');
-  if (audList) {
-    const segs = [
-      { name:'Black Hair Care Community', color:'var(--border-strong)', stores: STORES.filter(s=>s.black>=40) },
-      { name:'Hispanic / Bilingual Market', color:'var(--border-strong)', stores: STORES.filter(s=>s.hisp>=20) },
-      { name:'Premium / K-Beauty Shopper', color:'var(--border-strong)', stores: STORES.filter(s=>s.asian>=15||s.income>=85000) },
-      { name:'Value / Budget-Conscious', color:'var(--border-strong)', stores: STORES.filter(s=>s.income<65000) },
-      { name:'General / Mixed Market', color:'var(--border-strong)', stores: STORES.filter(s=>s.black<40&&s.hisp<20&&s.asian<15&&s.income>=65000) },
-    ].filter(seg=>seg.stores.length>0);
-    audList.innerHTML = segs.map(seg=>`<div class="seg-row"><div class="seg-dot" style="background:${seg.color}"></div><div><div class="seg-name">${seg.name}</div><div class="seg-desc">${seg.stores.map(s=>esc(s.name)).join(' · ')}</div></div><div class="seg-num">${seg.stores.length} store${seg.stores.length>1?'s':''}</div></div>`).join('');
-  }
   const gaC = STORES.filter(s=>s.state==='GA').length;
   const flC = STORES.filter(s=>s.state==='FL').length;
   const locMap = document.getElementById('locator-map-ph');
