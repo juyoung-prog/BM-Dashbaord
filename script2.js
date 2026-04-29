@@ -553,12 +553,21 @@ function sortTable(col) {
 }
 
 // ══════════════════════════════════════════
-// STORE PHOTOS (per-store, persisted in localStorage)
+// STORE PHOTOS (shared via Supabase Storage + DB)
 // ══════════════════════════════════════════
-const storePhotos = JSON.parse(localStorage.getItem('bm_storePhotos') || '{}');
+const storePhotos = {};   // populated from DB on load; keyed by store_id
 
-function saveStorePhotos() {
-  localStorage.setItem('bm_storePhotos', JSON.stringify(storePhotos));
+async function loadStorePhotosFromDB() {
+  try {
+    const { data, error } = await sb.from('store_photos').select('store_id, photo_url');
+    if (error || !data) return;
+    data.forEach(row => { storePhotos[row.store_id] = row.photo_url; });
+    // Refresh panel if a store is already selected
+    const s = STORES[selectedId];
+    if (s) updatePhotoPanel(s);
+  } catch (e) {
+    console.warn('[store-photos] load failed:', e);
+  }
 }
 
 function updatePhotoPanel(s) {
@@ -588,23 +597,38 @@ function triggerPhotoUpload() {
 }
 
 
-function handlePhotoUpload(event) {
+async function handlePhotoUpload(event) {
+  if (!window.currentUserIsAdmin) return;
   const file = event.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    storePhotos[selectedId] = e.target.result;
-    saveStorePhotos();
-    const bg = document.getElementById('rp-photo-bg');
-    const hero = document.getElementById('rp-photo');
-    if (bg) {
-      bg.style.backgroundImage = `url('${e.target.result}')`;
-      bg.style.opacity = '1';
-    }
-    if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
-  };
-  reader.readAsDataURL(file);
   event.target.value = '';
+
+  const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
+  const path = `store-${selectedId}.${ext}`;
+
+  // 1. Upload file to Supabase Storage (upsert — overwrites existing)
+  const { error: uploadErr } = await sb.storage
+    .from('store-photos')
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (uploadErr) { console.error('[photo-upload] storage error:', uploadErr); return; }
+
+  // 2. Get public URL + cache-bust so re-uploads refresh immediately
+  const { data: { publicUrl } } = sb.storage.from('store-photos').getPublicUrl(path);
+  const url = `${publicUrl}?t=${Date.now()}`;
+
+  // 3. Persist URL in DB
+  const { data: { session } } = await sb.auth.getSession();
+  await sb.from('store_photos').upsert(
+    { store_id: selectedId, photo_url: url, uploaded_by: session?.user?.email ?? '', updated_at: new Date().toISOString() },
+    { onConflict: 'store_id' }
+  );
+
+  // 4. Update in-memory cache + UI immediately
+  storePhotos[selectedId] = url;
+  const bg   = document.getElementById('rp-photo-bg');
+  const hero = document.getElementById('rp-photo');
+  if (bg)   { bg.style.backgroundImage = `url('${url}')`; bg.style.opacity = '1'; }
+  if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
 }
 
 // ══════════════════════════════════════════

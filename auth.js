@@ -86,6 +86,9 @@ async function showDashboard(user) {
   if (inviteBtn && window.currentUserIsAdmin) inviteBtn.style.display = '';
 
   applyAdminRestrictions();
+
+  // Load shared store photos from DB (all users see the same photos)
+  if (typeof loadStorePhotosFromDB === 'function') loadStorePhotosFromDB();
 }
 
 function applyAdminRestrictions() {
@@ -101,6 +104,12 @@ function applyAdminRestrictions() {
     btn.title = 'Admin access required';
     btn.classList.add('admin-locked');
   });
+
+  // Hide photo upload controls for non-admins
+  const changeBtn  = document.querySelector('.rp-hero-change-btn');
+  const uploadHint = document.querySelector('.rp-hero-upload-hint');
+  if (changeBtn)  changeBtn.style.display  = 'none';
+  if (uploadHint) uploadHint.style.display = 'none';
 }
 
 // ── Sign In ───────────────────────────────────
