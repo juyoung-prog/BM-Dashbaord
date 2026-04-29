@@ -730,8 +730,7 @@ svg { display: block; }
 }
 .rp-hero.has-photo {
   background: #111214;
-  border: 1px solid rgba(0,0,0,.12);
-  border-style: solid;
+  border: none;
   cursor: default;
 }
 .rp-hero-bg {
@@ -2050,7 +2049,7 @@ button.admin-locked {
 }
 [data-theme="dark"] .rp-hero.has-photo {
   background: #0D0D0F;
-  border-color: rgba(255,255,255,.08);
+  border: none;
 }
 
 /* ── Issue 3: Table row separation — legible without loud dividers ── */
