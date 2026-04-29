@@ -230,7 +230,9 @@ function openInviteModal() {
   const modal = document.getElementById('invite-modal');
   if (!modal) return;
   modal.style.display = 'flex';
-  document.getElementById('invite-email').value = '';
+  const emailInput = document.getElementById('invite-email');
+  emailInput.value = '';
+  emailInput.classList.remove('error');
   const msgEl = document.getElementById('invite-msg');
   msgEl.textContent = '';
   msgEl.className = 'invite-msg';
@@ -250,6 +252,7 @@ async function sendInvite() {
   if (!email) {
     msgEl.textContent = 'Please enter an email address.';
     msgEl.className = 'invite-msg invite-error';
+    emailInput.classList.add('error');
     return;
   }
 
@@ -257,6 +260,7 @@ async function sendInvite() {
   btn.textContent = 'Sending...';
   msgEl.textContent = '';
   msgEl.className = 'invite-msg';
+  emailInput.classList.remove('error');
 
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
@@ -285,6 +289,7 @@ async function sendInvite() {
       msgEl.textContent = `✓ Invite sent to ${email}.`;
       msgEl.className = 'invite-msg invite-success';
       emailInput.value = '';
+      emailInput.classList.remove('error');
     }
   } catch (err) {
     console.error('[invite-user] fetch failed:', err);
