@@ -560,12 +560,19 @@ const storePhotos = {};   // populated from DB on load; keyed by store_id
 async function loadStorePhotosFromDB() {
   try {
     console.log('[store-photos] fetching from store_photos table…');
-    const { data, error } = await sb.from('store_photos').select('store_id, photo_url');
+    const { data, error } = await sb.from('store_photos')
+      .select('store_id, photo_url, zoom, object_position_x, object_position_y');
     if (error) { console.error('[store-photos] fetch error:', error); return; }
     if (!data || data.length === 0) { console.log('[store-photos] no rows found in store_photos'); return; }
     console.log('[store-photos] fetched rows:', data);
-    data.forEach(row => { storePhotos[row.store_id] = row.photo_url; });
-    // Refresh panel if a store is already selected
+    data.forEach(row => {
+      storePhotos[row.store_id] = {
+        url:  row.photo_url,
+        zoom: row.zoom             ?? 1,
+        x:    row.object_position_x ?? 50,
+        y:    row.object_position_y ?? 50,
+      };
+    });
     const s = STORES[selectedId];
     if (s) updatePhotoPanel(s);
   } catch (e) {
@@ -574,25 +581,76 @@ async function loadStorePhotosFromDB() {
 }
 
 function updatePhotoPanel(s) {
-  const hero = document.getElementById('rp-photo');
-  const bg   = document.getElementById('rp-photo-bg');
-  const hint = document.querySelector('.rp-hero-upload-hint');
+  const hero    = document.getElementById('rp-photo');
+  const bg      = document.getElementById('rp-photo-bg');
   const capName = document.getElementById('rp-photo-name');
   const capAddr = document.getElementById('rp-photo-addr');
   const badge   = document.getElementById('rp-photo-state');
+  const controls = document.getElementById('rp-crop-controls');
   if (!bg) return;
-  if (storePhotos[s.id]) {
-    bg.style.backgroundImage = `url('${storePhotos[s.id]}')`;
-    bg.style.opacity = '1';
+
+  const photo = storePhotos[s.id];
+  if (photo) {
+    const { url, zoom = 1, x = 50, y = 50 } = photo;
+    bg.style.backgroundImage    = `url('${url}')`;
+    bg.style.backgroundSize     = 'cover';
+    bg.style.backgroundPosition = `${x}% ${y}%`;
+    bg.style.transform          = zoom !== 1 ? `scale(${zoom})` : '';
+    bg.style.transformOrigin    = `${x}% ${y}%`;
+    bg.style.opacity            = '1';
     if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
+    if (controls && window.currentUserIsAdmin) {
+      controls.style.display = '';
+      document.getElementById('crop-zoom').value = zoom;
+      document.getElementById('crop-x').value    = x;
+      document.getElementById('crop-y').value    = y;
+    }
   } else {
     bg.style.backgroundImage = '';
-    bg.style.opacity = '0';
-    if (hero) { hero.style.background = ''; hero.classList.remove('has-photo'); }
+    bg.style.transform       = '';
+    bg.style.opacity         = '0';
+    if (hero)     { hero.style.background = ''; hero.classList.remove('has-photo'); }
+    if (controls) controls.style.display = 'none';
   }
   if (capName) capName.textContent = s.name;
   if (capAddr) capAddr.textContent = s.addr;
   if (badge)   badge.textContent   = s.state;
+}
+
+function previewCrop() {
+  const zoom = parseFloat(document.getElementById('crop-zoom').value);
+  const x    = parseFloat(document.getElementById('crop-x').value);
+  const y    = parseFloat(document.getElementById('crop-y').value);
+  const bg   = document.getElementById('rp-photo-bg');
+  if (!bg) return;
+  bg.style.backgroundPosition = `${x}% ${y}%`;
+  bg.style.transform          = zoom !== 1 ? `scale(${zoom})` : '';
+  bg.style.transformOrigin    = `${x}% ${y}%`;
+}
+
+async function saveCropSettings() {
+  const zoom = parseFloat(document.getElementById('crop-zoom').value);
+  const x    = parseFloat(document.getElementById('crop-x').value);
+  const y    = parseFloat(document.getElementById('crop-y').value);
+  const payload = {
+    store_id:          Number(selectedId),
+    zoom,
+    object_position_x: x,
+    object_position_y: y,
+  };
+  console.log('[crop] saving settings:', payload);
+  const { data, error } = await sb.from('store_photos')
+    .upsert(payload, { onConflict: 'store_id' })
+    .select();
+  console.log('[crop] save result:', data);
+  if (error) { console.error('[crop] save failed:', error?.message); return; }
+  if (storePhotos[selectedId]) {
+    storePhotos[selectedId].zoom = zoom;
+    storePhotos[selectedId].x   = x;
+    storePhotos[selectedId].y   = y;
+  }
+  const btn = document.querySelector('.rp-crop-save');
+  if (btn) { btn.textContent = 'Saved ✓'; setTimeout(() => { btn.textContent = 'Save position'; }, 1500); }
 }
 
 function triggerPhotoUpload() {
@@ -646,11 +704,25 @@ async function handlePhotoUpload(event) {
 
   // 4. Update in-memory cache + UI (cache-bust only for immediate display)
   const displayUrl = `${publicUrl}?t=${Date.now()}`;
-  storePhotos[selectedId] = publicUrl;
+  storePhotos[selectedId] = { url: publicUrl, zoom: 1, x: 50, y: 50 };
   const bg   = document.getElementById('rp-photo-bg');
   const hero = document.getElementById('rp-photo');
-  if (bg)   { bg.style.backgroundImage = `url('${displayUrl}')`; bg.style.opacity = '1'; }
+  if (bg) {
+    bg.style.backgroundImage    = `url('${displayUrl}')`;
+    bg.style.backgroundSize     = 'cover';
+    bg.style.backgroundPosition = '50% 50%';
+    bg.style.transform          = '';
+    bg.style.opacity            = '1';
+  }
   if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
+  // Show crop controls with defaults
+  const controls = document.getElementById('rp-crop-controls');
+  if (controls && window.currentUserIsAdmin) {
+    controls.style.display = '';
+    document.getElementById('crop-zoom').value = 1;
+    document.getElementById('crop-x').value    = 50;
+    document.getElementById('crop-y').value    = 50;
+  }
 }
 
 // ══════════════════════════════════════════
