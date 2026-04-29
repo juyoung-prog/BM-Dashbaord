@@ -1061,9 +1061,11 @@ svg { display: block; }
 .page { display: none; }
 .page.active { display: block; }
 
-/* Influencer Hub — full-width, no right panel */
-.layout:has(#page-influencers.active) .right-panel { display: none; }
-.layout:has(#page-influencers.active) .main { padding-right: var(--s8); }
+/* Influencer Hub & Settings — full-width, no right panel */
+.layout:has(#page-influencers.active) .right-panel,
+.layout:has(#page-settings.active) .right-panel { display: none; }
+.layout:has(#page-influencers.active) .main,
+.layout:has(#page-settings.active) .main { padding-right: var(--s8); }
 
 /* ═══════ OTHER PAGES ═══════ */
 .income-bar-row {
