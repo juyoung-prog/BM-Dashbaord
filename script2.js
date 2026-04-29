@@ -559,8 +559,11 @@ const storePhotos = {};   // populated from DB on load; keyed by store_id
 
 async function loadStorePhotosFromDB() {
   try {
+    console.log('[store-photos] fetching from store_photos table…');
     const { data, error } = await sb.from('store_photos').select('store_id, photo_url');
-    if (error || !data) return;
+    if (error) { console.error('[store-photos] fetch error:', error); return; }
+    if (!data || data.length === 0) { console.log('[store-photos] no rows found in store_photos'); return; }
+    console.log('[store-photos] fetched rows:', data);
     data.forEach(row => { storePhotos[row.store_id] = row.photo_url; });
     // Refresh panel if a store is already selected
     const s = STORES[selectedId];
@@ -606,28 +609,40 @@ async function handlePhotoUpload(event) {
   const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
   const path = `store-${selectedId}.${ext}`;
 
-  // 1. Upload file to Supabase Storage (upsert — overwrites existing)
-  const { error: uploadErr } = await sb.storage
+  // 1. Upload to Supabase Storage
+  console.log('[photo-upload] uploading to storage — bucket: store-photos, path:', path);
+  const { data: uploadData, error: uploadErr } = await sb.storage
     .from('store-photos')
     .upload(path, file, { upsert: true, contentType: file.type });
-  if (uploadErr) { console.error('[photo-upload] storage error:', uploadErr); return; }
+  if (uploadErr) { console.error('[photo-upload] storage upload failed:', uploadErr); return; }
+  console.log('[photo-upload] storage upload success:', uploadData);
 
-  // 2. Get public URL + cache-bust so re-uploads refresh immediately
-  const { data: { publicUrl } } = sb.storage.from('store-photos').getPublicUrl(path);
-  const url = `${publicUrl}?t=${Date.now()}`;
+  // 2. Get public URL (clean — no cache-bust in DB)
+  const { data: urlData } = sb.storage.from('store-photos').getPublicUrl(path);
+  const publicUrl = urlData?.publicUrl;
+  if (!publicUrl) { console.error('[photo-upload] failed to get public URL'); return; }
+  console.log('[photo-upload] public URL:', publicUrl);
 
-  // 3. Persist URL in DB
+  // 3. Upsert into store_photos table
   const { data: { session } } = await sb.auth.getSession();
-  await sb.from('store_photos').upsert(
-    { store_id: selectedId, photo_url: url, uploaded_by: session?.user?.email ?? '', updated_at: new Date().toISOString() },
+  const { data: upsertData, error: upsertErr } = await sb.from('store_photos').upsert(
+    {
+      store_id:    selectedId,
+      photo_url:   publicUrl,
+      uploaded_by: session?.user?.email ?? '',
+      updated_at:  new Date().toISOString(),
+    },
     { onConflict: 'store_id' }
   );
+  if (upsertErr) { console.error('[photo-upload] DB upsert failed:', upsertErr); return; }
+  console.log('[photo-upload] DB upsert success:', upsertData);
 
-  // 4. Update in-memory cache + UI immediately
-  storePhotos[selectedId] = url;
+  // 4. Update in-memory cache + UI (cache-bust only for immediate display)
+  const displayUrl = `${publicUrl}?t=${Date.now()}`;
+  storePhotos[selectedId] = publicUrl;
   const bg   = document.getElementById('rp-photo-bg');
   const hero = document.getElementById('rp-photo');
-  if (bg)   { bg.style.backgroundImage = `url('${url}')`; bg.style.opacity = '1'; }
+  if (bg)   { bg.style.backgroundImage = `url('${displayUrl}')`; bg.style.opacity = '1'; }
   if (hero) { hero.style.background = ''; hero.classList.add('has-photo'); }
 }
 
