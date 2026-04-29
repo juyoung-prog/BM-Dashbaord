@@ -1471,11 +1471,9 @@ button.admin-locked {
 .btn-danger-ghost:hover { background: rgba(255,59,48,.05); border-color: var(--error); }
 
 /* Form settings */
-.settings-form-body { padding: var(--s4) var(--s5) var(--s5); }
 .form-group { margin-bottom: 0; }
 .form-label { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 3px; }
 .form-helper { font-size: 11.5px; color: var(--text-secondary); margin-bottom: var(--s3); }
-.form-divider { height: 1px; background: var(--border-subtle); margin: var(--s4) 0; }
 .form-row-toggle {
   display: flex; align-items: center; justify-content: space-between; gap: var(--s6);
 }
@@ -1604,25 +1602,6 @@ button.admin-locked {
 /* Sync spinner */
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Notes textareas */
-.form-textarea {
-  width: 100%; padding: var(--s3) var(--s3);
-  border: 1px solid var(--border-default);
-  border-radius: var(--r-sm);
-  font-family: var(--font-sans);
-  font-size: 12.5px; line-height: 1.6;
-  color: var(--text-primary);
-  background: var(--bg-base);
-  resize: vertical;
-  transition: border-color var(--dur) var(--ease);
-  margin-top: var(--s2);
-}
-.form-textarea:focus {
-  outline: none;
-  border-color: var(--border-strong);
-  background: var(--bg-surface);
-}
-.form-textarea::placeholder { color: var(--text-tertiary); }
 
 /* Modal */
 .modal-backdrop {
