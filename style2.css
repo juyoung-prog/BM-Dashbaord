@@ -1061,6 +1061,10 @@ svg { display: block; }
 .page { display: none; }
 .page.active { display: block; }
 
+/* Influencer Hub — full-width, no right panel */
+.layout:has(#page-influencers.active) .right-panel { display: none; }
+.layout:has(#page-influencers.active) .main { padding-right: var(--s8); }
+
 /* ═══════ OTHER PAGES ═══════ */
 .income-bar-row {
   display: flex; align-items: center; gap: var(--s3);
