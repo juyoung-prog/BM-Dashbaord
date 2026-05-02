@@ -24,7 +24,20 @@ const _AVC=[
   {bg:'#EAF3DE',tx:'#3B6D11'},{bg:'#FAEEDA',tx:'#854F0B'},
   {bg:'#FCEBEB',tx:'#A32D2D'}
 ];
-const _ETH_LBL={Black:'Black / African American',Hispanic:'Hispanic / Latino',Asian:'Asian / Korean',White:'White / Caucasian','South Asian':'South Asian',Mixed:'Mixed / Other'};
+const _ETH_LBL={
+  'Asian':'Asian',
+  'Black':'Black or African American',
+  'Hispanic':'Hispanic or Latino',
+  'White':'White',
+  'Native American':'Native American or Indigenous',
+  'Pacific Islander':'Native Hawaiian or Other Pacific Islander',
+  'Middle Eastern':'Middle Eastern or North African',
+  'Mixed':'Mixed / Multiracial',
+  'Other':'Other',
+  'Prefer not to say':'Prefer not to say',
+  // legacy values — kept so old records render gracefully
+  'South Asian':'South Asian'
+};
 
 // ══════════════════════════════════════
 // DATA
@@ -239,12 +252,16 @@ function _renderInfFilters(){
     </select></div>
     <div class="inf-fg"><label>Ethnicity</label><select onchange="_infF.eth=this.value;_renderInfStats();_renderInfTable()">
       <option value="">All</option>
-      <option value="Black" ${_infF.eth==='Black'?'selected':''}>Black / African American</option>
-      <option value="Hispanic" ${_infF.eth==='Hispanic'?'selected':''}>Hispanic / Latino</option>
-      <option value="Asian" ${_infF.eth==='Asian'?'selected':''}>Asian / Korean</option>
-      <option value="White" ${_infF.eth==='White'?'selected':''}>White / Caucasian</option>
-      <option value="South Asian" ${_infF.eth==='South Asian'?'selected':''}>South Asian</option>
-      <option value="Mixed" ${_infF.eth==='Mixed'?'selected':''}>Mixed / Other</option>
+      <option value="Asian" ${_infF.eth==='Asian'?'selected':''}>Asian</option>
+      <option value="Black" ${_infF.eth==='Black'?'selected':''}>Black or African American</option>
+      <option value="Hispanic" ${_infF.eth==='Hispanic'?'selected':''}>Hispanic or Latino</option>
+      <option value="White" ${_infF.eth==='White'?'selected':''}>White</option>
+      <option value="Native American" ${_infF.eth==='Native American'?'selected':''}>Native American or Indigenous</option>
+      <option value="Pacific Islander" ${_infF.eth==='Pacific Islander'?'selected':''}>Native Hawaiian or Other Pacific Islander</option>
+      <option value="Middle Eastern" ${_infF.eth==='Middle Eastern'?'selected':''}>Middle Eastern or North African</option>
+      <option value="Mixed" ${_infF.eth==='Mixed'?'selected':''}>Mixed / Multiracial</option>
+      <option value="Other" ${_infF.eth==='Other'?'selected':''}>Other</option>
+      <option value="Prefer not to say" ${_infF.eth==='Prefer not to say'?'selected':''}>Prefer not to say</option>
     </select></div>
     <div class="inf-fg"><label>Tier</label><select onchange="_infF.tier=this.value;_renderInfStats();_renderInfTable()">
       <option value="">All Tiers</option>
@@ -1045,12 +1062,16 @@ function _injectInfHTML(){
         <div class="inf-fg2" style="margin:0"><label>Ethnicity</label>
           <select id="inf-mo-eth" style="min-width:0">
             <option value="">— select —</option>
-            <option value="Black">Black / African American</option>
-            <option value="Hispanic">Hispanic / Latino</option>
-            <option value="Asian">Asian / Korean</option>
-            <option value="White">White / Caucasian</option>
-            <option value="South Asian">South Asian</option>
-            <option value="Mixed">Mixed / Other</option>
+            <option value="Asian">Asian</option>
+            <option value="Black">Black or African American</option>
+            <option value="Hispanic">Hispanic or Latino</option>
+            <option value="White">White</option>
+            <option value="Native American">Native American or Indigenous</option>
+            <option value="Pacific Islander">Native Hawaiian or Other Pacific Islander</option>
+            <option value="Middle Eastern">Middle Eastern or North African</option>
+            <option value="Mixed">Mixed / Multiracial</option>
+            <option value="Other">Other</option>
+            <option value="Prefer not to say">Prefer not to say</option>
           </select>
         </div>
         <div class="inf-fg2" style="margin:0"><label>Status</label>
