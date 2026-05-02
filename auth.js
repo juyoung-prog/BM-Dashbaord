@@ -52,10 +52,10 @@ async function initAuth() {
       return;
     }
   } else {
-    // Dashboard page — redirect to login if no session
+    // Dashboard page — skip auth redirect for local preview
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {
-      window.location.replace('login.html');
+      document.body.classList.remove('auth-pending');
       return;
     }
     await showDashboard(session.user);
