@@ -56,10 +56,18 @@
 .eth-White{background:var(--bg-subtle);color:var(--text-secondary)}
 .eth-South-Asian{background:rgba(204,121,167,.15);color:#8b4f7a}
 .eth-Mixed{background:var(--accent-dim2);color:var(--accent)}
+.eth-Native-American{background:rgba(166,97,26,.12);color:#7a4a10}
+.eth-Pacific-Islander{background:rgba(0,158,200,.12);color:#006b8a}
+.eth-Middle-Eastern{background:rgba(120,94,240,.12);color:#5c3fbf}
+.eth-Other{background:var(--bg-subtle);color:var(--text-secondary)}
+.eth-Prefer-not-to-say{background:var(--bg-subtle);color:var(--text-tertiary)}
 [data-theme="dark"] .eth-Black{background:rgba(0,114,178,.22);color:#56b6e9}
 [data-theme="dark"] .eth-Hispanic{background:rgba(230,159,0,.2);color:#e6c84a}
 [data-theme="dark"] .eth-Asian{background:rgba(0,158,115,.2);color:#4db89a}
 [data-theme="dark"] .eth-South-Asian{background:rgba(204,121,167,.2);color:#d495bc}
+[data-theme="dark"] .eth-Native-American{background:rgba(166,97,26,.2);color:#c8853a}
+[data-theme="dark"] .eth-Pacific-Islander{background:rgba(0,158,200,.2);color:#3dc4e0}
+[data-theme="dark"] .eth-Middle-Eastern{background:rgba(120,94,240,.2);color:#a98df0}
 
 /* ── Tier chips ── */
 .tier-chip{display:inline-flex;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;white-space:nowrap}
