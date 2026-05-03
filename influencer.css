@@ -454,6 +454,7 @@
   border-bottom:1px solid var(--border-subtle);
 }
 .inf-side-store-row:last-of-type{border-bottom:none}
+.inf-side-store-code{font-size:9px;font-weight:600;font-family:var(--font-mono);color:var(--text-tertiary);flex-shrink:0;min-width:26px;letter-spacing:.02em}
 .inf-side-store-name{flex:1;font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis}
 .inf-side-store-count{
   font-size:10px;font-weight:600;font-family:var(--font-mono);

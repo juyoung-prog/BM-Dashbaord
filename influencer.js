@@ -198,16 +198,35 @@ function _syncFab(){
 
 function _renderStorePanelContent(){
   try{
-    const stores=typeof STORES!=='undefined'?STORES:[];
-    const byStore=stores.map(s=>({
-      id:s.id, name:s.name, state:s.state,
-      infCount:BM_INFS.filter(i=>(i.storeIds||[]).includes(s.id)).length,
-    })).sort((a,b)=>b.infCount-a.infCount);
-    const withInfs=byStore.filter(s=>s.infCount>0);
-    const gaStoreIds=stores.filter(s=>s.state==='GA').map(s=>s.id);
-    const flStoreIds=stores.filter(s=>s.state==='FL').map(s=>s.id);
-    const gaInfs=BM_INFS.filter(i=>i.status==='Active'&&(i.storeIds||[]).some(id=>gaStoreIds.includes(id))).length;
-    const flInfs=BM_INFS.filter(i=>i.status==='Active'&&(i.storeIds||[]).some(id=>flStoreIds.includes(id))).length;
+    const GA_STORES=[
+      {code:'G01',id:1, name:'Camp Creek'},
+      {code:'G02',id:4, name:'Duluth'},
+      {code:'G03',id:6, name:'Greenbriar'},
+      {code:'G04',id:9, name:'Morrow'},
+      {code:'G05',id:7, name:'Headland'},
+      {code:'G06',id:10,name:'Old National'},
+      {code:'G07',id:12,name:'Riverdale'},
+      {code:'G08',id:3, name:'Douglasville'},
+      {code:'G09',id:2, name:'Columbus'},
+    ];
+    const FL_STORES=[
+      {code:'BF1',id:11,name:'Orlando'},
+      {code:'BF2',id:8, name:'Miami Gardens'},
+      {code:'BF3',id:5, name:'Florida Mall'},
+      {code:'BF4',id:13,name:'Tamarac'},
+      {code:'BF5',id:0, name:'West Palm Beach'},
+    ];
+    const gaIds=GA_STORES.map(s=>s.id);
+    const flIds=FL_STORES.map(s=>s.id);
+    const countFor=id=>BM_INFS.filter(i=>(i.storeIds||[]).includes(id)).length;
+    const gaInfs=BM_INFS.filter(i=>i.status==='Active'&&(i.storeIds||[]).some(id=>gaIds.includes(id))).length;
+    const flInfs=BM_INFS.filter(i=>i.status==='Active'&&(i.storeIds||[]).some(id=>flIds.includes(id))).length;
+    const storeRow=s=>`
+      <div class="inf-side-store-row">
+        <span class="inf-side-store-code">${s.code}</span>
+        <span class="inf-side-store-name">${s.name}</span>
+        <span class="inf-side-store-count">${countFor(s.id)}</span>
+      </div>`;
     return`
       <div class="inf-side-stat-row">
         <div class="inf-side-stat"><div class="inf-side-stat-val">${BM_INFS.length}</div><div class="inf-side-stat-lbl">Total</div></div>
@@ -220,14 +239,11 @@ function _renderStorePanelContent(){
         <div class="inf-side-region"><span class="inf-store-chip inf-chip-FL" style="font-size:9px;padding:1px 6px">FL</span><span class="inf-side-region-val">${flInfs} active</span></div>
       </div>
       <div class="inf-side-divider"></div>
-      <div class="inf-side-section-lbl">By Store</div>
-      ${withInfs.length?withInfs.map(s=>`
-        <div class="inf-side-store-row">
-          <span class="inf-store-chip inf-chip-${s.state}" style="font-size:9px;padding:1px 5px;flex-shrink:0">${s.state}</span>
-          <span class="inf-side-store-name">${s.name}</span>
-          <span class="inf-side-store-count">${s.infCount}</span>
-        </div>`).join(''):`<div style="font-size:12px;color:var(--text-tertiary);padding:6px 0">No store assignments yet</div>`}
-      ${stores.length&&withInfs.length<stores.length?`<div class="inf-side-note">${stores.length-withInfs.length} store${stores.length-withInfs.length!==1?'s':''} without influencers</div>`:''}
+      <div class="inf-side-section-lbl">GA Stores</div>
+      ${GA_STORES.map(storeRow).join('')}
+      <div class="inf-side-divider" style="margin:10px 0 8px"></div>
+      <div class="inf-side-section-lbl">FL Stores</div>
+      ${FL_STORES.map(storeRow).join('')}
     `;
   }catch(e){
     return`<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">Store data unavailable</div>`;
