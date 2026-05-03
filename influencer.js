@@ -86,8 +86,9 @@ function _initSample(){
 function _ini(n){return(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
 function _aviSt(name){const c=_AVC[(name.charCodeAt(0)||0)%_AVC.length];return`background:${c.bg};color:${c.tx}`}
 function _fmtN(n){if(!n)return'0';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(0)+'K';return String(n)}
-function _tier(f){if(f<10000)return'Nano';if(f<100000)return'Micro';if(f<1000000)return'Macro';return'Mega'}
-function _tierChip(f){const t=_tier(f);return`<span class="tier-chip tier-${t}">${t}</span>`}
+function _tier(f){if(f>=100000)return'Macro';if(f>=10000)return'Tier1';if(f>=3000)return'Tier2';return'Tier3'}
+const _TIER_LBL={Macro:'Macro',Tier1:'Tier 1',Tier2:'Tier 2',Tier3:'Tier 3'};
+function _tierChip(f){const t=_tier(f);return`<span class="tier-chip tier-${t}">${_TIER_LBL[t]}</span>`}
 function _ethChip(e){if(!e)return'';return`<span class="eth-chip eth-${e.replace(/\s+/g,'-')}">${_ETH_LBL[e]||e}</span>`}
 function _ctChip(t){const m={'K-beauty':'kbeauty','General Store':'general','Event':'event'};return`<span class="ct-chip ct-${m[t]||'general'}">${t}</span>`}
 function _storeChip(storeId){const st=typeof STORES!=='undefined'&&STORES.find(s=>s.id===storeId);if(!st)return'';return`<span class="inf-store-chip inf-chip-${st.state}">${st.name}</span>`}
@@ -149,7 +150,11 @@ function _renderInfPanel(){
         <div class="card">
           <div class="card-header">
             <div class="card-title" id="inf-count-lbl">All Influencers</div>
-            <button class="inf-btn-p" onclick="openAddInf()">+ Add Influencer</button>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <button class="inf-btn-g" onclick="infImportCSV()">↑ Import CSV</button>
+              <button class="inf-btn-g" onclick="infExportCSV()">↓ Export CSV</button>
+              <button class="inf-btn-p" onclick="openAddInf()">+ Add Influencer</button>
+            </div>
           </div>
           <div class="inf-tbl-scroll">
             <div class="inf-tbl-head">
@@ -158,9 +163,8 @@ function _renderInfPanel(){
               <div class="inf-th">Ethnicity</div>
               <div class="inf-th">Tier</div>
               <div class="inf-th">Stores</div>
-              <div class="inf-th">Campaign Types</div>
+              <div class="inf-th">Event / Campaign</div>
               <div class="inf-th">Followers</div>
-              <div class="inf-th">Status</div>
               <div class="inf-th"></div>
             </div>
             <div id="inf-tbl-body"></div>
@@ -257,11 +261,9 @@ function _renderInfFilters(){
   el.innerHTML=`
     <div class="inf-fg"><label>Search</label><input style="width:140px" placeholder="Name or handle…" value="${_esc(_infF.q)}" oninput="_infF.q=this.value;_renderInfStats();_renderInfTable()"></div>
     <div class="inf-fg"><label>Store</label><select onchange="_infF.store=this.value;_renderInfStats();_renderInfTable()"><option value="">All Stores</option>${storeOpts}</select></div>
-    <div class="inf-fg"><label>Campaign Type</label><select onchange="_infF.ctype=this.value;_renderInfStats();_renderInfTable()">
-      <option value="">All Types</option>
-      <option value="K-beauty" ${_infF.ctype==='K-beauty'?'selected':''}>K-beauty</option>
-      <option value="General Store" ${_infF.ctype==='General Store'?'selected':''}>General Store</option>
-      <option value="Event" ${_infF.ctype==='Event'?'selected':''}>Event</option>
+    <div class="inf-fg"><label>Event / Campaign</label><select onchange="_infF.ctype=this.value;_renderInfStats();_renderInfTable()">
+      <option value="">All Events</option>
+      ${[...new Set(BM_INFS.flatMap(i=>i.campaignTypes||[]))].sort().map(t=>`<option value="${_esc(t)}" ${_infF.ctype===t?'selected':''}>${_esc(t)}</option>`).join('')}
     </select></div>
     <div class="inf-fg"><label>Platform</label><select onchange="_infF.plat=this.value;_renderInfStats();_renderInfTable()">
       <option value="">All</option>
@@ -284,10 +286,10 @@ function _renderInfFilters(){
     </select></div>
     <div class="inf-fg"><label>Tier</label><select onchange="_infF.tier=this.value;_renderInfStats();_renderInfTable()">
       <option value="">All Tiers</option>
-      <option value="Nano" ${_infF.tier==='Nano'?'selected':''}>Nano &lt;10K</option>
-      <option value="Micro" ${_infF.tier==='Micro'?'selected':''}>Micro 10K–100K</option>
-      <option value="Macro" ${_infF.tier==='Macro'?'selected':''}>Macro 100K–1M</option>
-      <option value="Mega" ${_infF.tier==='Mega'?'selected':''}>Mega 1M+</option>
+      <option value="Macro" ${_infF.tier==='Macro'?'selected':''}>Macro: Over 100K</option>
+      <option value="Tier1" ${_infF.tier==='Tier1'?'selected':''}>Tier 1: 10K+</option>
+      <option value="Tier2" ${_infF.tier==='Tier2'?'selected':''}>Tier 2: 3K–9K</option>
+      <option value="Tier3" ${_infF.tier==='Tier3'?'selected':''}>Tier 3: Under 3K</option>
     </select></div>
     <div class="inf-fg"><label>Follower Range</label>
       <div class="inf-range-row">
@@ -296,12 +298,6 @@ function _renderInfFilters(){
         <input class="inf-ri" placeholder="Max" type="number" value="${_infF.fmax}" oninput="_infF.fmax=this.value;_renderInfStats();_renderInfTable()">
       </div>
     </div>
-    <div class="inf-fg"><label>Status</label><select onchange="_infF.status=this.value;_renderInfStats();_renderInfTable()">
-      <option value="">All</option>
-      <option value="Active" ${_infF.status==='Active'?'selected':''}>Active</option>
-      <option value="Prospect" ${_infF.status==='Prospect'?'selected':''}>Prospect</option>
-      <option value="Inactive" ${_infF.status==='Inactive'?'selected':''}>Inactive</option>
-    </select></div>
     <div class="inf-fg" style="align-self:flex-end"><button class="inf-btn-g" onclick="_infF={q:'',store:'',ctype:'',plat:'',eth:'',tier:'',fmin:'',fmax:'',status:''};_renderInfPanel()">Clear</button></div>`;
 }
 
@@ -356,7 +352,6 @@ function _renderInfTable(){
       <div class="inf-td"><div style="display:flex;flex-wrap:wrap;gap:2px">${storeChips||'<span style="color:var(--text-tertiary);font-size:11px">—</span>'}</div></div>
       <div class="inf-td"><div style="display:flex;flex-wrap:wrap">${ctChips||'<span style="color:var(--text-tertiary);font-size:11px">—</span>'}</div></div>
       <div class="inf-td" style="font-family:var(--font-mono)">${_fmtN(inf.followers)}</div>
-      <div class="inf-td">${_sBadge(inf.status)}</div>
       <div class="inf-td" style="display:flex;align-items:center;gap:8px">
         <div class="inf-row-actions" onclick="event.stopPropagation()">
           <button class="inf-btn-xs" onclick="openEditInf(${inf.id})">Edit</button>
@@ -421,7 +416,7 @@ function openInfDrawer(id){
     </div>
 
     <div class="inf-dsec">
-      <div class="inf-dsec-head">Platforms & Campaign Types</div>
+      <div class="inf-dsec-head">Platforms & Event / Campaign</div>
       <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:7px">
         ${(inf.platforms||[]).map(p=>`<span class="badge badge-green" style="font-size:10px">${p}</span>`).join('')||'<span style="color:var(--text-tertiary);font-size:11px">None set</span>'}
       </div>
@@ -688,6 +683,7 @@ function _populateInfModal(inf){
   const fv=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||''};
   fv('inf-mo-name',inf?.name);
   fv('inf-mo-handle',inf?.igHandle||inf?.ttHandle);
+  fv('inf-mo-email',inf?.email);
   fv('inf-mo-followers',inf?.followers);
   const fsel=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||''};
   fsel('inf-mo-eth',inf?.ethnicity);
@@ -832,7 +828,7 @@ function saveInf(){
     // Populate legacy URL fields from links for backward compat (drawer, table, etc.)
     igUrl:links[0]||'', ttUrl:links[1]||'', ytUrl:links[2]||'',
     links,
-    email:'', loc:'',
+    email:v('inf-mo-email'), loc:'',
     ethnicity:v('inf-mo-eth'), category:'Beauty', status:v('inf-mo-status')||'Prospect',
     followers:parseInt(v('inf-mo-followers'))||0, eng:0, fee:0,
     notes:document.getElementById('inf-mo-notes')?.value.trim()||'',
@@ -1012,6 +1008,271 @@ function saveVideo(){
 function deleteVideo(id){if(!confirm('Delete video record?'))return;BM_VIDEOS=BM_VIDEOS.filter(v=>v.id!==id);_saveInf();_renderVidPanel();}
 
 // ══════════════════════════════════════
+// CSV IMPORT / EXPORT
+// ══════════════════════════════════════
+
+// Store-code → internal store ID (mirrors _renderStorePanelContent)
+const _CSV_STORE_MAP={
+  G01:1,G02:4,G03:6,G04:9,G05:7,G06:10,G07:12,G08:3,G09:2,
+  BF1:11,BF2:8,BF3:5,BF4:13,BF5:0
+};
+
+// Parse raw CSV text → array of header-keyed row objects.
+// Handles quoted fields, embedded commas, double-quote escapes, CRLF.
+function _parseCSV(text){
+  text=(text||'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();
+  if(!text)return[];
+  const splitRow=row=>{
+    const cells=[];let cur='';let q=false;
+    for(let i=0;i<row.length;i++){
+      const c=row[i];
+      if(c==='"'){if(q&&row[i+1]==='"'){cur+='"';i++;}else q=!q;}
+      else if(c===','&&!q){cells.push(cur);cur='';}
+      else cur+=c;
+    }
+    cells.push(cur);return cells;
+  };
+  const lines=[];let cur='';let q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c==='"'){if(q&&text[i+1]==='"'){cur+='"';i++;}else q=!q;}
+    else if(c==='\n'&&!q){lines.push(cur);cur='';}
+    else cur+=c;
+  }
+  if(cur)lines.push(cur);
+  if(lines.length<2)return[];
+  const headers=splitRow(lines[0]).map(h=>h.trim());
+  return lines.slice(1).filter(l=>l.trim()).map(line=>{
+    const vals=splitRow(line);
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=(vals[i]||'').trim());
+    return obj;
+  });
+}
+
+// Truthy check for Yes/No/0/N cells
+function _csvTruthy(v){
+  const s=String(v||'').trim().toLowerCase();
+  return s!==''&&s!=='0'&&s!=='n'&&s!=='no'&&s!=='false'&&s!=='none'&&s!=='-'&&s!=='na'&&s!=='n/a';
+}
+
+// Parse follower counts that may include K / M suffixes
+function _csvFollowers(s){
+  const v=String(s||'').trim().replace(/,/g,'').replace(/\s/g,'');
+  if(!v||v==='-'||v.toLowerCase()==='n/a')return 0;
+  if(/^\d+\.?\d*[kK]$/.test(v))return Math.round(parseFloat(v)*1000);
+  if(/^\d+\.?\d*[mM]$/.test(v))return Math.round(parseFloat(v)*1000000);
+  return parseInt(v)||0;
+}
+
+// Detect platforms from URL / Social Media label / handle
+function _csvPlatforms(url,socialMedia,handle){
+  const all=[url,socialMedia,handle].map(s=>(s||'').toLowerCase()).join(' ');
+  const p=[];
+  if(all.includes('instagram')||/^@/.test(handle))p.push('IG');
+  if(all.includes('tiktok'))p.push('TT');
+  if(all.includes('youtube'))p.push('YT');
+  return p.length?p:['IG'];
+}
+
+// Split a delimited events string into an array
+function _csvEvents(v){
+  return String(v||'').split(/[,;|\/\\]/).map(s=>s.trim()).filter(Boolean);
+}
+
+// Scan all columns for invitation patterns (e.g. "G02_Kbeauty Invitation", "BF3_General_Invitation")
+// and populate storeIds + campaignTypes from truthy cells.
+function _csvInvCols(row,storeIds,campaignTypes){
+  Object.keys(row).forEach(col=>{
+    if(!_csvTruthy(row[col]))return;
+    const m=col.match(/^(G\d{2}|BF\d+)[_\s]*(kbeauty|k-?beauty|general|event)/i);
+    if(!m)return;
+    const code=m[1].toUpperCase();
+    const typeRaw=m[2].toLowerCase().replace(/-/g,'');
+    const storeId=_CSV_STORE_MAP[code];
+    if(storeId!==undefined&&!storeIds.includes(storeId))storeIds.push(storeId);
+    const evtName=typeRaw==='kbeauty'?'K-beauty':typeRaw==='general'?'General Store':'Event';
+    if(!campaignTypes.includes(evtName))campaignTypes.push(evtName);
+  });
+}
+
+// Find an existing influencer matching this row (email → handle → link)
+function _csvFindDup(email,handle,links){
+  const em=(email||'').toLowerCase().trim();
+  const hd=_normHandle(handle);
+  const lks=(links||[]).map(u=>_normUrl(u)).filter(Boolean);
+  return BM_INFS.find(inf=>{
+    if(em&&inf.email&&inf.email.toLowerCase().trim()===em)return true;
+    if(hd&&inf.igHandle&&_normHandle(inf.igHandle)===hd)return true;
+    if(lks.length)return[...(inf.links||[]),inf.igUrl,inf.ttUrl,inf.ytUrl]
+      .filter(Boolean).some(u=>lks.includes(_normUrl(u)));
+    return false;
+  })||null;
+}
+
+// Map one CSV row object to the dashboard influencer schema
+function _csvRowToInf(row){
+  const c=k=>(row[k]||'').trim();
+  const name=c('Name')||c('name')||'';
+  const handle=c('Handle')||c('handle')||'';
+  const email=c('Email')||c('email')||'';
+  if(!name&&!email&&!handle)return null; // fully blank row
+  const links=[c('Social Media_url'),c('Social Media url'),c('Link'),c('Url'),c('URL')]
+    .filter(v=>v&&v.startsWith('http'));
+  const followers=_csvFollowers(c('Follower')||c('Followers')||c('followers'));
+  const platforms=_csvPlatforms(links[0]||'',c('Social Media')||c('Platform')||'',handle);
+  const campaignTypes=_csvEvents(c('Events')||c('Event')||'');
+  const storeIds=[];
+  _csvInvCols(row,storeIds,campaignTypes);
+  const noteParts=[
+    c('Note')||c('Notes')||'',
+    c('DM Sent')?'DM Sent: '+c('DM Sent'):'',
+    c('Attend')?'Attend: '+c('Attend'):'',
+    c('Agreement')?'Agreement: '+c('Agreement'):'',
+    c('Shared')?'Shared: '+c('Shared'):'',
+  ].filter(Boolean);
+  return{
+    name,
+    igHandle:handle,ttHandle:'',
+    igUrl:links[0]||'',ttUrl:links[1]||'',ytUrl:links[2]||'',
+    links,
+    email,
+    photoUrl:c('Profile')||c('Image')||c('photo')||'',
+    photoData:'',
+    ethnicity:'',category:'Beauty',status:'Prospect',
+    followers,eng:0,fee:0,loc:'',
+    platforms,storeIds,
+    campaignTypes:[...new Set(campaignTypes)],
+    notes:noteParts.join(' | '),
+  };
+}
+
+// Create a credit record from a CSV row if Credit amount is present
+function _csvMakeCredit(row,infId,infName,out){
+  const c=k=>(row[k]||'').trim();
+  const amount=parseInt(c('Credit'))||0;
+  if(!amount)return;
+  const serial=c('Barcode')||c('barcode')||`CSV-${Date.now()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+  out.push({
+    id:Date.now()+Math.random(),
+    infId,infName,storeId:null,storeCode:'',
+    serial,amount,
+    issued:c('Month')||new Date().toISOString().split('T')[0],
+    expiry:'',
+    status:_csvTruthy(c('Used'))?'Used':'Unused'
+  });
+}
+
+// Process all parsed rows: create new influencers, merge duplicates
+function _importInfluencers(rows){
+  let imported=0,updated=0,skipped=0;
+  const newCredits=[];
+  rows.forEach(row=>{
+    const inf=_csvRowToInf(row);
+    if(!inf){skipped++;return;}
+    const dup=_csvFindDup(inf.email,inf.igHandle,inf.links);
+    if(dup){
+      let changed=false;
+      const merge=(key,val)=>{if(!dup[key]&&val){dup[key]=val;changed=true;}};
+      merge('email',inf.email);merge('igHandle',inf.igHandle);
+      merge('photoUrl',inf.photoUrl);merge('followers',inf.followers);merge('notes',inf.notes);
+      if(inf.platforms.length){
+        const u=[...new Set([...(dup.platforms||[]),...inf.platforms])];
+        if(u.length>(dup.platforms||[]).length){dup.platforms=u;changed=true;}
+      }
+      if(inf.storeIds.length){
+        const u=[...new Set([...(dup.storeIds||[]),...inf.storeIds])];
+        if(u.length>(dup.storeIds||[]).length){dup.storeIds=u;changed=true;}
+      }
+      if(inf.campaignTypes.length){
+        const u=[...new Set([...(dup.campaignTypes||[]),...inf.campaignTypes])];
+        if(u.length>(dup.campaignTypes||[]).length){dup.campaignTypes=u;changed=true;}
+      }
+      if(changed)updated++;else skipped++;
+      _csvMakeCredit(row,dup.id,dup.name,newCredits);
+    }else{
+      inf.id=Date.now()+Math.random();
+      BM_INFS.push(inf);
+      _csvMakeCredit(row,inf.id,inf.name,newCredits);
+      imported++;
+    }
+  });
+  BM_CREDITS.push(...newCredits);
+  _saveInf();
+  return{imported,updated,skipped};
+}
+
+// Trigger the hidden file input
+function infImportCSV(){
+  const el=document.getElementById('inf-csv-input');
+  if(el){el.value='';el.click();}
+}
+
+// Called when the user selects a CSV file
+function _onCSVFileChange(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const rows=_parseCSV(ev.target.result);
+      if(!rows.length){alert('No data rows found in CSV.');return;}
+      const stats=_importInfluencers(rows);
+      _renderInfPanel();
+      _showImportSummary(stats,rows.length);
+    }catch(err){alert('CSV import failed: '+err.message);}
+  };
+  reader.readAsText(file);
+}
+
+function _showImportSummary(stats,total){
+  const body=document.getElementById('inf-import-body');
+  if(body)body.innerHTML=`
+    <div class="inf-imp-row"><span>Rows in file</span><strong>${total}</strong></div>
+    <div class="inf-imp-row inf-imp-new"><span>Imported (new)</span><strong>${stats.imported}</strong></div>
+    <div class="inf-imp-row inf-imp-upd"><span>Updated (merged)</span><strong>${stats.updated}</strong></div>
+    <div class="inf-imp-row inf-imp-skip"><span>Skipped</span><strong>${stats.skipped}</strong></div>`;
+  document.getElementById('inf-import-mo')?.classList.add('open');
+}
+function infCloseImportSummary(){
+  document.getElementById('inf-import-mo')?.classList.remove('open');
+}
+
+// Export all influencers as a CSV download
+function infExportCSV(){
+  const esc=v=>{
+    const s=String(v==null?'':v);
+    return(s.includes(',')||s.includes('"')||s.includes('\n'))?`"${s.replace(/"/g,'""')}"`:s;
+  };
+  const storeLabel=id=>{
+    const st=typeof STORES!=='undefined'&&STORES.find(s=>s.id===id);
+    return st?`${st.name} (${st.state})`:'';
+  };
+  const headers=['Name','Handle','Email','Social Links','Followers','Tier',
+    'Ethnicity','Platforms','Event / Campaign','Assigned Stores','Status','Notes'];
+  const rows=BM_INFS.map(inf=>[
+    inf.name||'',
+    inf.igHandle||'',
+    inf.email||'',
+    [...new Set([...(inf.links||[]),inf.igUrl,inf.ttUrl,inf.ytUrl].filter(Boolean))].join(' | '),
+    inf.followers||0,
+    _TIER_LBL[_tier(inf.followers)]||'',
+    inf.ethnicity||'',
+    (inf.platforms||[]).join(' | '),
+    (inf.campaignTypes||[]).join(' | '),
+    (inf.storeIds||[]).map(storeLabel).filter(Boolean).join(' | '),
+    inf.status||'',
+    inf.notes||''
+  ].map(esc).join(','));
+  const csv=[headers.map(esc).join(','),...rows].join('\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='influencers_export.csv';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════
 // INJECT HTML (modals + drawer)
 // ══════════════════════════════════════
 function _injectInfHTML(){
@@ -1062,6 +1323,7 @@ function _injectInfHTML(){
         <div style="flex:1;display:flex;flex-direction:column;gap:8px">
           <div class="inf-fg2" style="margin:0"><label>Full Name *</label><input id="inf-mo-name" placeholder="Sarah Kim"></div>
           <div class="inf-fg2" style="margin:0"><label>Social Handle</label><input id="inf-mo-handle" placeholder="@username"></div>
+          <div class="inf-fg2" style="margin:0"><label>Email Address</label><input id="inf-mo-email" type="email" placeholder="name@example.com"></div>
         </div>
       </div>
 
@@ -1110,13 +1372,13 @@ function _injectInfHTML(){
       <button type="button" class="inf-add-link-btn" onclick="infAddLinkRow()">+ Add link</button>
     </div>
 
-    <!-- ── Section 3: Content Tags ── -->
+    <!-- ── Section 3: Event / Campaign ── -->
     <div class="inf-form-section">
-      <div class="inf-form-sec-lbl">Content Tags</div>
+      <div class="inf-form-sec-lbl">Event / Campaign</div>
       <div class="inf-tag-picker" id="inf-tag-picker">
         <div class="inf-tag-field" id="inf-tag-field" onclick="infTagFieldClick(event)">
           <div class="inf-tag-chips" id="inf-tag-chips"></div>
-          <input class="inf-tag-search" id="inf-tag-search" placeholder="Search or add tag…" oninput="infTagPickerFilter(this.value)" onkeydown="infTagPickerKeydown(event)" onclick="event.stopPropagation()" autocomplete="off">
+          <input class="inf-tag-search" id="inf-tag-search" placeholder="Search or add event / campaign…" oninput="infTagPickerFilter(this.value)" onkeydown="infTagPickerKeydown(event)" onclick="event.stopPropagation()" autocomplete="off">
         </div>
         <div class="inf-tag-dropdown" id="inf-tag-dropdown">
           <div class="inf-tag-list" id="inf-tag-list"></div>
@@ -1201,6 +1463,19 @@ function _injectInfHTML(){
     <div class="inf-mact">
       <button class="inf-btn-g" onclick="document.getElementById('inf-mo-vid').classList.remove('open')">Cancel</button>
       <button class="inf-btn-p" onclick="saveVideo()">Save Video</button>
+    </div>
+  </div></div>
+
+  <!-- CSV file input (hidden) -->
+  <input type="file" id="inf-csv-input" accept=".csv,text/csv" style="display:none" onchange="_onCSVFileChange(event)">
+
+  <!-- Import summary modal -->
+  <div class="inf-mo" id="inf-import-mo" onclick="if(event.target===this)infCloseImportSummary()">
+  <div class="inf-md" style="max-width:360px">
+    <h2 style="margin-bottom:18px">Import Complete</h2>
+    <div id="inf-import-body"></div>
+    <div class="inf-mact">
+      <button class="inf-btn-p" onclick="infCloseImportSummary()">Done</button>
     </div>
   </div></div>`;
   document.body.appendChild(div);
