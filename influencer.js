@@ -151,17 +151,20 @@ function _renderInfPanel(){
             <div class="card-title" id="inf-count-lbl">All Influencers</div>
             <button class="inf-btn-p" onclick="openAddInf()">+ Add Influencer</button>
           </div>
-          <div class="inf-tbl-head">
-            <div class="inf-th"></div>
-            <div class="inf-th">Influencer</div>
-            <div class="inf-th">Ethnicity</div>
-            <div class="inf-th">Tier</div>
-            <div class="inf-th">Stores</div>
-            <div class="inf-th">Campaign Types</div>
-            <div class="inf-th">Followers</div>
-            <div class="inf-th">Status</div>
+          <div class="inf-tbl-scroll">
+            <div class="inf-tbl-head">
+              <div class="inf-th"></div>
+              <div class="inf-th">Influencer</div>
+              <div class="inf-th">Ethnicity</div>
+              <div class="inf-th">Tier</div>
+              <div class="inf-th">Stores</div>
+              <div class="inf-th">Campaign Types</div>
+              <div class="inf-th">Followers</div>
+              <div class="inf-th">Status</div>
+              <div class="inf-th"></div>
+            </div>
+            <div id="inf-tbl-body"></div>
           </div>
-          <div id="inf-tbl-body"></div>
         </div>
       </div>
       <div class="inf-split-side${_infStorePanelOpen?'':' collapsed'}" id="inf-split-side">

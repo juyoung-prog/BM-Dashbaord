@@ -26,20 +26,22 @@
 .inf-ss{font-size:11px;margin-top:2px;color:var(--text-tertiary)}
 
 /* ── Influencer table ── */
-.inf-tbl-head,.inf-tbl-row{display:grid;grid-template-columns:40px 1fr 120px 76px 130px 130px 88px 80px;gap:0;padding:0 16px;align-items:center}
+.inf-tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.inf-tbl-head,.inf-tbl-row{display:grid;grid-template-columns:36px minmax(120px,1fr) 146px 60px 106px 110px 64px 72px 52px;gap:0;padding:0 16px;align-items:center}
 .inf-tbl-head{border-bottom:1px solid var(--border-default);padding-top:4px;padding-bottom:4px}
 .inf-th{padding:8px;font-size:10px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em}
 .inf-tbl-row{border-bottom:1px solid var(--border-subtle);cursor:pointer;transition:background var(--dur) var(--ease)}
 .inf-tbl-row:hover{background:var(--bg-subtle)}
 .inf-tbl-row:last-child{border-bottom:none}
-.inf-td{padding:11px 8px;font-size:12px}
+.inf-td{padding:11px 8px;font-size:12px;min-width:0}
 
 /* ── Avatar ── */
 .inf-av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;overflow:hidden}
 .inf-av img{width:100%;height:100%;object-fit:cover}
-.inf-name-cell{display:flex;align-items:center;gap:9px}
-.inf-name-info strong{display:block;font-weight:500;font-size:13px;line-height:1.3}
-.inf-name-info span{font-size:10px;color:var(--text-tertiary)}
+.inf-name-cell{display:flex;align-items:center;gap:9px;min-width:0;overflow:hidden}
+.inf-name-info{min-width:0;overflow:hidden}
+.inf-name-info strong{display:block;font-weight:500;font-size:13px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inf-name-info span{font-size:10px;color:var(--text-tertiary);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ── Social links ── */
 .inf-sl-link{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;text-decoration:none;margin:1px}
@@ -49,7 +51,7 @@
 [data-theme="dark"] .sl-yt{background:rgba(183,28,28,.2);color:#ef9a9a}
 
 /* ── Ethnicity chips ── */
-.eth-chip{display:inline-flex;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;margin:1px;white-space:nowrap}
+.eth-chip{display:inline-block;max-width:100%;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;margin:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
 .eth-Black{background:rgba(0,114,178,.12);color:#0072B2}
 .eth-Hispanic{background:rgba(230,159,0,.12);color:#b07800}
 .eth-Asian{background:rgba(0,158,115,.12);color:#007a5e}
@@ -519,7 +521,8 @@
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .inf-stats-strip{grid-template-columns:1fr 1fr}
-  .inf-tbl-head,.inf-tbl-row{grid-template-columns:36px 1fr 90px 70px 70px}
+  /* Show: avatar, name, ethnicity, tier, stores — hide cols 6-9 */
+  .inf-tbl-head,.inf-tbl-row{grid-template-columns:36px minmax(0,1fr) 110px 54px 90px}
   .inf-td:nth-child(n+6){display:none}
   .inf-th:nth-child(n+6){display:none}
   .inf-drw{width:100%;max-width:100%}
