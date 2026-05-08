@@ -374,6 +374,7 @@
 .inf-store-inline{display:flex;flex-wrap:wrap;gap:4px 20px}
 .inf-ck-store{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-primary);cursor:pointer;white-space:nowrap}
 .inf-ck-store input{cursor:pointer;accent-color:var(--primary)}
+.inf-ck-store-code{font-family:var(--font-mono);font-size:10px;font-weight:600;color:var(--text-tertiary);min-width:28px}
 
 /* ══════════════════════════════
    SPLIT LAYOUT (Influencers tab)
@@ -533,6 +534,15 @@
   .inf-split-side{width:100%!important;margin-left:0!important;margin-top:14px;opacity:1!important}
   .inf-split-side.collapsed{max-height:0;overflow:hidden;margin-top:0;opacity:0!important}
 }
+
+/* ── Per-event status list (modal Section 3) ── */
+.inf-evt-status-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-tertiary);margin:12px 0 6px}
+.inf-evt-status-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:var(--r-sm);background:var(--bg-subtle);margin-bottom:4px}
+.inf-evt-status-row:last-child{margin-bottom:0}
+.inf-evt-status-name{flex:1;font-size:12px;font-weight:500;color:var(--text-primary);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inf-evt-status-sel{padding:4px 8px;border-radius:var(--r-xs);border:1px solid var(--border-default);background:var(--bg-base);color:var(--text-primary);font-size:11px;font-family:inherit;outline:none;flex-shrink:0;cursor:pointer}
+.inf-evt-status-sel:focus{border-color:var(--border-strong);box-shadow:0 0 0 2px var(--primary-dim)}
+.inf-evt-status-empty{font-size:11px;color:var(--text-tertiary);padding:6px 2px}
 
 /* ── CSV import summary rows ── */
 .inf-imp-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:var(--r-sm);margin-bottom:6px;font-size:13px;background:var(--bg-subtle);color:var(--text-secondary)}
