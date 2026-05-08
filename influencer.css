@@ -14,6 +14,15 @@
 .inf-fg label{font-size:10px;font-weight:500;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.05em}
 .inf-fg input,.inf-fg select{padding:6px 10px;border-radius:var(--r-sm);border:1px solid var(--border-default);background:var(--bg-base);color:var(--text-primary);font-size:12px;font-family:inherit;outline:none;min-width:100px}
 .inf-fg input:focus,.inf-fg select:focus{border-color:var(--border-strong);box-shadow:0 0 0 3px var(--primary-dim)}
+.inf-search-wrap{position:relative;display:flex;align-items:center}
+.inf-search-input{padding-right:26px!important;min-width:180px!important}
+.inf-search-clear{position:absolute;right:5px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:18px;height:18px;padding:0;background:none;border:none;border-radius:50%;cursor:pointer;color:var(--text-tertiary);font-size:15px;line-height:1;transition:background var(--dur),color var(--dur)}
+.inf-search-clear:hover{background:var(--bg-subtle);color:var(--text-primary)}
+.inf-fg--search{flex:2 1 240px}
+.inf-fg--search label{color:var(--text-secondary);font-weight:700;font-size:11px}
+.inf-fg--search .inf-search-input{padding:9px 34px 9px 14px!important;min-width:0!important;width:100%;font-size:13px;border-color:var(--border-strong)}
+.inf-fg--search .inf-search-input:focus{border-color:var(--primary,#7C6FF7);box-shadow:0 0 0 3px var(--primary-dim)}
+.inf-fg--search .inf-search-clear{right:8px;width:20px;height:20px;font-size:16px}
 .inf-range-row{display:flex;align-items:center;gap:4px}
 .inf-ri{width:76px;padding:6px 8px;border-radius:var(--r-sm);border:1px solid var(--border-default);background:var(--bg-base);color:var(--text-primary);font-size:11px;font-family:var(--font-mono);outline:none}
 .inf-ri:focus{border-color:var(--border-strong)}

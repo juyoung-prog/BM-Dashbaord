@@ -277,7 +277,12 @@ function _renderInfFilters(){
   if(!el)return;
   const storeOpts=_INF_STORES.map(s=>`<option value="${s.id}" ${_infF.store==s.id?'selected':''}>${s.name} (${s.state})</option>`).join('');
   el.innerHTML=`
-    <div class="inf-fg"><label>Search</label><input style="width:140px" placeholder="Name or handle…" value="${_esc(_infF.q)}" oninput="_infF.q=this.value;_renderInfStats();_renderInfTable()"></div>
+    <div class="inf-fg inf-fg--search"><label>Search</label>
+      <div class="inf-search-wrap">
+        <input id="inf-search-input" class="inf-search-input" placeholder="Name, handle, email, store, campaign…" value="${_esc(_infF.q)}" oninput="_infSetQ(this.value)">
+        <button class="inf-search-clear" id="inf-search-clear" onclick="_infSetQ('')" title="Clear search" style="display:${_infF.q?'flex':'none'}">×</button>
+      </div>
+    </div>
     <div class="inf-fg"><label>Store</label><select onchange="_infF.store=this.value;_renderInfStats();_renderInfTable()"><option value="">All Stores</option>${storeOpts}</select></div>
     <div class="inf-fg"><label>Event / Campaign</label><select onchange="_infF.ctype=this.value;_renderInfStats();_renderInfTable()">
       <option value="">All Events</option>
@@ -316,13 +321,31 @@ function _renderInfFilters(){
         <input class="inf-ri" placeholder="Max" type="number" value="${_infF.fmax}" oninput="_infF.fmax=this.value;_renderInfStats();_renderInfTable()">
       </div>
     </div>
-    <div class="inf-fg" style="align-self:flex-end"><button class="inf-btn-g" onclick="_infF={q:'',store:'',ctype:'',plat:'',eth:'',tier:'',fmin:'',fmax:'',status:''};_renderInfPanel()">Clear</button></div>`;
+    <div class="inf-fg" style="align-self:flex-end"><button class="inf-btn-g" onclick="_infF={q:'',store:'',ctype:'',plat:'',eth:'',tier:'',fmin:'',fmax:'',status:''};_renderInfPanel()">Clear All</button></div>`;
+}
+
+function _infSetQ(val){
+  _infF.q=val;
+  const inp=document.getElementById('inf-search-input');
+  const clr=document.getElementById('inf-search-clear');
+  if(inp&&inp.value!==val)inp.value=val;
+  if(clr)clr.style.display=val?'flex':'none';
+  _renderInfStats();
+  _renderInfTable();
 }
 
 function _getFilteredInfs(){
   let d=[...BM_INFS];
-  const q=(_infF.q||'').toLowerCase();
-  if(q)d=d.filter(i=>i.name.toLowerCase().includes(q)||(i.igHandle||'').toLowerCase().includes(q)||(i.ttHandle||'').toLowerCase().includes(q));
+  const q=(_infF.q||'').trim().toLowerCase();
+  if(q){
+    const qn=q.replace(/[^a-z0-9]/g,'');
+    const hit=s=>{const v=(s||'').toLowerCase();return v.includes(q)||(qn&&v.replace(/[^a-z0-9]/g,'').includes(qn));};
+    d=d.filter(i=>
+      hit(i.name)||hit(i.igHandle)||hit(i.ttHandle)||hit(i.email)||hit(i.notes)||
+      (i.storeIds||[]).some(id=>{const st=_INF_STORES.find(s=>s.id===id);return st&&hit(st.name);})||
+      (i.campaignTypes||[]).some(t=>hit(t))
+    );
+  }
   if(_infF.store)d=d.filter(i=>(i.storeIds||[]).includes(parseInt(_infF.store)));
   if(_infF.ctype)d=d.filter(i=>(i.campaignTypes||[]).includes(_infF.ctype));
   if(_infF.plat)d=d.filter(i=>(i.platforms||[]).includes(_infF.plat));
@@ -353,7 +376,11 @@ function _renderInfTable(){
   const lbl=document.getElementById('inf-count-lbl');
   if(!el)return;
   if(lbl)lbl.textContent=`${d.length} Influencer${d.length!==1?'s':''}`;
-  if(!d.length){el.innerHTML=`<div class="inf-empty"><div class="inf-empty-icon">👤</div>No influencers match your filters</div>`;return;}
+  if(!d.length){
+    const msg=_infF.q?`No influencers found for "<strong>${_esc(_infF.q)}</strong>"`:'No influencers match your filters';
+    el.innerHTML=`<div class="inf-empty"><div class="inf-empty-icon">👤</div><div>${msg}</div></div>`;
+    return;
+  }
   el.innerHTML=d.map(inf=>{
     const storeChips=(inf.storeIds||[]).map(id=>_storeChip(id)).join('');
     const ctChips=(inf.campaignTypes||[]).map(t=>_ctChip(t)).join('');
