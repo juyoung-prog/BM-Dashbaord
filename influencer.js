@@ -15,7 +15,25 @@ let _vidF={ q:'',plat:'',store:'',collab:'' };
 let _credF={ inf:'',store:'',status:'' };
 let _infDupIgnoreAll=false;
 const _INF_DEFAULT_TAGS=['Hair','Wig','Hair Extensions','Protective Style','Haircare','K-Beauty','J-Beauty','Skincare','Makeup','Fashion','Lifestyle','GRWM','Product Review','Store Visit','Family','Comedy','General Merchandise'];
-let _infTagSel=[], _infTagExtra=[];
+let _infTagSel=[], _infTagExtra=[], _infTagStatuses={};
+
+// Canonical store list — GA (G01–G09) then FL (BF1–BF5) in code order
+const _INF_STORES=[
+  {code:'G01',id:1, name:'Camp Creek',   state:'GA'},
+  {code:'G02',id:4, name:'Duluth',       state:'GA'},
+  {code:'G03',id:6, name:'Greenbriar',   state:'GA'},
+  {code:'G04',id:9, name:'Morrow',       state:'GA'},
+  {code:'G05',id:7, name:'Headland',     state:'GA'},
+  {code:'G06',id:10,name:'Old National', state:'GA'},
+  {code:'G07',id:12,name:'Riverdale',    state:'GA'},
+  {code:'G08',id:3, name:'Douglasville', state:'GA'},
+  {code:'G09',id:2, name:'Columbus',     state:'GA'},
+  {code:'BF1',id:11,name:'Orlando',         state:'FL'},
+  {code:'BF2',id:8, name:'Miami Gardens',   state:'FL'},
+  {code:'BF3',id:5, name:'Florida Mall',    state:'FL'},
+  {code:'BF4',id:13,name:'Tamarac',         state:'FL'},
+  {code:'BF5',id:0, name:'West Palm Beach', state:'FL'},
+];
 
 // ── Palette for avatars ──
 const _AVC=[
@@ -91,7 +109,7 @@ const _TIER_LBL={Macro:'Macro',Tier1:'Tier 1',Tier2:'Tier 2',Tier3:'Tier 3'};
 function _tierChip(f){const t=_tier(f);return`<span class="tier-chip tier-${t}">${_TIER_LBL[t]}</span>`}
 function _ethChip(e){if(!e)return'';return`<span class="eth-chip eth-${e.replace(/\s+/g,'-')}">${_ETH_LBL[e]||e}</span>`}
 function _ctChip(t){const m={'K-beauty':'kbeauty','General Store':'general','Event':'event'};return`<span class="ct-chip ct-${m[t]||'general'}">${t}</span>`}
-function _storeChip(storeId){const st=typeof STORES!=='undefined'&&STORES.find(s=>s.id===storeId);if(!st)return'';return`<span class="inf-store-chip inf-chip-${st.state}">${st.name}</span>`}
+function _storeChip(storeId){const st=_INF_STORES.find(s=>s.id===storeId);if(!st)return'';return`<span class="inf-store-chip inf-chip-${st.state}">${st.name}</span>`}
 function _score(inf){return Math.min(Math.round(Math.min((inf.eng||0)*8,40)+Math.min(Math.log10(Math.max(inf.followers||1,1))*8,35)+(inf.platforms||[]).length*5+(inf.status==='Active'?20:inf.status==='Prospect'?10:0)),100)}
 function _photoSrc(inf){return inf.photoUrl||inf.photoData||''}
 function _aviEl(inf,sz){
@@ -257,7 +275,7 @@ function _renderStorePanelContent(){
 function _renderInfFilters(){
   const el=document.getElementById('inf-fbar');
   if(!el)return;
-  const storeOpts=(typeof STORES!=='undefined'?STORES:[]).map(s=>`<option value="${s.id}" ${_infF.store==s.id?'selected':''}>${s.name} (${s.state})</option>`).join('');
+  const storeOpts=_INF_STORES.map(s=>`<option value="${s.id}" ${_infF.store==s.id?'selected':''}>${s.name} (${s.state})</option>`).join('');
   el.innerHTML=`
     <div class="inf-fg"><label>Search</label><input style="width:140px" placeholder="Name or handle…" value="${_esc(_infF.q)}" oninput="_infF.q=this.value;_renderInfStats();_renderInfTable()"></div>
     <div class="inf-fg"><label>Store</label><select onchange="_infF.store=this.value;_renderInfStats();_renderInfTable()"><option value="">All Stores</option>${storeOpts}</select></div>
@@ -383,6 +401,8 @@ function openInfDrawer(id){
   const videos=BM_VIDEOS.filter(v=>v.infId===id).sort((a,b)=>(b.views||0)-(a.views||0));
   const editBtn=document.getElementById('inf-drw-edit-btn');
   if(editBtn)editBtn.onclick=()=>{closeInfDrawer();openEditInf(id)};
+  const emailBtn=document.getElementById('inf-drw-email-btn');
+  if(emailBtn){emailBtn.onclick=()=>sendBrevoTestEmail(id);emailBtn.disabled=false;emailBtn.textContent='Send Test Email';emailBtn.style.color='';}
   const score=_score(inf);
   const storeChips=(inf.storeIds||[]).map(id=>_storeChip(id)).filter(Boolean);
   const _drwUrls=(inf.links&&inf.links.length?inf.links:[inf.igUrl,inf.ttUrl,inf.ytUrl]).filter(Boolean);
@@ -488,7 +508,7 @@ function _renderVidPanel(){
   vids.sort((a,b)=>(b.views||0)-(a.views||0));
   const tv=vids.reduce((a,v)=>a+(v.views||0),0);
   const tl=vids.reduce((a,v)=>a+(v.likes||0),0);
-  const storeOpts=(typeof STORES!=='undefined'?STORES:[]).map(s=>`<option value="${s.id}" ${_vidF.store==s.id?'selected':''}>${s.name}</option>`).join('');
+  const storeOpts=_INF_STORES.map(s=>`<option value="${s.id}" ${_vidF.store==s.id?'selected':''}>${s.name} (${s.state})</option>`).join('');
   panel.innerHTML=`
     <div class="inf-fbar">
       <div class="inf-fg"><label>Search</label><input style="width:140px" placeholder="Title or influencer…" value="${_esc(_vidF.q)}" oninput="_vidF.q=this.value;_renderVidPanel()"></div>
@@ -566,7 +586,7 @@ function _renderCredPanel(){
   const totalVal=creds.reduce((a,c)=>a+(c.amount||0),0);
   const unusedVal=creds.filter(c=>c.status==='Unused').reduce((a,c)=>a+(c.amount||0),0);
   const infOpts=BM_INFS.map(i=>`<option value="${i.id}" ${_credF.inf==i.id?'selected':''}>${i.name}</option>`).join('');
-  const storeOpts=(typeof STORES!=='undefined'?STORES:[]).map(s=>`<option value="${s.id}" ${_credF.store==s.id?'selected':''}>${s.name}</option>`).join('');
+  const storeOpts=_INF_STORES.map(s=>`<option value="${s.id}" ${_credF.store==s.id?'selected':''}>${s.name} (${s.state})</option>`).join('');
   panel.innerHTML=`
     <div class="inf-fbar">
       <div class="inf-fg"><label>Influencer</label><select onchange="_credF.inf=this.value;_renderCredPanel()"><option value="">All</option>${infOpts}</select></div>
@@ -656,12 +676,11 @@ function _onLinksBlur(e){
 function _populateInfModal(inf){
   const m=document.getElementById('inf-mo-inf');
   if(!m)return;
-  // Store rows grouped by state
-  const _allStores=typeof STORES!=='undefined'?STORES:[];
-  const storeHTML=['FL','GA'].map(state=>{
-    const group=_allStores.filter(st=>st.state===state);
+  // Store rows grouped by state, GA first then FL, in code order
+  const storeHTML=['GA','FL'].map(state=>{
+    const group=_INF_STORES.filter(st=>st.state===state);
     if(!group.length)return'';
-    const items=group.map(st=>`<label class="inf-ck-store"><input type="checkbox" value="${st.id}" name="inf-mo-store" ${inf&&(inf.storeIds||[]).includes(st.id)?'checked':''}> ${st.name}</label>`).join('');
+    const items=group.map(st=>`<label class="inf-ck-store"><input type="checkbox" value="${st.id}" name="inf-mo-store" ${inf&&(inf.storeIds||[]).includes(st.id)?'checked':''}><span class="inf-ck-store-code">${st.code}</span>${st.name}</label>`).join('');
     return`<div class="inf-store-group"><div class="inf-store-group-lbl">${state} Stores</div><div class="inf-store-inline">${items}</div></div>`;
   }).join('');
   // Reset photo
@@ -687,7 +706,6 @@ function _populateInfModal(inf){
   fv('inf-mo-followers',inf?.followers);
   const fsel=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||''};
   fsel('inf-mo-eth',inf?.ethnicity);
-  fsel('inf-mo-status',inf?.status||'Prospect');
   // Platforms
   document.querySelectorAll('[name="inf-mo-plat"]').forEach(c=>c.checked=inf?(inf.platforms||[]).includes(c.value):false);
   // Links: prefer inf.links array, fall back to legacy igUrl/ttUrl/ytUrl fields
@@ -704,8 +722,12 @@ function _populateInfModal(inf){
   // Stores
   const sl=document.getElementById('inf-mo-store-list');
   if(sl)sl.innerHTML=storeHTML;
-  // Tags
-  infTagPickerInit(inf?.campaignTypes||[]);
+  // Tags — build per-event statuses, using global status as fallback for legacy records
+  const _legacyStatus=inf?.status||'Prospect';
+  const _storedStatuses=inf?.campaignStatuses||{};
+  const _initStatuses={};
+  (inf?.campaignTypes||[]).forEach(t=>{_initStatuses[t]=_storedStatuses[t]||_legacyStatus;});
+  infTagPickerInit(inf?.campaignTypes||[],_initStatuses);
   // Notes
   const notesEl=document.getElementById('inf-mo-notes');
   if(notesEl)notesEl.value=inf?.notes||'';
@@ -770,8 +792,9 @@ function infTagCreateNew(tag){
 function infTagPickerClose(){
   document.getElementById('inf-tag-dropdown')?.classList.remove('open');
 }
-function infTagPickerInit(selected){
+function infTagPickerInit(selected,statuses){
   _infTagSel=[...(selected||[])];
+  _infTagStatuses={...(statuses||{})};
   _infTagSel.forEach(t=>{
     const all=[..._INF_DEFAULT_TAGS,..._infTagExtra];
     if(!all.find(x=>x.toLowerCase()===t.toLowerCase()))_infTagExtra.push(t);
@@ -785,6 +808,27 @@ function _infTagRenderChips(){
   const el=document.getElementById('inf-tag-chips');
   if(!el)return;
   el.innerHTML=_infTagSel.map(t=>`<span class="inf-tag-chip-sel">${_esc(t)}<button type="button" class="inf-tag-chip-sel-rm" data-tag="${_esc(t)}" onclick="infTagRemoveBtn(this)" tabindex="-1">×</button></span>`).join('');
+  _infTagRenderStatusList();
+}
+function _infTagRenderStatusList(){
+  const el=document.getElementById('inf-evt-status-list');
+  if(!el)return;
+  const opts=['Prospect','Active','Inactive','Completed'];
+  if(!_infTagSel.length){
+    el.innerHTML='<div class="inf-evt-status-empty">Add events above to set a status per event</div>';
+    return;
+  }
+  el.innerHTML=_infTagSel.map(t=>{
+    const cur=_infTagStatuses[t]||'Prospect';
+    const sel=v=>`<option value="${v}"${cur===v?' selected':''}>${v}</option>`;
+    return`<div class="inf-evt-status-row">
+      <span class="inf-evt-status-name">${_esc(t)}</span>
+      <select class="inf-evt-status-sel" data-tag="${_esc(t)}" onchange="infEvtStatusChange(this)">${opts.map(sel).join('')}</select>
+    </div>`;
+  }).join('');
+}
+function infEvtStatusChange(sel){
+  _infTagStatuses[sel.dataset.tag]=sel.value;
 }
 function _infTagRenderList(q){
   const el=document.getElementById('inf-tag-list');if(!el)return;
@@ -829,13 +873,18 @@ function saveInf(){
     igUrl:links[0]||'', ttUrl:links[1]||'', ytUrl:links[2]||'',
     links,
     email:v('inf-mo-email'), loc:'',
-    ethnicity:v('inf-mo-eth'), category:'Beauty', status:v('inf-mo-status')||'Prospect',
+    ethnicity:v('inf-mo-eth'), category:'Beauty',
     followers:parseInt(v('inf-mo-followers'))||0, eng:0, fee:0,
     notes:document.getElementById('inf-mo-notes')?.value.trim()||'',
-    platforms:platforms.length?platforms:['IG'], storeIds, campaignTypes:[..._infTagSel],
+    platforms:platforms.length?platforms:['IG'], storeIds,
+    campaignTypes:[..._infTagSel],
+    campaignStatuses:{..._infTagStatuses},
     photoUrl, photoData
   };
   const eid=document.getElementById('inf-mo-inf-editid')?.value;
+  // Preserve the legacy top-level status from the existing record (not deleted, just not edited here)
+  const _prev=eid?BM_INFS.find(i=>i.id==eid):null;
+  inf.status=_prev?.status||'Prospect';
   if(eid){const idx=BM_INFS.findIndex(i=>i.id==eid);inf.id=parseInt(eid);BM_INFS[idx]=inf;}
   else{inf.id=Date.now();BM_INFS.push(inf);}
   _saveInf();
@@ -920,7 +969,7 @@ function openAddCredit(){_openCreditModal(null,null);}
 function openAddCreditFor(infId){_openCreditModal(infId,null);}
 function _openCreditModal(infId,cred){
   const infOpts=BM_INFS.map(i=>`<option value="${i.id}" ${infId===i.id?'selected':''}>${i.name}</option>`).join('');
-  const storeOpts=`<option value="">— select —</option>`+(typeof STORES!=='undefined'?STORES:[]).map(s=>`<option value="${s.id}">${s.name} (${s.state})</option>`).join('');
+  const storeOpts=`<option value="">— select —</option>`+_INF_STORES.map(s=>`<option value="${s.id}">${s.name} (${s.state})</option>`).join('');
   document.getElementById('inf-mo-cred-inf').innerHTML=infOpts;
   document.getElementById('inf-mo-cred-store').innerHTML=storeOpts;
   document.getElementById('inf-mo-cred-editid').value=cred?cred.id:'';
@@ -940,7 +989,7 @@ function saveCredit(){
   const infId=parseInt(document.getElementById('inf-mo-cred-inf')?.value);
   const inf=BM_INFS.find(i=>i.id===infId);
   const storeId=parseInt(document.getElementById('inf-mo-cred-store')?.value)||null;
-  const st=storeId&&typeof STORES!=='undefined'?STORES.find(s=>s.id===storeId):null;
+  const st=storeId?_INF_STORES.find(s=>s.id===storeId):null;
   const cr={
     infId,infName:inf?inf.name:'Unknown',storeId,storeCode:st?st.name:'',
     serial,amount:parseInt(document.getElementById('inf-mo-cred-amount')?.value)||0,
@@ -967,7 +1016,7 @@ function openAddVideo(){_openVideoModal(null,null);}
 function openEditVideo(id){_openVideoModal(null,BM_VIDEOS.find(v=>v.id===id));}
 function _openVideoModal(infId,vid){
   const infOpts=BM_INFS.map(i=>`<option value="${i.id}" ${infId===i.id||(vid&&vid.infId===i.id)?'selected':''}>${i.name}</option>`).join('');
-  const storeOpts=`<option value="">— none —</option>`+(typeof STORES!=='undefined'?STORES:[]).map(s=>`<option value="${s.id}" ${vid&&vid.storeId===s.id?'selected':''}>${s.name}</option>`).join('');
+  const storeOpts=`<option value="">— none —</option>`+_INF_STORES.map(s=>`<option value="${s.id}" ${vid&&vid.storeId===s.id?'selected':''}>${s.name} (${s.state})</option>`).join('');
   document.getElementById('inf-mo-vid-inf').innerHTML=infOpts;
   document.getElementById('inf-mo-vid-store').innerHTML=storeOpts;
   document.getElementById('inf-mo-vid-editid').value=vid?vid.id:'';
@@ -988,7 +1037,7 @@ function saveVideo(){
   const infId=parseInt(document.getElementById('inf-mo-vid-inf')?.value);
   const inf=BM_INFS.find(i=>i.id===infId);
   const storeId=parseInt(document.getElementById('inf-mo-vid-store')?.value)||null;
-  const st=storeId&&typeof STORES!=='undefined'?STORES.find(s=>s.id===storeId):null;
+  const st=storeId?_INF_STORES.find(s=>s.id===storeId):null;
   const v=id=>document.getElementById(id)?.value||'';
   const vid={
     infId,infName:inf?inf.name:'Unknown',storeId,storeName:st?st.name:'',
@@ -1244,7 +1293,7 @@ function infExportCSV(){
     return(s.includes(',')||s.includes('"')||s.includes('\n'))?`"${s.replace(/"/g,'""')}"`:s;
   };
   const storeLabel=id=>{
-    const st=typeof STORES!=='undefined'&&STORES.find(s=>s.id===id);
+    const st=_INF_STORES.find(s=>s.id===id);
     return st?`${st.name} (${st.state})`:'';
   };
   const headers=['Name','Handle','Email','Social Links','Followers','Tier',
@@ -1273,6 +1322,51 @@ function infExportCSV(){
 }
 
 // ══════════════════════════════════════
+// BREVO EMAIL
+// ══════════════════════════════════════
+async function sendBrevoTestEmail(infId){
+  const inf=BM_INFS.find(i=>i.id===infId);
+  if(!inf)return;
+  if(!inf.email){alert('This influencer has no email address on file.');return;}
+
+  const btn=document.getElementById('inf-drw-email-btn');
+  if(btn){btn.disabled=true;btn.textContent='Sending…';}
+
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(!session){
+      alert('Session expired. Please sign in again.');
+      if(btn){btn.disabled=false;btn.textContent='Send Test Email';}
+      return;
+    }
+    const res=await fetch(`${SUPABASE_URL}/functions/v1/send-brevo-email`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
+      body:JSON.stringify({
+        to_email:inf.email,
+        to_name:inf.name,
+        subject:'Test Email — BeautyMaster Ops',
+        html_content:`<p>Hi ${inf.name},</p><p>This is a test email from BeautyMaster Ops confirming email delivery is working correctly.</p>`,
+        text_content:`Hi ${inf.name},\n\nThis is a test email from BeautyMaster Ops confirming email delivery is working correctly.`,
+      }),
+    });
+    const data=await res.json();
+    if(!res.ok||!data.success){
+      alert(`Failed to send: ${data.error||'Unknown error'}`);
+      if(btn){btn.disabled=false;btn.textContent='Send Test Email';}
+      return;
+    }
+    if(btn){btn.textContent='✓ Sent!';btn.style.color='var(--success)';}
+    setTimeout(()=>{
+      if(btn){btn.disabled=false;btn.textContent='Send Test Email';btn.style.color='';}
+    },3000);
+  }catch(e){
+    alert('Network error. Please try again.');
+    if(btn){btn.disabled=false;btn.textContent='Send Test Email';}
+  }
+}
+
+// ══════════════════════════════════════
 // INJECT HTML (modals + drawer)
 // ══════════════════════════════════════
 function _injectInfHTML(){
@@ -1292,6 +1386,7 @@ function _injectInfHTML(){
       <span class="inf-drw-head-title">Influencer Profile</span>
       <div style="display:flex;gap:6px">
         <button class="inf-btn-g" id="inf-drw-edit-btn">Edit</button>
+        <button class="inf-btn-g" id="inf-drw-email-btn">Send Test Email</button>
         <button class="inf-btn-g" onclick="closeInfDrawer()">✕</button>
       </div>
     </div>
@@ -1337,8 +1432,8 @@ function _injectInfHTML(){
         </div>
       </div>
 
-      <!-- Followers / Ethnicity / Status -->
-      <div class="inf-fr3" style="gap:8px">
+      <!-- Followers / Ethnicity -->
+      <div class="inf-fr" style="gap:8px">
         <div class="inf-fg2" style="margin:0"><label>Followers</label><input id="inf-mo-followers" type="number" placeholder="50000" style="min-width:0"></div>
         <div class="inf-fg2" style="margin:0"><label>Ethnicity</label>
           <select id="inf-mo-eth" style="min-width:0">
@@ -1353,13 +1448,6 @@ function _injectInfHTML(){
             <option value="Mixed">Mixed / Multiracial</option>
             <option value="Other">Other</option>
             <option value="Prefer not to say">Prefer not to say</option>
-          </select>
-        </div>
-        <div class="inf-fg2" style="margin:0"><label>Status</label>
-          <select id="inf-mo-status" style="min-width:0">
-            <option value="Prospect">Prospect</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
           </select>
         </div>
       </div>
@@ -1384,6 +1472,8 @@ function _injectInfHTML(){
           <div class="inf-tag-list" id="inf-tag-list"></div>
         </div>
       </div>
+      <div class="inf-evt-status-lbl">Status per Event</div>
+      <div id="inf-evt-status-list"></div>
     </div>
 
     <!-- ── Section 4: Assigned Stores ── -->
