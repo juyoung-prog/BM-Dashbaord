@@ -52,10 +52,9 @@ async function initAuth() {
       return;
     }
   } else {
-    // Dashboard page — skip auth redirect for local preview
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {
-      document.body.classList.remove('auth-pending');
+      window.location.replace('login.html');
       return;
     }
     await showDashboard(session.user);
@@ -135,7 +134,7 @@ async function handleSignIn() {
 // ── Sign Out ──────────────────────────────────
 async function handleSignOut() {
   await sb.auth.signOut();
-  // onAuthStateChange redirects to login.html
+  window.location.replace('login.html');
 }
 
 // ── Toggle login ↔ signup ─────────────────────
