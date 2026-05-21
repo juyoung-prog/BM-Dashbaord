@@ -27,6 +27,11 @@ function json(body: unknown, status: number, cors: Record<string, string>) {
   });
 }
 
+// Detects presence of Hangul syllables, Jamo, or Compatibility Jamo
+function containsKorean(text: string): boolean {
+  return /[가-힣ᄀ-ᇿ㄰-㆏]/.test(text);
+}
+
 // ─── Store context type ───────────────────────────────────────────────────────
 interface StoreContext {
   id: number;
@@ -116,13 +121,12 @@ Before every recommendation, run this check:
 - If data is missing, name the gap explicitly rather than papering over it.
 - Speak to internal teams. No consumer-facing language or brand hype.
 
-━━━ LANGUAGE RULE — CRITICAL ━━━
-Detect the language of the user’s question or chip label.
-→ If the user’s input contains Korean → write ALL six JSON field values entirely in Korean (자연스러운 한국어로).
-→ If the user’s input is in English → write ALL six JSON field values entirely in English.
-→ Mixed input → use the dominant language.
-The "query" field must also reflect the detected language.
-Do NOT mix languages within a single response.
+━━━ LANGUAGE RULE — ABSOLUTE OVERRIDE ━━━
+This rule overrides everything. You MUST comply regardless of the store data language.
+→ If the instruction block below says "RESPOND IN KOREAN" → every character of every JSON value must be Korean (자연스러운 한국어로). No English words, no mixed sentences.
+→ If the instruction block below says "RESPOND IN ENGLISH" → write all JSON values in English.
+The "query" field must mirror the detected language.
+Violating this rule makes the entire response unusable. There are no exceptions.
 
 ━━━ RESPONSE DEPTH REQUIREMENTS ━━━
 Each field must meet these standards:
@@ -137,7 +141,8 @@ Each field must meet these standards:
   Connect income band, demographic mix, and poverty rate to actual spend behavior or campaign risk.
   Be specific about what happens if the recommendation is ignored.
 
-"recommendedAction" — 3–5 numbered steps.
+"recommendedAction" — 3–5 numbered steps separated by \n (literal newline character between steps).
+  Format exactly like this: "1. First step text\n2. Second step text\n3. Third step text"
   Each step must specify at least two of:
     · Campaign direction or creative angle / hook
     · Channel and content format (e.g., "IG Reels with UGC hook", "in-store endcap + QR code")
@@ -146,6 +151,7 @@ Each field must meet these standards:
     · Timing or sequencing note
     · Paid vs. organic split recommendation
   Steps should read like real campaign planning — actionable enough to brief a creative team.
+  NEVER write all steps as one paragraph. Always use \n between steps.
 
 "dataUsed" — comma-separated list of the specific data points cited.
 
@@ -164,13 +170,17 @@ Respond with ONLY a valid JSON object containing exactly these six fields:
 Return raw JSON only. No markdown, no explanation, no text outside the JSON object.`;
 }
 
-function buildUserMessage(promptKey: string, chipLabel: string, s: StoreContext, customText?: string): string {
+function buildUserMessage(promptKey: string, chipLabel: string, s: StoreContext, customText?: string, lang: 'ko' | 'en' = 'en'): string {
   const done = s.merch.filter(([t]) => t === 'done').map(([, txt]) => txt);
   const pend = s.merch.filter(([t]) => t === 'pend').map(([, txt]) => txt);
   const merchSummary = [
     done.length > 0 ? `Completed: ${done.join(', ')}` : '',
     pend.length > 0 ? `Pending: ${pend.join(', ')}` : 'All merchandising items complete',
   ].filter(Boolean).join(' | ');
+
+  const langInstruction = lang === 'ko'
+    ? 'LANGUAGE INSTRUCTION: RESPOND IN KOREAN — 모든 JSON 필드값을 반드시 한국어로 작성하세요. 영어 단어 혼용 금지.'
+    : 'LANGUAGE INSTRUCTION: RESPOND IN ENGLISH — write all JSON field values in English.';
 
   const storeContext = `STORE CONTEXT
 Name: ${s.name} (${s.store})
@@ -183,14 +193,18 @@ Merchandising: ${merchSummary}
 Priority Flag: ${s.priority || 'general market'}`;
 
   if (customText) {
-    return `${storeContext}
+    return `${langInstruction}
+
+${storeContext}
 
 USER QUESTION
 ${customText}`;
   }
 
   const description = PROMPT_DESCRIPTIONS[promptKey] ?? PROMPT_DESCRIPTIONS['summarize'];
-  return `${storeContext}
+  return `${langInstruction}
+
+${storeContext}
 
 REQUEST
 ${description}
@@ -254,6 +268,8 @@ Deno.serve(async (req) => {
   }
 
   // 4. Call OpenAI ──────────────────────────────────────────────────────────────
+  const lang = containsKorean(customText || chipLabel) ? 'ko' : 'en';
+
   let openaiRes: Response;
   try {
     openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -269,7 +285,7 @@ Deno.serve(async (req) => {
         max_tokens:      1200,
         messages: [
           { role: 'system', content: buildSystemPrompt() },
-          { role: 'user',   content: buildUserMessage(promptKey, chipLabel, store, customText || undefined) },
+          { role: 'user',   content: buildUserMessage(promptKey, chipLabel, store, customText || undefined, lang) },
         ],
       }),
     });
