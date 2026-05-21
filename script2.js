@@ -856,10 +856,10 @@ function selectStore(id) {
 }
 
 // ══════════════════════════════════════════
-// AI ASSISTANT — PHASE 1 (Mock Responses)
+// AI ASSISTANT — PHASE 2 (Real AI via Supabase Edge Function)
 // ══════════════════════════════════════════
 
-function handleAIChip(btn, promptKey) {
+async function handleAIChip(btn, promptKey) {
   document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
 
@@ -872,22 +872,50 @@ function handleAIChip(btn, promptKey) {
   if (aiResp)    aiResp.style.display    = 'none';
   if (aiLoading) aiLoading.style.display = 'flex';
 
-  // Simulated latency mirrors future async API feel
-  setTimeout(() => {
+  try {
+    const result = await sendMessageToAI(promptKey, STORES[selectedId], chipLabel);
     if (aiLoading) aiLoading.style.display = 'none';
-    const result = sendMessageToAI(promptKey, STORES[selectedId], chipLabel);
     renderAIResponse(result);
-  }, 650 + Math.random() * 350);
+  } catch (err) {
+    console.error('[AI Assistant] Edge Function error, falling back to mock:', err);
+    if (aiLoading) aiLoading.style.display = 'none';
+    renderAIResponse(generateMockAIResponse(promptKey, STORES[selectedId], chipLabel));
+  }
 }
 
-// Future connection point — replace return below with:
-//   fetch('/functions/v1/ai-assistant', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-//     body: JSON.stringify({ promptKey, storeId: store.id, chipLabel })
-//   }).then(r => r.json())
-function sendMessageToAI(promptKey, store, chipLabel) {
-  return generateMockAIResponse(promptKey, store, chipLabel);
+// Calls Supabase Edge Function → OpenAI API.
+// Falls back to generateMockAIResponse() if this throws.
+async function sendMessageToAI(promptKey, store, chipLabel) {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/ai-store-assistant`, {
+    method: 'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
+      promptKey,
+      chipLabel,
+      store: {
+        id: store.id,           name: store.name,         store: store.store,
+        state: store.state,     income: store.income,     poverty: store.poverty,
+        black: store.black,     hisp: store.hisp,         asian: store.asian,
+        white: store.white,     wage: store.wage,         pop: store.pop,
+        band: store.band,       priorityText: store.priorityText,
+        priority: store.priority, bannerLabel: store.bannerLabel,
+        raceLabel: store.raceLabel, msg: store.msg,       merch: store.merch,
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`HTTP ${res.status}: ${detail}`);
+  }
+
+  return res.json();
 }
 
 function generateMockAIResponse(promptKey, s, chipLabel) {
