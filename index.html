@@ -595,43 +595,53 @@
         <button class="ai-chip" onclick="handleAIChip(this,'compare')">Compare Similar Stores</button>
       </div>
 
-      <!-- Empty state -->
-      <div class="ai-empty" id="ai-empty">
-        <div class="ai-empty-text">Select a prompt above to generate an insight for this store.</div>
-      </div>
+      <!-- Conversation panel: contains all states + input -->
+      <div class="ai-panel">
 
-      <!-- Loading state -->
-      <div class="ai-loading" id="ai-loading">
-        <span class="ai-loading-dot"></span>
-        <span class="ai-loading-dot"></span>
-        <span class="ai-loading-dot"></span>
-      </div>
+        <!-- State: empty / loading / user-msg / response -->
+        <div class="ai-panel-body">
 
-      <!-- User message — shown only when chat input is used -->
-      <div class="ai-user-msg" id="ai-user-msg" style="display:none">
-        <div class="ai-user-msg-label">You</div>
-        <div id="ai-user-msg-text"></div>
-      </div>
+          <!-- Empty state -->
+          <div class="ai-empty" id="ai-empty">
+            <div class="ai-empty-text">Select a prompt above or type a question below.</div>
+          </div>
 
-      <!-- Response area -->
-      <div class="ai-response" id="ai-response">
-        <div class="ai-response-header">
-          <span class="ai-response-query" id="ai-response-query"></span>
-          <button class="ai-response-clear" onclick="clearAIResponse()" title="Clear">&times;</button>
+          <!-- Loading state -->
+          <div class="ai-loading" id="ai-loading">
+            <span class="ai-loading-dot"></span>
+            <span class="ai-loading-dot"></span>
+            <span class="ai-loading-dot"></span>
+          </div>
+
+          <!-- User message — shown only when chat input is used -->
+          <div class="ai-user-msg" id="ai-user-msg" style="display:none">
+            <div class="ai-user-msg-label">You</div>
+            <div id="ai-user-msg-text"></div>
+          </div>
+
+          <!-- Response area -->
+          <div class="ai-response" id="ai-response">
+            <div class="ai-response-header">
+              <span class="ai-response-query" id="ai-response-query"></span>
+              <button class="ai-response-clear" onclick="clearAIResponse()" title="Clear">&times;</button>
+            </div>
+            <div class="ai-response-body" id="ai-response-body"></div>
+          </div>
+
+        </div><!-- /ai-panel-body -->
+
+        <!-- Chat input — always anchored at bottom of panel -->
+        <div class="ai-chat-row">
+          <input type="text" class="ai-chat-input" id="ai-chat-input"
+                 placeholder="Ask about this store…"
+                 autocomplete="off"
+                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChatMessage()}">
+          <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </div>
-        <div class="ai-response-body" id="ai-response-body"></div>
-      </div>
 
-      <!-- Chat input — always visible -->
-      <div class="ai-chat-row">
-        <input type="text" class="ai-chat-input" id="ai-chat-input"
-               placeholder="Ask about this store…"
-               autocomplete="off"
-               onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChatMessage()}">
-        <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
-      </div>
+      </div><!-- /ai-panel -->
     </div>
   </aside>
 
