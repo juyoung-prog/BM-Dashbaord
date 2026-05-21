@@ -574,15 +574,46 @@
       </div>
     </div>
 
-    <!-- Suggested Actions -->
-    <div class="rp-section">
-      <div class="rp-section-label">Suggested Actions</div>
-      <div class="rp-cta-group">
-        <button class="rp-cta rp-cta-primary" id="rp-act1">View Campaign Guide</button>
-        <button class="rp-cta rp-cta-secondary" id="rp-act2">Export Store Brief</button>
-        <button class="rp-cta rp-cta-secondary" onclick="showToast('Opening store playbook...')">Open Store Playbook</button>
-        <button class="rp-cta rp-cta-secondary" onclick="showToast('Opening merchandising notes...')">Review Merchandising Notes</button>
-        <button class="rp-cta rp-cta-accent" onclick="showToast('Opening comparison view...')">Compare Similar Stores</button>
+    <!-- AI Assistant -->
+    <div class="rp-section" id="rp-ai-section">
+      <div class="rp-section-label">AI Assistant</div>
+
+      <div class="ai-chip-group-label">Analyze</div>
+      <div class="ai-chips">
+        <button class="ai-chip" onclick="handleAIChip(this,'summarize')">Summarize this store</button>
+        <button class="ai-chip" onclick="handleAIChip(this,'messaging')">Suggest campaign messaging</button>
+        <button class="ai-chip" onclick="handleAIChip(this,'risks')">Find marketing risks</button>
+        <button class="ai-chip" onclick="handleAIChip(this,'next')">Recommend next action</button>
+      </div>
+
+      <div class="ai-chip-group-label">Actions</div>
+      <div class="ai-chips">
+        <button class="ai-chip" id="rp-act1" onclick="handleAIChip(this,'guide')">View Campaign Guide</button>
+        <button class="ai-chip" onclick="handleAIChip(this,'export')">Export Store Brief</button>
+        <button class="ai-chip" onclick="handleAIChip(this,'playbook')">Open Store Playbook</button>
+        <button class="ai-chip" onclick="handleAIChip(this,'merch-notes')">Review Merchandising Notes</button>
+        <button class="ai-chip" onclick="handleAIChip(this,'compare')">Compare Similar Stores</button>
+      </div>
+
+      <!-- Empty state -->
+      <div class="ai-empty" id="ai-empty">
+        <div class="ai-empty-text">Select a prompt above to generate an insight for this store.</div>
+      </div>
+
+      <!-- Loading state -->
+      <div class="ai-loading" id="ai-loading">
+        <span class="ai-loading-dot"></span>
+        <span class="ai-loading-dot"></span>
+        <span class="ai-loading-dot"></span>
+      </div>
+
+      <!-- Response area -->
+      <div class="ai-response" id="ai-response">
+        <div class="ai-response-header">
+          <span class="ai-response-query" id="ai-response-query"></span>
+          <button class="ai-response-clear" onclick="clearAIResponse()" title="Clear">&times;</button>
+        </div>
+        <div class="ai-response-body" id="ai-response-body"></div>
       </div>
     </div>
   </aside>
