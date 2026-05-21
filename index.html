@@ -595,6 +595,16 @@
         <button class="ai-chip" onclick="handleAIChip(this,'compare')">Compare Similar Stores</button>
       </div>
 
+      <!-- Model mode selector -->
+      <div class="ai-mode-row">
+        <div class="ai-mode-btns">
+          <button class="ai-mode-btn is-active" data-mode="fast"     data-tooltip="gpt-4o-mini"  onclick="setAIMode(this)">Fast</button>
+          <button class="ai-mode-btn"           data-mode="balanced" data-tooltip="gpt-4.1-mini" onclick="setAIMode(this)">Balanced</button>
+          <button class="ai-mode-btn"           data-mode="advanced" data-tooltip="gpt-4.1"      onclick="setAIMode(this)">Advanced</button>
+        </div>
+        <span class="ai-mode-hint">Advanced may use more credits.</span>
+      </div>
+
       <!-- Conversation panel: contains all states + input -->
       <div class="ai-panel">
 

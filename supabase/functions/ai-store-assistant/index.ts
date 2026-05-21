@@ -271,16 +271,25 @@ Deno.serve(async (req) => {
   }
 
   // 2. Parse and validate request body ─────────────────────────────────────────
-  let promptKey: string, chipLabel: string, customText: string, store: StoreContext;
+  const MODE_MODEL: Record<string, string> = {
+    fast:     'gpt-4o-mini',
+    balanced: 'gpt-4.1-mini',
+    advanced: 'gpt-4.1',
+  };
+
+  let promptKey: string, chipLabel: string, customText: string, mode: string, store: StoreContext;
   try {
     const body = await req.json();
     promptKey  = (body?.promptKey  ?? '').trim();
     chipLabel  = (body?.chipLabel  ?? '').trim();
     customText = (body?.customText ?? '').trim();
+    mode       = (body?.mode       ?? '').trim();
     store      = body?.store as StoreContext;
   } catch {
     return json({ error: 'Invalid JSON body' }, 400, cors);
   }
+
+  const model = MODE_MODEL[mode] ?? MODE_MODEL['fast'];
 
   if (!promptKey && !customText) return json({ error: 'promptKey or customText is required' }, 400, cors);
   if (!store?.name) return json({ error: 'store context is required' }, 400, cors);
@@ -304,7 +313,7 @@ Deno.serve(async (req) => {
         'Content-Type':  'application/json',
       },
       body: JSON.stringify({
-        model:           'gpt-4o-mini',
+        model:           model,
         response_format: { type: 'json_object' },
         temperature:     0.5,
         max_tokens:      3500,
@@ -349,7 +358,7 @@ Deno.serve(async (req) => {
   }
 
   console.log(
-    `[ai-store-assistant] OK store=${store.name} prompt=${promptKey}`,
+    `[ai-store-assistant] OK store=${store.name} prompt=${promptKey} model=${model}`,
     `tokens=${openaiData?.usage?.total_tokens ?? '?'}`,
   );
   return json(structured, 200, cors);

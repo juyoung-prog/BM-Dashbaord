@@ -1176,6 +1176,68 @@ svg { display: block; }
   border-color: var(--primary);
   color: #fff;
 }
+.ai-mode-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--s3);
+  gap: var(--s2);
+}
+.ai-mode-btns {
+  display: flex;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 2px;
+  gap: 1px;
+}
+.ai-mode-btn {
+  position: relative;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  color: var(--text-tertiary);
+  background: none;
+  border: none;
+  border-radius: calc(var(--r-sm) - 2px);
+  cursor: pointer;
+  line-height: 1.4;
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.ai-mode-btn:hover { color: var(--text-secondary); }
+.ai-mode-btn.is-active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+/* CSS tooltip via data-tooltip + ::after */
+.ai-mode-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(18,18,20,.88);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 400;
+  font-family: var(--font-mono, monospace);
+  padding: 3px 8px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s;
+  z-index: 20;
+}
+.ai-mode-btn:hover::after { opacity: 1; }
+.ai-mode-hint {
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .ai-panel {
   margin-top: var(--s3);
   border: 1px solid var(--border-subtle);
@@ -2775,6 +2837,15 @@ body.auth-pending .sidebar-overlay {
   background: #3A3A3C;
   border-color: #555;
   color: #F2F2F7;
+}
+[data-theme="dark"] .ai-mode-btns {
+  background: rgba(255,255,255,.05);
+  border-color: rgba(255,255,255,.09);
+}
+[data-theme="dark"] .ai-mode-btn.is-active {
+  background: rgba(255,255,255,.11);
+  color: var(--text-primary);
+  box-shadow: none;
 }
 [data-theme="dark"] .ai-panel {
   background: rgba(255,255,255,.03);

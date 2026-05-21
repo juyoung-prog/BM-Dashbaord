@@ -861,6 +861,14 @@ function selectStore(id) {
 // AI ASSISTANT — PHASE 2 (Real AI via Supabase Edge Function)
 // ══════════════════════════════════════════
 
+let aiMode = 'fast';
+
+function setAIMode(btn) {
+  document.querySelectorAll('.ai-mode-btn').forEach(b => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  aiMode = btn.dataset.mode;
+}
+
 async function handleAIChip(btn, promptKey) {
   document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
@@ -951,6 +959,7 @@ async function sendMessageToAI(promptKey, store, chipLabel, customText = null) {
       promptKey:  promptKey  || '',
       chipLabel:  chipLabel  || '',
       customText: customText || '',
+      mode:       aiMode,
       store: {
         id: store.id,           name: store.name,         store: store.store,
         state: store.state,     income: store.income,     poverty: store.poverty,
