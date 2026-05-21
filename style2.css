@@ -1298,6 +1298,68 @@ svg { display: block; }
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
+.ai-user-msg {
+  margin-top: var(--s3);
+  padding: var(--s2) var(--s3);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+}
+.ai-user-msg-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+#ai-user-msg-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  word-break: break-word;
+}
+.ai-chat-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-top: var(--s3);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--border-subtle);
+}
+.ai-chat-input {
+  flex: 1;
+  height: 32px;
+  padding: 0 var(--s2);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  outline: none;
+  transition: border-color var(--dur) var(--ease);
+  min-width: 0;
+}
+.ai-chat-input::placeholder { color: var(--text-tertiary); }
+.ai-chat-input:focus { border-color: var(--border-strong); }
+.ai-chat-input:disabled { opacity: .5; cursor: not-allowed; }
+.ai-chat-send {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+.ai-chat-send:hover { background: var(--primary-hover); }
+.ai-chat-send:disabled { opacity: .4; cursor: not-allowed; }
 
 /* ═══════ PAGES ═══════ */
 .page { display: none; }
@@ -2732,4 +2794,25 @@ body.auth-pending .sidebar-overlay {
 }
 [data-theme="dark"] .ai-confidence {
   border-color: rgba(255,255,255,.08);
+}
+[data-theme="dark"] .ai-user-msg {
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.08);
+}
+[data-theme="dark"] .ai-chat-row {
+  border-color: rgba(255,255,255,.08);
+}
+[data-theme="dark"] .ai-chat-input {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.1);
+  color: var(--text-primary);
+}
+[data-theme="dark"] .ai-chat-input:focus {
+  border-color: rgba(255,255,255,.2);
+}
+[data-theme="dark"] .ai-chat-send {
+  background: #3A3A3C;
+}
+[data-theme="dark"] .ai-chat-send:hover {
+  background: #48484A;
 }

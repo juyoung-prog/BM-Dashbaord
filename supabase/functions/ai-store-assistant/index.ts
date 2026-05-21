@@ -65,11 +65,61 @@ const PROMPT_DESCRIPTIONS: Record<string, string> = {
 
 // ─── Prompt builders ──────────────────────────────────────────────────────────
 function buildSystemPrompt(): string {
-  return `You are a retail operations and marketing intelligence assistant for BeautyMaster, a specialty beauty retail chain serving diverse communities across Georgia and Florida.
+  return `You are Beauty Master’s Creative and Marketing Strategist.
 
-Your role: support internal operations managers and regional marketing teams with data-driven, actionable insights.
+Use the provided dashboard/store data first. Based on store-level market data, campaign goals, channel characteristics, proven content patterns, and leadership business rules, create practical and localized campaign strategies that can be used immediately.
 
-Tone: operational, calm, precise, and data-first. Never use consumer-facing language or marketing hype. You speak to internal teams, not customers.
+Business context:
+- Beauty Master is a beauty supply retailer.
+- The core audience is Black women.
+- Secondary audiences may include Hispanic customers, Asian customers, K-Beauty customers, family shoppers, beauty professionals, and reseller customers.
+- Campaign types may include openings, promotions, events, recruitment, awareness, traffic, and conversion.
+- Channels may include Instagram, TikTok, flyers, posters, in-store digital screens, website banners, paid social, email, SMS, landing pages, and short-form video.
+
+Leadership rules take priority over general market logic unless there is strong real performance evidence.
+
+Store priority rules:
+1. K-Beauty priority stores
+- All BF stores
+- G02 Duluth
+- G08 Douglasville
+- G09 Columbus
+
+2. GM priority stores
+- G02 Duluth
+- G04 Morrow
+- G08 Douglasville
+- G09 Columbus
+- BF1
+- BF3
+- BF5
+
+3. State-level direction
+- Georgia: Hair Care and Hair Extensions remain the core.
+- Florida: K-Beauty is a core business priority.
+
+Category decision logic:
+Before making any recommendation, determine:
+1. Is this store a K-Beauty priority store?
+2. Is this store a GM priority store?
+3. Is it in Georgia or Florida?
+4. Which category should be the hero for this campaign objective?
+
+Rules:
+- Do not give generic advice.
+- Always connect data to action.
+- Be clear, direct, and decisive.
+- Prioritize visit-driving clarity, product relevance, and promotional communication over abstract brand language.
+- If data is incomplete, use the most reliable provided signals and clearly state what data is missing.
+- Do not hallucinate numbers.
+- Do not use consumer-facing hype.
+- Speak to internal operations and marketing teams.
+
+Paid campaign rule:
+For paid campaigns, recommend practical execution direction such as creative asset direction, hook ideas, audience interests, caption angles, and testing ideas when relevant.
+
+Traffic-driving rule:
+For traffic-driving campaigns, specify the clearest next action and what type of creative should launch first.
 
 You must respond with ONLY a valid JSON object containing exactly these six fields:
 {
@@ -84,7 +134,7 @@ You must respond with ONLY a valid JSON object containing exactly these six fiel
 Return raw JSON only. Do not include any text, explanation, or markdown outside the JSON object.`;
 }
 
-function buildUserMessage(promptKey: string, chipLabel: string, s: StoreContext): string {
+function buildUserMessage(promptKey: string, chipLabel: string, s: StoreContext, customText?: string): string {
   const done = s.merch.filter(([t]) => t === 'done').map(([, txt]) => txt);
   const pend = s.merch.filter(([t]) => t === 'pend').map(([, txt]) => txt);
   const merchSummary = [
@@ -92,9 +142,7 @@ function buildUserMessage(promptKey: string, chipLabel: string, s: StoreContext)
     pend.length > 0 ? `Pending: ${pend.join(', ')}` : 'All merchandising items complete',
   ].filter(Boolean).join(' | ');
 
-  const description = PROMPT_DESCRIPTIONS[promptKey] ?? PROMPT_DESCRIPTIONS['summarize'];
-
-  return `STORE CONTEXT
+  const storeContext = `STORE CONTEXT
 Name: ${s.name} (${s.store})
 Priority Segment: ${s.priorityText}
 Income Band: ${s.bannerLabel} | Median Income: $${s.income.toLocaleString()} | Poverty Rate: ${s.poverty}%
@@ -102,7 +150,17 @@ Demographics: ${s.raceLabel} (Black ${s.black}%, Hispanic ${s.hisp}%, Asian ${s.
 Average Wage: $${s.wage}/hr | Trade Area Population: ${s.pop.toLocaleString()}
 Recommended In-Store Message: ${s.msg}
 Merchandising: ${merchSummary}
-Priority Flag: ${s.priority || 'general market'}
+Priority Flag: ${s.priority || 'general market'}`;
+
+  if (customText) {
+    return `${storeContext}
+
+USER QUESTION
+${customText}`;
+  }
+
+  const description = PROMPT_DESCRIPTIONS[promptKey] ?? PROMPT_DESCRIPTIONS['summarize'];
+  return `${storeContext}
 
 REQUEST
 ${description}
@@ -144,17 +202,18 @@ Deno.serve(async (req) => {
   }
 
   // 2. Parse and validate request body ─────────────────────────────────────────
-  let promptKey: string, chipLabel: string, store: StoreContext;
+  let promptKey: string, chipLabel: string, customText: string, store: StoreContext;
   try {
     const body = await req.json();
-    promptKey  = (body?.promptKey ?? '').trim();
-    chipLabel  = (body?.chipLabel ?? '').trim();
+    promptKey  = (body?.promptKey  ?? '').trim();
+    chipLabel  = (body?.chipLabel  ?? '').trim();
+    customText = (body?.customText ?? '').trim();
     store      = body?.store as StoreContext;
   } catch {
     return json({ error: 'Invalid JSON body' }, 400, cors);
   }
 
-  if (!promptKey) return json({ error: 'promptKey is required' }, 400, cors);
+  if (!promptKey && !customText) return json({ error: 'promptKey or customText is required' }, 400, cors);
   if (!store?.name) return json({ error: 'store context is required' }, 400, cors);
 
   // 3. Get OpenAI key from Supabase secrets ─────────────────────────────────────
@@ -180,7 +239,7 @@ Deno.serve(async (req) => {
         max_tokens:      600,
         messages: [
           { role: 'system', content: buildSystemPrompt() },
-          { role: 'user',   content: buildUserMessage(promptKey, chipLabel, store) },
+          { role: 'user',   content: buildUserMessage(promptKey, chipLabel, store, customText || undefined) },
         ],
       }),
     });

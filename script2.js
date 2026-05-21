@@ -847,9 +847,11 @@ function selectStore(id) {
     const aiEmpty   = document.getElementById('ai-empty');
     const aiLoading = document.getElementById('ai-loading');
     const aiResp    = document.getElementById('ai-response');
+    const aiUserMsg = document.getElementById('ai-user-msg');
     if (aiEmpty)   aiEmpty.style.display   = '';
     if (aiLoading) aiLoading.style.display = 'none';
     if (aiResp)    aiResp.style.display    = 'none';
+    if (aiUserMsg) aiUserMsg.style.display = 'none';
     document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
   }
   renderTable();
@@ -867,9 +869,11 @@ async function handleAIChip(btn, promptKey) {
   const aiEmpty   = document.getElementById('ai-empty');
   const aiLoading = document.getElementById('ai-loading');
   const aiResp    = document.getElementById('ai-response');
+  const aiUserMsg = document.getElementById('ai-user-msg');
 
   if (aiEmpty)   aiEmpty.style.display   = 'none';
   if (aiResp)    aiResp.style.display    = 'none';
+  if (aiUserMsg) aiUserMsg.style.display = 'none';
   if (aiLoading) aiLoading.style.display = 'flex';
 
   try {
@@ -883,9 +887,57 @@ async function handleAIChip(btn, promptKey) {
   }
 }
 
+async function sendAIChatMessage() {
+  const input   = document.getElementById('ai-chat-input');
+  const sendBtn = document.getElementById('ai-chat-send-btn');
+  if (!input) return;
+
+  const userText = input.value.trim();
+  if (!userText) return;
+
+  // Deactivate chips — chat is a free-form query
+  document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
+
+  // Show user message bubble
+  const aiUserMsg    = document.getElementById('ai-user-msg');
+  const aiUserMsgTxt = document.getElementById('ai-user-msg-text');
+  if (aiUserMsg && aiUserMsgTxt) {
+    aiUserMsgTxt.textContent = userText;
+    aiUserMsg.style.display  = '';
+  }
+
+  input.value       = '';
+  input.disabled    = true;
+  if (sendBtn) sendBtn.disabled = true;
+
+  const aiEmpty   = document.getElementById('ai-empty');
+  const aiLoading = document.getElementById('ai-loading');
+  const aiResp    = document.getElementById('ai-response');
+
+  if (aiEmpty)   aiEmpty.style.display   = 'none';
+  if (aiResp)    aiResp.style.display    = 'none';
+  if (aiLoading) aiLoading.style.display = 'flex';
+
+  try {
+    const result = await sendMessageToAI(null, STORES[selectedId], userText, userText);
+    if (aiLoading) aiLoading.style.display = 'none';
+    renderAIResponse(result);
+  } catch (err) {
+    console.error('[AI Chat] Edge Function error, falling back to mock:', err);
+    if (aiLoading) aiLoading.style.display = 'none';
+    renderAIResponse(generateMockAIResponse('custom', STORES[selectedId], userText));
+  } finally {
+    input.disabled = false;
+    if (sendBtn) sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
 // Calls Supabase Edge Function → OpenAI API.
+// promptKey: chip-based query key (or null for custom chat)
+// customText: user-typed question (or null for chip-based queries)
 // Falls back to generateMockAIResponse() if this throws.
-async function sendMessageToAI(promptKey, store, chipLabel) {
+async function sendMessageToAI(promptKey, store, chipLabel, customText = null) {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) throw new Error('Not authenticated');
 
@@ -896,8 +948,9 @@ async function sendMessageToAI(promptKey, store, chipLabel) {
       'Authorization': `Bearer ${session.access_token}`,
     },
     body: JSON.stringify({
-      promptKey,
-      chipLabel,
+      promptKey:  promptKey  || '',
+      chipLabel:  chipLabel  || '',
+      customText: customText || '',
       store: {
         id: store.id,           name: store.name,         store: store.store,
         state: store.state,     income: store.income,     poverty: store.poverty,
@@ -1012,6 +1065,15 @@ function generateMockAIResponse(promptKey, s, chipLabel) {
     }
   };
 
+  responses['custom'] = {
+    query: chipLabel ? chipLabel.slice(0, 48) + (chipLabel.length > 48 ? '…' : '') : 'Custom question',
+    keyInsight: `Based on available store data for ${s.name}: ${s.bannerLabel.toLowerCase()} market (median income ${incomeStr}), ${s.priorityText} primary audience (${s.raceLabel}). ${pendMerch.length > 0 ? `${pendMerch.length} merchandising item(s) still pending.` : 'Shelf execution is complete.'}`,
+    whyItMatters: `The AI service connection is not active — this is a fallback response using local store data. Your question has been received and the store context is ready for analysis once the AI service is live.`,
+    recommendedAction: `Review the store profile above manually and consult the ${s.priorityText} playbook for relevant guidance. Re-submit your question once the Edge Function and OpenAI API key are confirmed active.`,
+    dataUsed: `Store profile, income band (${s.bannerLabel}), demographic mix (${s.raceLabel}), merchandising checklist`,
+    confidence: 45
+  };
+
   return responses[promptKey] || responses['summarize'];
 }
 
@@ -1052,10 +1114,12 @@ function renderAIResponse(result) {
 
 function clearAIResponse() {
   document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
-  const aiResp  = document.getElementById('ai-response');
-  const aiEmpty = document.getElementById('ai-empty');
-  if (aiResp)  aiResp.style.display  = 'none';
-  if (aiEmpty) aiEmpty.style.display = '';
+  const aiResp    = document.getElementById('ai-response');
+  const aiEmpty   = document.getElementById('ai-empty');
+  const aiUserMsg = document.getElementById('ai-user-msg');
+  if (aiResp)    aiResp.style.display    = 'none';
+  if (aiEmpty)   aiEmpty.style.display   = '';
+  if (aiUserMsg) aiUserMsg.style.display = 'none';
 }
 
 // ══════════════════════════════════════════
