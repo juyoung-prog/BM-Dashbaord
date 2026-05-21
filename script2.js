@@ -971,110 +971,62 @@ async function sendMessageToAI(promptKey, store, chipLabel, customText = null) {
   return res.json();
 }
 
+// ─── Strategy section config ───────────────────────────────────────────────────
+const STRATEGY_SECTIONS = [
+  { key: 'objectiveSummary',        en: 'Objective Summary',          ko: '목표 요약',              defaultOpen: true  },
+  { key: 'audienceInsight',         en: 'Audience & Market Insight',   ko: '고객 및 시장 인사이트',  defaultOpen: true  },
+  { key: 'strategicRecommendation', en: 'Strategic Recommendation',    ko: '전략적 권장 사항',       defaultOpen: true  },
+  { key: 'creativeDirection',       en: 'Creative Direction',          ko: '크리에이티브 방향',      defaultOpen: false },
+  { key: 'offerCta',                en: 'Offer / CTA',                 ko: '프로모션 / CTA',         defaultOpen: false },
+  { key: 'channelExecution',        en: 'Channel Execution',           ko: '채널 실행',              defaultOpen: false },
+  { key: 'executionBrief',          en: 'Execution Brief',             ko: '실행 브리프',            defaultOpen: false },
+  { key: 'headlines',               en: 'Headlines',                   ko: '헤드라인',               defaultOpen: false },
+  { key: 'designerVersion',         en: 'Designer Version',            ko: '디자이너 버전',          defaultOpen: false },
+  { key: 'testPlan',                en: 'Test Plan',                   ko: '테스트 계획',            defaultOpen: false },
+];
+
 function generateMockAIResponse(promptKey, s, chipLabel) {
-  const pendMerch  = s.merch.filter(([t]) => t === 'pend').map(([, txt]) => txt);
-  const doneMerch  = s.merch.filter(([t]) => t === 'done').map(([, txt]) => txt);
-  const peerStores = STORES.filter(p => p.id !== s.id && p.state === s.state).slice(0, 2).map(p => p.name);
+  const pend       = s.merch.filter(([t]) => t === 'pend').map(([, txt]) => txt);
+  const done       = s.merch.filter(([t]) => t === 'done').map(([, txt]) => txt);
   const incomeStr  = '$' + s.income.toLocaleString();
+  const herocat    = s.state === 'FL' ? 'K-Beauty' : s.priority === 'accent' ? 'Black Hair Care' : 'Hair Care';
+  const secondcat  = s.state === 'FL' ? 'Hair Care' : s.priority === 'info' ? 'K-Beauty' : 'General Beauty';
+  const readyLabel = pend.length > 0 ? `${pend.length} item(s) pending before campaign activation` : 'store is campaign-ready';
+  const label      = chipLabel || promptKey || 'Store analysis';
 
-  const seg = ({
-    accent: { tone: 'Black hair care heritage and community trust',        brand: 'trusted Black beauty brands',                        channel: 'community-first' },
-    warn:   { tone: 'bilingual accessibility and cultural representation', brand: 'bilingual beauty SKUs and culturally resonant brands', channel: 'dual-language' },
-    info:   { tone: 'K-Beauty innovation and premium skincare',            brand: 'K-Beauty and Asian hair care',                        channel: 'premium-lifestyle' },
-    '':     { tone: 'neighborhood accessibility and everyday value',      brand: 'general beauty essentials',                           channel: 'community-awareness' }
-  })[s.priority] || { tone: 'neighborhood accessibility', brand: 'beauty essentials', channel: 'community-awareness' };
+  return {
+    query: label.length > 60 ? label.slice(0, 57) + '…' : label,
 
-  const incomeCtx = s.band === 'upper'
-    ? 'price-resilient and open to premium SKUs'
-    : s.band === 'mid'
-      ? 'value-conscious but willing to trade up for trusted brands'
-      : 'highly value-sensitive — price and convenience are primary drivers';
+    objectiveSummary:
+      `Drive traffic and conversion at ${s.name} (${s.store}). Hero category: ${herocat}. Primary audience: ${s.priorityText} (${s.raceLabel}). ${readyLabel.charAt(0).toUpperCase() + readyLabel.slice(1)}.\n\nIncome band: ${s.bannerLabel} — median income ${incomeStr}, poverty rate ${s.poverty}%. This is a ${s.band === 'upper' ? 'price-resilient' : s.band === 'mid' ? 'value-conscious' : 'price-sensitive'} market.`,
 
-  const responses = {
-    summarize: {
-      query: 'Summarize this store',
-      keyInsight: `${s.name} is a ${s.bannerLabel.toLowerCase()} market (median income ${incomeStr}) with a ${s.priorityText} primary audience. ${s.black > 50 ? `Black shoppers represent ${s.black}% of the trade area — this is a high-priority Black beauty market.` : s.hisp > 25 ? `Hispanic shoppers represent ${s.hisp}% of the trade area, making bilingual engagement a strategic priority.` : `The trade area is demographically mixed (${s.raceLabel}), calling for a balanced general market strategy.`}`,
-      whyItMatters: `At a poverty rate of ${s.poverty}% and average wage of $${s.wage}/hr, shoppers are ${incomeCtx}. Campaign and merchandising strategy must reflect this economic posture.`,
-      recommendedAction: `${pendMerch.length > 0 ? `Complete pending shelf items (${pendMerch.join('; ')}) before launching paid media. ` : 'Shelf execution is complete — store is campaign-ready. '}${s.priority === 'accent' ? 'Prioritize Black hair care endcap visibility.' : s.priority === 'warn' ? 'Ensure bilingual signage is prominent at store entry.' : s.priority === 'info' ? 'Expand K-Beauty shelf ahead of next season.' : 'Run a local awareness campaign tied to neighborhood demographics.'}`,
-      dataUsed: `Median income (${incomeStr}), poverty rate (${s.poverty}%), demographic mix (${s.raceLabel}), avg wage ($${s.wage}/hr), merchandising checklist`,
-      confidence: 87
-    },
-    messaging: {
-      query: 'Suggest campaign messaging',
-      keyInsight: `For ${s.name}, lead with ${seg.tone}. Current recommended message: ${s.msg}${s.priority === 'warn' ? ` A dual-language execution (English + Spanish) is strongly indicated given the ${s.hisp}% Hispanic share.` : ''}`,
-      whyItMatters: `${s.priorityText} shoppers in the ${s.bannerLabel.toLowerCase()} income band respond best to messaging that reflects their identity and daily needs. Segment-matched creative outperforms generic campaigns by 18–31% in comparable markets.`,
-      recommendedAction: `4-week cycle: Weeks 1–2 digital (geo-targeted to ${s.name} ZIP), Week 3 in-store signage refresh with ${seg.brand}, Week 4 measure foot traffic lift.${s.priority === 'warn' ? ' Run Spanish-language copy in parallel.' : ''}`,
-      dataUsed: `Priority segment (${s.priorityText}), income band (${s.bannerLabel}), recommended messaging, demographic mix (${s.raceLabel})`,
-      confidence: 82
-    },
-    risks: {
-      query: 'Find marketing risks',
-      keyInsight: `${s.name} faces ${s.poverty > 15 ? `elevated economic pressure — ${s.poverty}% poverty rate may suppress discretionary beauty spend on premium SKUs.` : s.poverty > 10 ? `moderate economic sensitivity — ${s.poverty}% poverty rate warrants value-first messaging with selective premium positioning.` : `low economic risk — ${s.poverty}% poverty rate supports a mixed pricing strategy.`}${pendMerch.length > 0 ? ` Additionally, ${pendMerch.length} unresolved merchandising item(s) risk undermining campaign credibility.` : ''}`,
-      whyItMatters: `Campaigns launched before shelf execution is complete drive traffic to underwhelming in-store experiences. ${s.pop < 50000 ? `Small trade area population (${s.pop.toLocaleString()}) limits mass reach — precision targeting is critical.` : `Trade area population of ${s.pop.toLocaleString()} supports scaled outreach when execution is solid.`}`,
-      recommendedAction: `${pendMerch.length > 0 ? `Resolve before activating media: ${pendMerch.join('; ')}. ` : ''}Audit competitive beauty retail within 3 miles of ${s.name}. Set campaign budget ceiling at approx. $${(Math.round(s.income * 0.002 / 100) * 100).toLocaleString()} based on local income capacity.`,
-      dataUsed: `Poverty rate (${s.poverty}%), population (${s.pop.toLocaleString()}), pending merch items (${pendMerch.length}), income band (${s.bannerLabel})`,
-      confidence: 78
-    },
-    next: {
-      query: 'Recommend next action',
-      keyInsight: `The highest-impact next step for ${s.name}: ${pendMerch.length > 0 ? `complete pending shelf execution (${pendMerch.join('; ')}) to ensure store readiness before campaign activation.` : s.priority === 'accent' ? 'launch a targeted Black hair care campaign — shelf is ready and this is a high-priority market.' : s.priority === 'warn' ? 'deploy bilingual in-store signage and a matching geo-targeted digital campaign.' : s.priority === 'info' ? 'expand K-Beauty shelf space and run a premium launch activation.' : 'run a local awareness campaign tied to community identity.'}`,
-      whyItMatters: `${pendMerch.length > 0 ? 'Unresolved merchandising gaps create a disconnect between campaign promises and in-store reality, generating foot traffic without conversion.' : 'All merchandising is complete. This store is activation-ready — delay means leaving measurable revenue on the table.'}`,
-      recommendedAction: `${pendMerch.length > 0 ? `1. Complete: ${pendMerch.join(', ')}. 2. Schedule store walk within 7 days. 3. Activate campaign media after sign-off.` : `1. Select a ${s.priorityText} campaign template. 2. Set a 4-week geo-targeted digital flight. 3. Track foot traffic weekly and measure lift at Day 14.`}`,
-      dataUsed: `Merchandising checklist, priority segment (${s.priorityText}), demographic and income profile`,
-      confidence: 91
-    },
-    guide: {
-      query: chipLabel || 'View Campaign Guide',
-      keyInsight: `The ${s.priorityText} Campaign Guide for ${s.name} recommends a ${seg.channel} approach: ${s.priority === 'accent' ? 'Black hair care-led narrative with endcap placements and culturally authentic storytelling.' : s.priority === 'warn' ? 'bilingual campaign spanning English and Spanish channels with culturally resonant creative.' : s.priority === 'info' ? 'premium K-Beauty launch strategy with sampling events and digital lookbook content.' : 'neighborhood-first general market approach with seasonal promotions and loyalty messaging.'}`,
-      whyItMatters: `Segment-matched campaigns in the BeautyMaster network generate 18–31% higher promotional lift versus generic creative. ${s.name}'s demographic profile (${s.raceLabel}) strongly matches the ${s.priorityText} archetype.`,
-      recommendedAction: `Activate the ${s.priorityText} Campaign Kit. Assign a local brand ambassador as campaign owner. Schedule in-store activation for the next 2-week window aligned with your paid digital flight.`,
-      dataUsed: `Priority segment (${s.priorityText}), income band (${s.bannerLabel}), demographic mix (${s.raceLabel}), store location (${s.store})`,
-      confidence: 85
-    },
-    export: {
-      query: 'Export Store Brief',
-      keyInsight: `Store brief for ${s.name} is ready. Key data: ${s.store} · ${s.bannerLabel} · ${s.priorityText} · Median Income ${incomeStr} · Poverty ${s.poverty}% · Black Pop. ${s.black}% · Hispanic ${s.hisp}%.`,
-      whyItMatters: `Store briefs align field reps and regional managers on execution priorities before store visits or campaign launches. Exporting ensures all stakeholders work from the same data snapshot.`,
-      recommendedAction: `In the full release, this generates a formatted PDF brief. For now, copy the key data above and share with the relevant ops or marketing stakeholder for ${s.name}.`,
-      dataUsed: `All available store data fields for ${s.name}`,
-      confidence: 95
-    },
-    playbook: {
-      query: 'Open Store Playbook',
-      keyInsight: `The ${s.priorityText} Store Playbook for ${s.name} covers shelf layout priorities, campaign timing windows, approved ${seg.brand} vendor list, and the field rep visit checklist.`,
-      whyItMatters: `Playbooks standardize execution across stores in the same segment tier, reducing inconsistencies that erode brand trust and campaign ROI.`,
-      recommendedAction: `Current checklist: ${doneMerch.length} item(s) complete, ${pendMerch.length} pending. ${pendMerch.length > 0 ? `Escalate: ${pendMerch.join('; ')}.` : 'No escalations — store is fully compliant with playbook standards.'}`,
-      dataUsed: `Priority segment (${s.priorityText}), merchandising checklist, store location (${s.store})`,
-      confidence: 88
-    },
-    'merch-notes': {
-      query: 'Review Merchandising Notes',
-      keyInsight: `${s.name}: ${doneMerch.length} completed, ${pendMerch.length} pending. ${doneMerch.length > 0 ? `Done: ${doneMerch.join('; ')}.` : ''} ${pendMerch.length > 0 ? `Pending: ${pendMerch.join('; ')}.` : 'All items resolved.'}`,
-      whyItMatters: `${pendMerch.length > 0 ? `Pending items create shelf gaps that reduce conversion. Each unresolved item represents an estimated 3–7% SKU capture loss in the affected category.` : `Full shelf compliance at ${s.name} positions this store for maximum campaign lift. Maintain with quarterly audits.`}`,
-      recommendedAction: `${pendMerch.length > 0 ? `Assign a field rep to resolve pending items within 5 business days. Photograph shelf state before and after. Log completion in the ops system.` : `Schedule a quarterly merchandising audit to maintain compliance. No immediate action required.`}`,
-      dataUsed: `Merchandising checklist (${s.merch.length} total: ${doneMerch.length} done, ${pendMerch.length} pending)`,
-      confidence: 93
-    },
-    compare: {
-      query: 'Compare Similar Stores',
-      keyInsight: `Peer stores with a similar profile to ${s.name} (${s.bannerLabel}, ${s.priorityText}): ${peerStores.length >= 2 ? peerStores.slice(0,2).join(' and ') : peerStores[0] || 'other network locations'}. These locations share comparable income bands and demographic compositions.`,
-      whyItMatters: `Benchmarking against peer stores reveals execution gaps and campaign performance outliers. Cross-store learning accelerates replication of what works across the ${s.priorityText} segment.`,
-      recommendedAction: `Run a side-by-side foot traffic and conversion review across ${s.name} and its peer locations. Identify which peer has the strongest recent campaign lift and replicate that approach in the next ${s.name} activation cycle.`,
-      dataUsed: `Store network data, income band (${s.bannerLabel}), state (${s.state}), priority segment (${s.priorityText})`,
-      confidence: 74
-    }
+    audienceInsight:
+      `Primary audience: ${s.priorityText} shoppers — ${s.raceLabel}. Black population ${s.black}%, Hispanic ${s.hisp}%, Asian ${s.asian}%.\n\nMedian income ${incomeStr}, average wage $${s.wage}/hr, poverty rate ${s.poverty}% — shoppers are ${s.band === 'upper' ? 'price-resilient and open to premium SKUs' : s.band === 'mid' ? 'value-conscious but willing to trade up for trusted brands' : 'highly price-sensitive; value messaging and clear offers are critical'}.\n\nTrade area population: ${s.pop.toLocaleString()}. ${s.hisp > 20 ? `Hispanic share (${s.hisp}%) exceeds 20% — bilingual copy is strongly recommended.` : ''}`,
+
+    strategicRecommendation:
+      `Lead with ${herocat} — this is the hero category for ${s.name} based on location, audience, and store priority rules.\n\n1. ${pend.length > 0 ? `Complete pending shelf items (${pend.join(', ')}) before launching paid media` : `Launch a ${herocat}-led geo-targeted campaign within 5 miles of ${s.name}`}\n2. ${s.priority === 'accent' ? 'Lead with Black hair care endcap visibility and in-store signage' : s.priority === 'warn' ? 'Deploy bilingual (English + Spanish) in-store signage and digital creative' : s.priority === 'info' ? 'Expand K-Beauty shelf and run a product discovery campaign' : 'Run a neighborhood awareness campaign tied to community identity'}\n3. Set a 4-week paid digital flight geo-targeted to the ${s.name} trade area\n4. Measure foot traffic lift at Day 14 — benchmark: 8–12% above baseline`,
+
+    creativeDirection:
+      `Visual direction: authentic, community-first. Show real people, real products, real results in recognizable settings.\n\nHero product: ${herocat === 'K-Beauty' ? 'Sheet masks, skincare sets, tinted sun sticks — show the routine, not just the product' : 'Hair extensions, edge control, protective style products — show the transformation'}\n\nFirst 3 seconds: product reveal with on-screen text naming the offer or benefit — no slow builds.\n\nTone: direct and confident. Message: "${s.msg}"\n\nCasting: ${s.black > 50 ? 'Black women 25–44' : s.hisp > 25 ? 'Hispanic women 20–40, bilingual presentation' : 'diverse, local-feeling cast reflecting the trade area'}\n\nAvoid: stock imagery, cluttered shelves, low-light interiors.`,
+
+    offerCta:
+      `Lead offer: 15–20% off hero category, or BOGO on selected SKUs — choose based on margin.\n\nDigital CTA: "Shop Now" with urgency window (7–10 days)\nIn-store CTA: "Visit Us Today" + limited-time callout on signage\nEmail/SMS CTA: "Tap to see the deal" with store name and address prominent\n\nUrgency mechanic: countdown or expiry language on all digital assets.`,
+
+    channelExecution:
+      `1. Instagram Reels (launch first): 15-sec product reveal, creator-style, ${herocat} hero SKU — geo-targeted to ${s.name} ZIP\n2. In-store digital screen: offer callout with hero product visual, high contrast, large CTA\n3. Flyer/poster: ${s.hisp > 20 ? 'bilingual (English + Spanish)' : 'English'}, hero product image + offer + store address\n4. Paid social: Meta geo-target 5-mile radius, ${s.priorityText} interest audiences\n${s.hisp > 20 ? '5. Spanish-language ad set running in parallel on Meta and TikTok' : '5. TikTok: organic creator-style product try-on — rotate if IG Reels CTR exceeds 2%'}`,
+
+    executionBrief:
+      `Headline priority: lead with offer or product benefit — store name secondary\nHero visual: ${herocat === 'K-Beauty' ? 'K-Beauty skincare routine or product reveal' : 'hair transformation or extension styling'}\nHero category: ${herocat}\nSecondary category: ${secondcat}\nCTA: Visit / Shop Now\nDo not show: cluttered shelves, text-heavy layouts, generic stock imagery, low-light interiors`,
+
+    headlines:
+      `Option A (offer-led): "Up to 20% Off ${herocat}. This Week Only at ${s.name}."\nOption B (identity-led): "Your Beauty. Your Store. ${s.name}."\nOption C (product-led): "${herocat === 'K-Beauty' ? 'K-Beauty Is Here.' : 'Hair Goals Start Here.'} Shop ${s.name} Today."\nOption D (urgency-led): "Limited Time. Real Deals. Don't Miss It."\nOption E (community): "Find It. Feel It. Only at BeautyMaster ${s.store}."`,
+
+    designerVersion:
+      `Format: vertical 9:16 for Reels/TikTok, square 1:1 for feed, horizontal 16:9 for in-store screen\nBackground: clean beauty aisle or neutral — avoid busy backgrounds\nText hierarchy: (1) offer/benefit headline — bold, large; (2) store name — medium weight; (3) CTA — button-style or underlined\nColor: BeautyMaster brand palette — do not introduce off-brand colors\nFont: bold sans-serif for headlines, clean body copy\nRequired elements: store name or location tag on every asset`,
+
+    testPlan:
+      `Week 1 (launch): ${herocat} offer-led creative — static image + Reel, geo-targeted to ${s.name} ZIP\nWeek 2 (test): lifestyle/community creative without explicit offer — compare CTR vs. Week 1\nWeek 3 (rotate): if Week 1 CTR exceeds 2%, push more offer-led; if Week 2 wins, shift to identity angle\nDay 14 metric: foot traffic lift target 8–12%, CTR benchmark 1.5–2.5%, conversion goal 8–12% of clicks\n${pend.length > 0 ? `Note: delay paid media launch until pending items resolved (${pend.join(', ')})` : 'Note: store is ready — launch can begin immediately'}`,
   };
-
-  responses['custom'] = {
-    query: chipLabel ? chipLabel.slice(0, 48) + (chipLabel.length > 48 ? '…' : '') : 'Custom question',
-    keyInsight: `Based on available store data for ${s.name}: ${s.bannerLabel.toLowerCase()} market (median income ${incomeStr}), ${s.priorityText} primary audience (${s.raceLabel}). ${pendMerch.length > 0 ? `${pendMerch.length} merchandising item(s) still pending.` : 'Shelf execution is complete.'}`,
-    whyItMatters: `The AI service connection is not active — this is a fallback response using local store data. Your question has been received and the store context is ready for analysis once the AI service is live.`,
-    recommendedAction: `Review the store profile above manually and consult the ${s.priorityText} playbook for relevant guidance. Re-submit your question once the Edge Function and OpenAI API key are confirmed active.`,
-    dataUsed: `Store profile, income band (${s.bannerLabel}), demographic mix (${s.raceLabel}), merchandising checklist`,
-    confidence: 45
-  };
-
-  return responses[promptKey] || responses['summarize'];
 }
 
 function renderAIResponse(result) {
@@ -1083,33 +1035,29 @@ function renderAIResponse(result) {
   const respEl  = document.getElementById('ai-response');
   if (!respEl) return;
 
-  queryEl.textContent = result.query;
-  bodyEl.innerHTML = `
-    <div class="ai-field">
-      <div class="ai-field-label">Key Insight</div>
-      <div class="ai-field-value highlight">${esc(result.keyInsight)}</div>
-    </div>
-    <div class="ai-field">
-      <div class="ai-field-label">Why It Matters</div>
-      <div class="ai-field-value">${esc(result.whyItMatters)}</div>
-    </div>
-    <div class="ai-field">
-      <div class="ai-field-label">Recommended Action</div>
-      <div class="ai-field-value">${esc(result.recommendedAction)}</div>
-    </div>
-    <div class="ai-field">
-      <div class="ai-field-label">Data Used</div>
-      <div class="ai-field-value" style="color:var(--text-secondary);font-size:11px">${esc(result.dataUsed)}</div>
-    </div>
-    <div class="ai-confidence">
-      <div class="ai-confidence-label">Confidence</div>
-      <div class="ai-confidence-track">
-        <div class="ai-confidence-fill" style="width:${result.confidence}%"></div>
-      </div>
-      <div class="ai-confidence-pct">${result.confidence}%</div>
-    </div>
-  `;
+  queryEl.textContent = result.query || '';
+
+  const isKorean = /[가-힣]/.test(result.query || '');
+
+  const sectionsHtml = STRATEGY_SECTIONS.map(s => {
+    const content   = result[s.key] ?? '';
+    const label     = isKorean ? s.ko : s.en;
+    const openClass = s.defaultOpen ? ' is-open' : '';
+    return `<div class="ai-strategy-section${openClass}">` +
+      `<button class="ai-strategy-toggle" onclick="toggleStrategySection(this)">` +
+        `<span>${esc(label)}</span>` +
+        `<span class="ai-strategy-chevron">&#8250;</span>` +
+      `</button>` +
+      `<div class="ai-strategy-body">${esc(content)}</div>` +
+    `</div>`;
+  }).join('');
+
+  bodyEl.innerHTML = `<div class="ai-strategy-doc">${sectionsHtml}</div>`;
   respEl.style.display = 'block';
+}
+
+function toggleStrategySection(btn) {
+  btn.closest('.ai-strategy-section').classList.toggle('is-open');
 }
 
 function clearAIResponse() {
