@@ -878,7 +878,17 @@ function updateAICopilotContext(s) {
   if (!s) return;
 
   const storeEl = document.getElementById('acp-context-store');
-  if (storeEl) storeEl.textContent = s.name + ' · ' + s.state;
+  if (storeEl) storeEl.textContent = s.name;
+
+  const tagsEl = document.getElementById('acp-ctx-tags');
+  if (tagsEl) {
+    const stateName = s.state === 'FL' ? 'Florida' : 'Georgia';
+    tagsEl.innerHTML = `
+      <span class="acp-ctx-tag">${stateName}</span>
+      <span class="acp-ctx-tag">${s.bannerLabel}</span>
+      <span class="acp-ctx-tag">${s.priorityText}</span>
+    `;
+  }
 
   const gridEl = document.getElementById('acp-context-grid');
   if (gridEl) {
@@ -886,95 +896,88 @@ function updateAICopilotContext(s) {
       ? (s.pop / 1000000).toFixed(1) + 'M'
       : Math.round(s.pop / 1000) + 'K';
     gridEl.innerHTML = `
-      <div class="acp-ctx-item"><span class="acp-ctx-k">Population</span><span class="acp-ctx-v">${popStr}</span></div>
-      <div class="acp-ctx-item"><span class="acp-ctx-k">Black</span><span class="acp-ctx-v">${s.black}%</span></div>
-      <div class="acp-ctx-item"><span class="acp-ctx-k">Hispanic</span><span class="acp-ctx-v">${s.hisp}%</span></div>
-      <div class="acp-ctx-item"><span class="acp-ctx-k">Income</span><span class="acp-ctx-v">$${Math.round(s.income / 1000)}K</span></div>
-      <div class="acp-ctx-item acp-ctx-wide"><span class="acp-ctx-k">Market Band</span><span class="acp-ctx-v">${s.bannerLabel}</span></div>
+      <span class="acp-ctx-stat"><b>${popStr}</b> pop</span>
+      <span class="acp-ctx-stat"><b>${s.black}%</b> Black</span>
+      <span class="acp-ctx-stat"><b>${s.hisp}%</b> Hispanic</span>
+      <span class="acp-ctx-stat"><b>$${Math.round(s.income / 1000)}K</b> income</span>
     `;
-  }
-
-  const marketEl = document.getElementById('acp-context-market');
-  if (marketEl) {
-    marketEl.innerHTML = `<span class="acp-ctx-market-label">Primary Focus</span><span class="acp-ctx-market-value">${s.priorityText}</span>`;
   }
 
   renderInsightCards(s);
 }
 
-function generateInsightCards(s) {
-  const cards = [];
+function buildInsightObs(s) {
+  const obs = [];
 
-  // Card 1 — Demographic signal
   if (s.black >= 60) {
-    cards.push({ type: 'opportunity', label: 'Demographic Opportunity',
-      title: 'Black hair care is the category anchor',
-      body: `${s.black}% Black population. Protective styles, extensions, and edge control should lead all media, in-store endcaps, and paid creative.`,
-      action: 'summarize', actionLabel: 'Build Strategy' });
+    obs.push({ type: 'opportunity', tag: 'Demographic Opportunity',
+      text: `<strong>${s.black}% Black population</strong> makes this a clear Black hair care-led market. Protective styles, extensions, and edge control should anchor the floor plan and all paid media.`,
+      action: 'summarize', actionLabel: 'Generate strategy' });
   } else if (s.hisp >= 25) {
-    cards.push({ type: 'opportunity', label: 'Demographic Opportunity',
-      title: 'Bilingual execution is required, not optional',
-      body: `${s.hisp}% Hispanic share exceeds the 20% threshold. English-only creative will underperform. Bilingual copy should run across all paid and in-store channels.`,
-      action: 'messaging', actionLabel: 'Develop Messaging' });
+    obs.push({ type: 'opportunity', tag: 'Demographic Opportunity',
+      text: `<strong>${s.hisp}% Hispanic share</strong> exceeds the 20% bilingual threshold. English-only creative will underperform — dual-language execution across paid and in-store is required.`,
+      action: 'messaging', actionLabel: 'Develop messaging' });
   } else if (s.asian >= 15 || s.priority === 'info') {
-    cards.push({ type: 'opportunity', label: 'Category Opportunity',
-      title: 'K-Beauty upsell potential is high',
-      body: `${s.asian}% Asian population with K-Beauty priority designation. Premium skincare and K-Beauty discovery should be visible at entry and featured in digital creative.`,
-      action: 'guide', actionLabel: 'View Playbook' });
+    obs.push({ type: 'opportunity', tag: 'Category Opportunity',
+      text: `K-Beauty is a priority revenue category here. <strong>${s.asian}% Asian population</strong> with K-Beauty priority designation — premium skincare and discovery should be visible at entry.`,
+      action: 'guide', actionLabel: 'View K-Beauty playbook' });
   } else {
-    cards.push({ type: 'signal', label: 'Market Signal',
-      title: 'Mixed market — broad community positioning',
-      body: `${s.raceLabel} — no single demographic above 50%. Niche campaigns will miss reach. Lead with community identity and category breadth.`,
-      action: 'summarize', actionLabel: 'Analyze Market' });
+    obs.push({ type: 'signal', tag: 'Market Signal',
+      text: `<strong>Balanced demographic mix</strong> (${s.raceLabel}) — no single group above 50%. Broad community positioning will outperform niche-only campaigns in this trade area.`,
+      action: 'summarize', actionLabel: 'Analyze full market' });
   }
 
-  // Card 2 — Pricing sensitivity
   if (s.poverty >= 15 || s.band === 'lower') {
-    cards.push({ type: 'risk', label: 'Pricing Risk',
-      title: 'Price-sensitive market — value framing is critical',
-      body: `${s.poverty}% poverty rate · ${s.bannerLabel}. Premium positioning without a price anchor reduces conversion. Lead with bundles and clear offer mechanics.`,
-      action: 'risks', actionLabel: 'Review Risks' });
+    obs.push({ type: 'risk', tag: 'Pricing Risk',
+      text: `<strong>${s.poverty}% poverty rate</strong> with ${s.bannerLabel} incomes. This market is price-sensitive — premium positioning without a value anchor will reduce conversion. Lead with bundles and clear price points.`,
+      action: 'risks', actionLabel: 'Review risks' });
   } else if (s.band === 'upper') {
-    cards.push({ type: 'opportunity', label: 'Revenue Opportunity',
-      title: 'Premium SKU environment — upsell is viable',
-      body: `$${s.income.toLocaleString()} median income · ${s.poverty}% poverty rate. Price-resilient market. K-Beauty sets, premium skincare, and discovery bundles are strong plays.`,
-      action: 'guide', actionLabel: 'Build Campaign' });
+    obs.push({ type: 'opportunity', tag: 'Revenue Opportunity',
+      text: `<strong>$${s.income.toLocaleString()} median income</strong> with only ${s.poverty}% poverty rate. This market is price-resilient — premium SKUs, K-Beauty sets, and discovery bundles are strong plays.`,
+      action: 'guide', actionLabel: 'Build premium campaign' });
   } else {
-    cards.push({ type: 'signal', label: 'Income Signal',
-      title: 'Mid-income — quality-value balance required',
-      body: `$${s.income.toLocaleString()} median income. Customers will trade up for trusted brands but need clear value justification. Avoid aspirational-only tone.`,
-      action: 'messaging', actionLabel: 'Refine Messaging' });
+    obs.push({ type: 'signal', tag: 'Income Signal',
+      text: `<strong>${s.bannerLabel} market</strong> at $${s.income.toLocaleString()} median income. Customers will trade up for trusted brands but need clear value justification. Avoid aspirational-only messaging.`,
+      action: 'messaging', actionLabel: 'Refine messaging' });
   }
 
-  // Card 3 — Merchandising readiness
   const pending = s.merch.filter(([t]) => t === 'pend');
   if (pending.length > 0) {
-    cards.push({ type: 'risk', label: 'Execution Risk',
-      title: `${pending.length} shelf item${pending.length > 1 ? 's' : ''} unresolved before launch`,
-      body: `Pending: ${pending.map(([, txt]) => txt).join(', ')}. Launching paid media before shelf resolution creates a gap between ad promise and in-store reality.`,
-      action: 'merch-notes', actionLabel: 'Review Merch' });
+    obs.push({ type: 'risk', tag: 'Execution Risk',
+      text: `<strong>${pending.length} merchandising item${pending.length > 1 ? 's' : ''} pending</strong> before launch: ${pending.map(([, txt]) => txt).join(', ')}. Launching paid media before shelf resolution creates a disconnect between ad promise and in-store reality.`,
+      action: 'merch-notes', actionLabel: 'Review merchandising' });
   } else {
-    cards.push({ type: 'ready', label: 'Campaign Ready',
-      title: 'All merchandising complete — activation-ready',
-      body: 'This store can support a full-funnel launch. Paid media, in-store signage, and digital can run simultaneously without shelf risk.',
-      action: 'next', actionLabel: 'Next Best Action' });
+    obs.push({ type: 'ready', tag: 'Campaign Ready',
+      text: `<strong>All merchandising complete.</strong> This store can support a full-funnel launch immediately — paid media, in-store signage, and digital can run simultaneously.`,
+      action: 'next', actionLabel: 'Get next best action' });
   }
 
-  return cards;
+  return obs;
 }
 
 function renderInsightCards(s) {
   const container = document.getElementById('acp-insights');
   if (!container) return;
-  const cards = generateInsightCards(s);
-  container.innerHTML = cards.map(c => `
-    <div class="acp-insight-card acp-insight-${c.type}">
-      <div class="acp-insight-label">${c.label}</div>
-      <div class="acp-insight-title">${c.title}</div>
-      <div class="acp-insight-body">${c.body}</div>
-      <button class="acp-insight-action" onclick="handleAIChip(this,'${c.action}')">${c.actionLabel} →</button>
+  const obs = buildInsightObs(s);
+  const obsHtml = obs.map(o => `
+    <div class="acp-obs acp-obs-${o.type}">
+      <span class="acp-obs-tag">${o.tag}</span>
+      <p class="acp-obs-text">${o.text}</p>
+      <button class="acp-obs-action" onclick="handleAIChip(this,'${o.action}')">${o.actionLabel} →</button>
     </div>
   `).join('');
+
+  container.innerHTML = `
+    <div class="acp-msg-ai">
+      <div class="acp-ai-avatar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="acp-ai-intro">
+        <p class="acp-intro-text">I've analyzed <strong>${s.name}</strong>. Here are the key observations before we begin:</p>
+        <div class="acp-obs-list">${obsHtml}</div>
+      </div>
+    </div>
+  `;
 }
 
 function resetAIState() {
@@ -986,7 +989,7 @@ function resetAIState() {
   if (aiResp)    aiResp.style.display    = 'none';
   if (aiUserMsg) aiUserMsg.style.display = 'none';
   if (insights)  insights.style.display  = '';
-  document.querySelectorAll('.acp-action-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-pill, .ai-chip').forEach(c => c.classList.remove('active'));
 }
 
 // Close on Escape
@@ -1007,7 +1010,7 @@ function setAIMode(btn) {
 }
 
 async function handleAIChip(btn, promptKey) {
-  document.querySelectorAll('.acp-action-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-pill, .acp-obs-action, .ai-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
 
   const chipLabel = btn.textContent.replace('→','').trim();
@@ -1040,7 +1043,7 @@ async function sendAIChatMessage() {
   const userText = input.value.trim();
   if (!userText) return;
 
-  document.querySelectorAll('.acp-action-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-pill, .acp-obs-action, .ai-chip').forEach(c => c.classList.remove('active'));
 
   // Show user message bubble
   const aiUserMsg    = document.getElementById('ai-user-msg');
@@ -1206,13 +1209,16 @@ function toggleStrategySection(btn) {
 }
 
 function clearAIResponse() {
-  document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-pill, .acp-obs-action, .ai-chip').forEach(c => c.classList.remove('active'));
   const aiResp    = document.getElementById('ai-response');
-  const aiEmpty   = document.getElementById('ai-empty');
   const aiUserMsg = document.getElementById('ai-user-msg');
+  const insights  = document.getElementById('acp-insights');
   if (aiResp)    aiResp.style.display    = 'none';
-  if (aiEmpty)   aiEmpty.style.display   = '';
   if (aiUserMsg) aiUserMsg.style.display = 'none';
+  if (insights)  insights.style.display  = '';
+  // Reset textarea height
+  const input = document.getElementById('ai-chat-input');
+  if (input) { input.style.height = 'auto'; input.focus(); }
 }
 
 // ══════════════════════════════════════════

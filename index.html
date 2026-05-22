@@ -79,10 +79,10 @@
 
 <aside class="ai-copilot-panel" id="ai-copilot-panel" role="complementary" aria-label="AI Copilot">
 
-  <!-- ── Panel header ── -->
+  <!-- ── Sticky header ── -->
   <div class="acp-header">
     <div class="acp-header-left">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div class="acp-header-dot"></div>
       <span class="acp-title">AI Copilot</span>
     </div>
     <button class="acp-close" onclick="closeAICopilot()" aria-label="Close">
@@ -90,82 +90,89 @@
     </button>
   </div>
 
-  <!-- ── AI Analysis Context block ── -->
+  <!-- ── Sticky context block ── -->
   <div class="acp-context" id="acp-context">
-    <div class="acp-context-eyebrow">Currently Analyzing</div>
-    <div class="acp-context-store" id="acp-context-store">No store selected</div>
-    <div class="acp-context-grid" id="acp-context-grid"></div>
-    <div class="acp-context-market" id="acp-context-market"></div>
+    <div class="acp-ctx-eyebrow">Currently Analyzing</div>
+    <div class="acp-ctx-store" id="acp-context-store">No store selected</div>
+    <div class="acp-ctx-tags" id="acp-ctx-tags"></div>
+    <div class="acp-ctx-stats" id="acp-context-grid"></div>
   </div>
 
-  <!-- ── Scrollable body: insights + conversation ── -->
+  <!-- ── Scrollable conversation body ── -->
   <div class="acp-body" id="acp-body">
 
-    <!-- Proactive insight cards (idle state) -->
+    <!-- AI intro / proactive insight message -->
     <div class="acp-insights" id="acp-insights"></div>
 
-    <!-- Loading state -->
+    <!-- Loading: AI thinking -->
     <div class="ai-loading" id="ai-loading">
-      <span class="ai-loading-dot"></span>
-      <span class="ai-loading-dot"></span>
-      <span class="ai-loading-dot"></span>
-    </div>
-
-    <!-- User message -->
-    <div class="ai-user-msg" id="ai-user-msg" style="display:none">
-      <div class="ai-user-msg-label">You</div>
-      <div id="ai-user-msg-text"></div>
-    </div>
-
-    <!-- AI response -->
-    <div class="ai-response" id="ai-response">
-      <div class="ai-response-header">
-        <span class="ai-response-query" id="ai-response-query"></span>
-        <button class="ai-response-clear" onclick="clearAIResponse()" title="Clear">&times;</button>
+      <div class="acp-msg-ai">
+        <div class="acp-ai-avatar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="acp-thinking-dots">
+          <span class="ai-loading-dot"></span>
+          <span class="ai-loading-dot"></span>
+          <span class="ai-loading-dot"></span>
+        </div>
       </div>
-      <div class="ai-response-body" id="ai-response-body"></div>
+    </div>
+
+    <!-- User message bubble -->
+    <div class="ai-user-msg" id="ai-user-msg" style="display:none">
+      <div class="acp-msg-user">
+        <div class="acp-user-bubble" id="ai-user-msg-text"></div>
+      </div>
+    </div>
+
+    <!-- AI response block -->
+    <div class="ai-response" id="ai-response">
+      <div class="acp-msg-ai">
+        <div class="acp-ai-avatar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="acp-ai-block">
+          <div class="acp-ai-block-header">
+            <span class="ai-response-query" id="ai-response-query"></span>
+            <button class="ai-response-clear" onclick="clearAIResponse()" title="Clear response">&times;</button>
+          </div>
+          <div class="ai-response-body" id="ai-response-body"></div>
+        </div>
+      </div>
     </div>
 
   </div><!-- /acp-body -->
 
-  <!-- ── Footer: 3 primary actions + mode + input ── -->
+  <!-- ── Sticky footer ── -->
   <div class="acp-footer">
 
-    <!-- 3 primary actions -->
-    <div class="acp-actions">
-      <button class="acp-action-btn" id="rp-act1" onclick="handleAIChip(this,'summarize')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        Generate Strategy
-      </button>
-      <button class="acp-action-btn" onclick="handleAIChip(this,'risks')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        Find Risks
-      </button>
-      <button class="acp-action-btn" onclick="handleAIChip(this,'compare')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        Compare Stores
-      </button>
+    <!-- Quick action pills -->
+    <div class="acp-quick-pills" id="acp-quick-pills">
+      <button class="acp-pill" id="rp-act1" onclick="handleAIChip(this,'summarize')">Generate Campaign Plan</button>
+      <button class="acp-pill" onclick="handleAIChip(this,'risks')">Find Risks</button>
+      <button class="acp-pill" onclick="handleAIChip(this,'compare')">Compare Stores</button>
+      <button class="acp-pill" onclick="handleAIChip(this,'messaging')">Suggest Messaging</button>
+      <button class="acp-pill" onclick="handleAIChip(this,'next')">Next Best Action</button>
     </div>
 
-    <!-- Mode selector -->
-    <div class="ai-mode-row">
-      <div class="ai-mode-btns">
-        <button class="ai-mode-btn is-active" data-mode="fast"     data-tooltip="gpt-4o-mini"  onclick="setAIMode(this)">Fast</button>
-        <button class="ai-mode-btn"           data-mode="balanced" data-tooltip="gpt-4.1-mini" onclick="setAIMode(this)">Balanced</button>
-        <button class="ai-mode-btn"           data-mode="advanced" data-tooltip="gpt-4.1"      onclick="setAIMode(this)">Advanced</button>
+    <!-- Input area -->
+    <div class="acp-input-wrap">
+      <textarea class="ai-chat-input" id="ai-chat-input"
+                placeholder="Ask about this store…"
+                rows="1"
+                autocomplete="off"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChatMessage()}"
+                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+      <div class="acp-input-controls">
+        <div class="ai-mode-btns">
+          <button class="ai-mode-btn is-active" data-mode="fast"     data-tooltip="GPT-4o mini — fast responses"   onclick="setAIMode(this)">Fast</button>
+          <button class="ai-mode-btn"           data-mode="balanced" data-tooltip="GPT-4.1 mini — balanced quality" onclick="setAIMode(this)">Balanced</button>
+          <button class="ai-mode-btn"           data-mode="advanced" data-tooltip="GPT-4.1 — deep analysis"        onclick="setAIMode(this)">Advanced</button>
+        </div>
+        <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send message">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
       </div>
-      <span class="ai-mode-hint">Advanced uses more credits.</span>
-    </div>
-
-    <!-- Chat input -->
-    <div class="ai-chat-row">
-      <input type="text" class="ai-chat-input" id="ai-chat-input"
-             placeholder="Ask about this store…"
-             autocomplete="off"
-             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChatMessage()}">
-      <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
     </div>
 
   </div><!-- /acp-footer -->
