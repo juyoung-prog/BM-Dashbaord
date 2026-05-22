@@ -919,37 +919,37 @@ function buildAIObservations(s) {
   const obs = [];
 
   if (s.black >= 60) {
-    obs.push({ type: 'opportunity', prefix: 'Opportunity detected',
-      text: `${s.black}% Black demographic makes this a clear hair care-led market. Protective styles and edge control should anchor the floor plan and paid media.` });
+    obs.push({ type: 'opportunity', prefix: 'Market opportunity',
+      text: `${s.black}% Black demographic concentration makes hair care-led positioning the primary strategic opportunity. Protective styles, extensions, and edge control should anchor the floor plan and paid media allocation.` });
   } else if (s.hisp >= 25) {
-    obs.push({ type: 'opportunity', prefix: 'Opportunity detected',
-      text: `${s.hisp}% Hispanic share — English-only creative will underperform here. Dual-language execution across paid and in-store is a stronger play.` });
+    obs.push({ type: 'opportunity', prefix: 'Market opportunity',
+      text: `Hispanic share of ${s.hisp}% indicates dual-language execution will outperform English-only creative across paid and in-store channels. Bilingual messaging is a structural requirement, not an option.` });
   } else if (s.asian >= 15 || s.priority === 'info') {
-    obs.push({ type: 'opportunity', prefix: 'Opportunity detected',
-      text: `${s.asian}% Asian population with K-Beauty priority designation. Premium skincare as lead category at entry.` });
+    obs.push({ type: 'opportunity', prefix: 'Category opportunity',
+      text: `${s.asian}% Asian consumer share with K-Beauty priority designation. Premium skincare as lead category at entry-level visibility maximizes category revenue potential.` });
   } else {
-    obs.push({ type: 'signal', prefix: 'AI noticed',
-      text: `Balanced demographics (${s.raceLabel}) — broad community positioning will outperform niche-only campaigns in this trade area.` });
+    obs.push({ type: 'signal', prefix: 'Market signal',
+      text: `Balanced demographics across ${s.raceLabel} — no single group above 50%. Broad-community positioning will outperform niche-only campaign strategy in this trade area.` });
   }
 
   if (s.poverty >= 15 || s.band === 'lower') {
-    obs.push({ type: 'risk', prefix: 'Risk flagged',
-      text: `${s.poverty}% poverty rate — premium positioning without a value anchor will compress conversion. Lead with bundles and clear price points.` });
+    obs.push({ type: 'risk', prefix: 'Pricing risk',
+      text: `${s.poverty}% poverty rate in a ${s.bannerLabel.toLowerCase()} income market. Premium positioning without a value anchor will compress conversion — lead with bundles, clear price points, and visible savings.` });
   } else if (s.band === 'upper') {
-    obs.push({ type: 'opportunity', prefix: 'Opportunity detected',
-      text: `$${s.income.toLocaleString()} median income with low poverty. Premium SKUs and discovery bundles are high-viability plays here.` });
+    obs.push({ type: 'opportunity', prefix: 'Revenue opportunity',
+      text: `$${s.income.toLocaleString()} median income with ${s.poverty}% poverty rate. Market is price-resilient — premium SKUs, K-Beauty sets, and discovery bundles are high-viability revenue plays.` });
   } else {
-    obs.push({ type: 'signal', prefix: 'AI noticed',
-      text: `${s.bannerLabel} income market — customers will trade up for trusted brands but need clear value justification.` });
+    obs.push({ type: 'signal', prefix: 'Income signal',
+      text: `${s.bannerLabel} income market at $${Math.round(s.income / 1000)}K median. Customers will trade up for trusted brands but respond better to value justification than aspirational luxury messaging.` });
   }
 
   const pending = s.merch.filter(([t]) => t === 'pend');
   if (pending.length > 0) {
-    obs.push({ type: 'risk', prefix: 'Risk flagged',
-      text: `${pending.length} merchandising item${pending.length > 1 ? 's' : ''} pending before launch. Paid media should hold until shelf is resolved.` });
+    obs.push({ type: 'risk', prefix: 'Execution risk',
+      text: `${pending.length} merchandising item${pending.length > 1 ? 's' : ''} unresolved before launch. Paid media activation before shelf readiness creates ad-to-store inconsistency that erodes first-impression trust.` });
   } else {
-    obs.push({ type: 'ready', prefix: 'Ready to launch',
-      text: 'All merchandising complete — full-funnel activation is viable immediately.' });
+    obs.push({ type: 'ready', prefix: 'Campaign ready',
+      text: 'All merchandising complete — full-funnel activation is viable immediately. Paid media, in-store signage, and digital can run in parallel.' });
   }
 
   return obs;
@@ -958,20 +958,20 @@ function buildAIObservations(s) {
 function buildProseOpening(s) {
   let opener;
   if (s.black >= 60) {
-    opener = `${s.name} is a clear Black hair care-led market with a ${s.black}% Black demographic.`;
+    opener = `${s.name} presents a high-concentration Black consumer market at ${s.black}%. Hair care-led strategy is the primary revenue driver.`;
   } else if (s.hisp >= 25) {
-    opener = `${s.name} shows strong Hispanic representation at ${s.hisp}% — a bilingual-first market.`;
+    opener = `${s.name} is a Hispanic-majority market at ${s.hisp}%. Bilingual execution across all channels is a structural requirement for performance.`;
   } else if (s.asian >= 15) {
-    opener = `${s.name} has meaningful Asian consumer share at ${s.asian}%, with K-Beauty as a priority category.`;
+    opener = `${s.name} carries meaningful Asian consumer share at ${s.asian}% with K-Beauty as a designated priority category.`;
   } else {
-    opener = `${s.name} is a broad-market opportunity with balanced demographics across ${s.raceLabel}.`;
+    opener = `${s.name} presents a balanced demographic market across ${s.raceLabel}. Broad-community positioning is the strongest strategic angle.`;
   }
   if (s.band === 'upper') {
-    opener += ` Premium positioning and discovery bundles have strong potential here.`;
+    opener += ` $${Math.round(s.income / 1000)}K median income — market is price-resilient and receptive to premium and discovery-led campaigns.`;
   } else if (s.band === 'lower' || s.poverty >= 15) {
-    opener += ` Value anchoring and clear price points will be critical to conversion.`;
+    opener += ` ${s.poverty}% poverty rate requires value anchoring before premium positioning can convert.`;
   } else {
-    opener += ` Mid-market messaging with trusted brand emphasis fits this customer.`;
+    opener += ` Mid-income customers respond to trusted brands with clear value justification rather than aspirational messaging.`;
   }
   return opener;
 }
@@ -1135,6 +1135,27 @@ document.addEventListener('keydown', (e) => {
 // ══════════════════════════════════════════
 
 let aiMode = 'fast';
+
+// Cycle input placeholder to reinforce operational tone
+(function initPlaceholderCycle() {
+  const options = [
+    'Analyze launch readiness…',
+    'Compare with similar markets…',
+    'Suggest campaign direction…',
+    'Identify pricing risks…',
+    'Build influencer strategy…',
+    'Evaluate community positioning…',
+    'Assess merchandising readiness…',
+  ];
+  let idx = 0;
+  setInterval(() => {
+    const input = document.getElementById('ai-chat-input');
+    if (input && document.activeElement !== input && !input.value) {
+      idx = (idx + 1) % options.length;
+      input.setAttribute('placeholder', options[idx]);
+    }
+  }, 3800);
+})();
 
 function setAIMode(btn) {
   document.querySelectorAll('.ai-mode-btn').forEach(b => b.classList.remove('is-active'));
