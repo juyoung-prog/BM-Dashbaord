@@ -843,19 +843,59 @@ function selectStore(id) {
     // Market lens label
     const htagType = document.getElementById('rp-htag-type');
     if (htagType) htagType.textContent = s.priorityText;
-    // Reset AI Assistant state when a different store is selected
-    const aiEmpty   = document.getElementById('ai-empty');
-    const aiLoading = document.getElementById('ai-loading');
-    const aiResp    = document.getElementById('ai-response');
-    const aiUserMsg = document.getElementById('ai-user-msg');
-    if (aiEmpty)   aiEmpty.style.display   = '';
-    if (aiLoading) aiLoading.style.display = 'none';
-    if (aiResp)    aiResp.style.display    = 'none';
-    if (aiUserMsg) aiUserMsg.style.display = 'none';
-    document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
+    // Reset AI state when store changes
+    resetAIState();
+    // Update copilot context badge
+    updateAICopilotContext(s);
   }
   renderTable();
 }
+
+// ══════════════════════════════════════════
+// AI COPILOT OVERLAY PANEL
+// ══════════════════════════════════════════
+
+function openAICopilot() {
+  document.getElementById('ai-copilot-panel').classList.add('is-open');
+  document.getElementById('ai-copilot-backdrop').classList.add('is-open');
+  document.getElementById('ai-copilot-trigger').classList.add('is-open');
+  // Focus chat input for immediate use
+  setTimeout(() => {
+    const input = document.getElementById('ai-chat-input');
+    if (input) input.focus();
+  }, 300);
+}
+
+function closeAICopilot() {
+  document.getElementById('ai-copilot-panel').classList.remove('is-open');
+  document.getElementById('ai-copilot-backdrop').classList.remove('is-open');
+  document.getElementById('ai-copilot-trigger').classList.remove('is-open');
+}
+
+function updateAICopilotContext(s) {
+  const valEl  = document.getElementById('acp-context-value');
+  const metaEl = document.getElementById('acp-context-meta');
+  if (!valEl || !s) return;
+  valEl.textContent  = s.name + ' · ' + s.state;
+  metaEl.textContent = s.bannerLabel + ' · ' + s.raceLabel + ' · ' + s.priorityText;
+}
+
+function resetAIState() {
+  const aiEmpty   = document.getElementById('ai-empty');
+  const aiLoading = document.getElementById('ai-loading');
+  const aiResp    = document.getElementById('ai-response');
+  const aiUserMsg = document.getElementById('ai-user-msg');
+  if (aiEmpty)   aiEmpty.style.display   = '';
+  if (aiLoading) aiLoading.style.display = 'none';
+  if (aiResp)    aiResp.style.display    = 'none';
+  if (aiUserMsg) aiUserMsg.style.display = 'none';
+  document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
+}
+
+// Close panel on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeAICopilot();
+});
 
 // ══════════════════════════════════════════
 // AI ASSISTANT — PHASE 2 (Real AI via Supabase Edge Function)

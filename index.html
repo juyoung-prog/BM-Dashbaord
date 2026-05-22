@@ -74,6 +74,106 @@
 </aside>
 
 
+<!-- ══════════════════ AI COPILOT OVERLAY ══════════════════ -->
+<div class="ai-copilot-backdrop" id="ai-copilot-backdrop" onclick="closeAICopilot()"></div>
+
+<aside class="ai-copilot-panel" id="ai-copilot-panel" role="complementary" aria-label="AI Copilot">
+
+  <!-- Panel header -->
+  <div class="acp-header">
+    <div class="acp-header-left">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span class="acp-title">AI Copilot</span>
+    </div>
+    <button class="acp-close" onclick="closeAICopilot()" aria-label="Close AI Copilot">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- Context badge -->
+  <div class="acp-context" id="acp-context">
+    <div class="acp-context-label">Context</div>
+    <div class="acp-context-value" id="acp-context-value">No store selected</div>
+    <div class="acp-context-meta" id="acp-context-meta"></div>
+  </div>
+
+  <!-- Chip prompts -->
+  <div class="acp-chips-wrap">
+    <div class="acp-chip-group-label">Analyze</div>
+    <div class="ai-chips">
+      <button class="ai-chip" onclick="handleAIChip(this,'summarize')">Summarize this store</button>
+      <button class="ai-chip" onclick="handleAIChip(this,'messaging')">Suggest campaign messaging</button>
+      <button class="ai-chip" onclick="handleAIChip(this,'risks')">Find marketing risks</button>
+      <button class="ai-chip" onclick="handleAIChip(this,'next')">Recommend next action</button>
+    </div>
+    <div class="acp-chip-group-label">Actions</div>
+    <div class="ai-chips">
+      <button class="ai-chip" id="rp-act1" onclick="handleAIChip(this,'guide')">View Campaign Guide</button>
+      <button class="ai-chip" onclick="handleAIChip(this,'export')">Export Store Brief</button>
+      <button class="ai-chip" onclick="handleAIChip(this,'playbook')">Open Store Playbook</button>
+      <button class="ai-chip" onclick="handleAIChip(this,'merch-notes')">Review Merchandising Notes</button>
+      <button class="ai-chip" onclick="handleAIChip(this,'compare')">Compare Similar Stores</button>
+    </div>
+  </div>
+
+  <!-- Scrollable conversation area — independent scroll context -->
+  <div class="acp-body" id="acp-body">
+
+    <!-- Empty state -->
+    <div class="ai-empty" id="ai-empty">
+      <div class="ai-empty-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div class="ai-empty-text">Select a prompt above or ask a question below.</div>
+    </div>
+
+    <!-- Loading state -->
+    <div class="ai-loading" id="ai-loading">
+      <span class="ai-loading-dot"></span>
+      <span class="ai-loading-dot"></span>
+      <span class="ai-loading-dot"></span>
+    </div>
+
+    <!-- User message -->
+    <div class="ai-user-msg" id="ai-user-msg" style="display:none">
+      <div class="ai-user-msg-label">You</div>
+      <div id="ai-user-msg-text"></div>
+    </div>
+
+    <!-- Response area -->
+    <div class="ai-response" id="ai-response">
+      <div class="ai-response-header">
+        <span class="ai-response-query" id="ai-response-query"></span>
+        <button class="ai-response-clear" onclick="clearAIResponse()" title="Clear">&times;</button>
+      </div>
+      <div class="ai-response-body" id="ai-response-body"></div>
+    </div>
+
+  </div><!-- /acp-body -->
+
+  <!-- Footer: mode selector + chat input — pinned to bottom -->
+  <div class="acp-footer">
+    <div class="ai-mode-row">
+      <div class="ai-mode-btns">
+        <button class="ai-mode-btn is-active" data-mode="fast"     data-tooltip="gpt-4o-mini"  onclick="setAIMode(this)">Fast</button>
+        <button class="ai-mode-btn"           data-mode="balanced" data-tooltip="gpt-4.1-mini" onclick="setAIMode(this)">Balanced</button>
+        <button class="ai-mode-btn"           data-mode="advanced" data-tooltip="gpt-4.1"      onclick="setAIMode(this)">Advanced</button>
+      </div>
+      <span class="ai-mode-hint">Advanced uses more credits.</span>
+    </div>
+    <div class="ai-chat-row">
+      <input type="text" class="ai-chat-input" id="ai-chat-input"
+             placeholder="Ask about this store…"
+             autocomplete="off"
+             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChatMessage()}">
+      <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+</aside><!-- /ai-copilot-panel -->
+
 <!-- ══════════════════ LAYOUT ══════════════════ -->
 <div class="layout">
   <main class="main">
@@ -87,7 +187,10 @@
           <div class="ph-title">Store Market Summary</div>
           <div class="ph-subtitle">Local market intelligence across 15 BeautyMaster locations</div>
         </div>
-
+        <button class="ai-copilot-trigger" id="ai-copilot-trigger" onclick="openAICopilot()" title="Open AI Copilot">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/><path d="M8 12h8M12 8v8"/></svg>
+          <span>AI Copilot</span>
+        </button>
       </div>
 
       <!-- KPI Grid -->
@@ -574,85 +677,6 @@
       </div>
     </div>
 
-    <!-- AI Assistant -->
-    <div class="rp-section" id="rp-ai-section">
-      <div class="rp-section-label">AI Assistant</div>
-
-      <div class="ai-chip-group-label">Analyze</div>
-      <div class="ai-chips">
-        <button class="ai-chip" onclick="handleAIChip(this,'summarize')">Summarize this store</button>
-        <button class="ai-chip" onclick="handleAIChip(this,'messaging')">Suggest campaign messaging</button>
-        <button class="ai-chip" onclick="handleAIChip(this,'risks')">Find marketing risks</button>
-        <button class="ai-chip" onclick="handleAIChip(this,'next')">Recommend next action</button>
-      </div>
-
-      <div class="ai-chip-group-label">Actions</div>
-      <div class="ai-chips">
-        <button class="ai-chip" id="rp-act1" onclick="handleAIChip(this,'guide')">View Campaign Guide</button>
-        <button class="ai-chip" onclick="handleAIChip(this,'export')">Export Store Brief</button>
-        <button class="ai-chip" onclick="handleAIChip(this,'playbook')">Open Store Playbook</button>
-        <button class="ai-chip" onclick="handleAIChip(this,'merch-notes')">Review Merchandising Notes</button>
-        <button class="ai-chip" onclick="handleAIChip(this,'compare')">Compare Similar Stores</button>
-      </div>
-
-      <!-- Model mode selector -->
-      <div class="ai-mode-row">
-        <div class="ai-mode-btns">
-          <button class="ai-mode-btn is-active" data-mode="fast"     data-tooltip="gpt-4o-mini"  onclick="setAIMode(this)">Fast</button>
-          <button class="ai-mode-btn"           data-mode="balanced" data-tooltip="gpt-4.1-mini" onclick="setAIMode(this)">Balanced</button>
-          <button class="ai-mode-btn"           data-mode="advanced" data-tooltip="gpt-4.1"      onclick="setAIMode(this)">Advanced</button>
-        </div>
-        <span class="ai-mode-hint">Advanced may use more credits.</span>
-      </div>
-
-      <!-- Conversation panel: contains all states + input -->
-      <div class="ai-panel">
-
-        <!-- State: empty / loading / user-msg / response -->
-        <div class="ai-panel-body">
-
-          <!-- Empty state -->
-          <div class="ai-empty" id="ai-empty">
-            <div class="ai-empty-text">Select a prompt above or type a question below.</div>
-          </div>
-
-          <!-- Loading state -->
-          <div class="ai-loading" id="ai-loading">
-            <span class="ai-loading-dot"></span>
-            <span class="ai-loading-dot"></span>
-            <span class="ai-loading-dot"></span>
-          </div>
-
-          <!-- User message — shown only when chat input is used -->
-          <div class="ai-user-msg" id="ai-user-msg" style="display:none">
-            <div class="ai-user-msg-label">You</div>
-            <div id="ai-user-msg-text"></div>
-          </div>
-
-          <!-- Response area -->
-          <div class="ai-response" id="ai-response">
-            <div class="ai-response-header">
-              <span class="ai-response-query" id="ai-response-query"></span>
-              <button class="ai-response-clear" onclick="clearAIResponse()" title="Clear">&times;</button>
-            </div>
-            <div class="ai-response-body" id="ai-response-body"></div>
-          </div>
-
-        </div><!-- /ai-panel-body -->
-
-        <!-- Chat input — always anchored at bottom of panel -->
-        <div class="ai-chat-row">
-          <input type="text" class="ai-chat-input" id="ai-chat-input"
-                 placeholder="Ask about this store…"
-                 autocomplete="off"
-                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChatMessage()}">
-          <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </div>
-
-      </div><!-- /ai-panel -->
-    </div>
   </aside>
 
 </div><!-- /layout -->
