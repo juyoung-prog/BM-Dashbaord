@@ -2936,7 +2936,8 @@ body.auth-pending .sidebar-overlay {
   position: fixed;
   top: 0;
   right: 0;
-  width: 480px;
+  width: 460px;
+  max-width: 34vw;
   height: 100vh;
   background: var(--bg-surface);
   border-left: 1px solid var(--border-subtle);
@@ -3789,3 +3790,194 @@ body.auth-pending .sidebar-overlay {
   border-color: rgba(255,255,255,.2);
 }
 [data-theme="dark"] .ai-chat-input { color: var(--text-primary); }
+
+/* ═══════════════════════════════════════════════
+   AI COPILOT — SIGNAL STRIPS (compact 2-line)
+   ═══════════════════════════════════════════════ */
+
+.acp-signal-strips {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.acp-signal-strip {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 11px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-base);
+  border-left: 3px solid transparent;
+}
+.acp-signal-opportunity { border-left-color: #22c55e; }
+.acp-signal-risk        { border-left-color: #f59e0b; }
+.acp-signal-signal      { border-left-color: #60a5fa; }
+.acp-signal-ready       { border-left-color: #34d399; }
+
+.acp-signal-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.acp-signal-opportunity .acp-signal-tag { color: #16a34a; }
+.acp-signal-risk .acp-signal-tag        { color: #d97706; }
+.acp-signal-signal .acp-signal-tag      { color: #3b82f6; }
+.acp-signal-ready .acp-signal-tag       { color: #059669; }
+
+.acp-signal-headline {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  min-width: 0;
+}
+
+[data-theme="dark"] .acp-signal-strip {
+  background: rgba(255,255,255,.03);
+  border-color: rgba(255,255,255,.07);
+}
+[data-theme="dark"] .acp-signal-opportunity { border-left-color: #4ade80; }
+[data-theme="dark"] .acp-signal-risk        { border-left-color: #fbbf24; }
+[data-theme="dark"] .acp-signal-signal      { border-left-color: #93c5fd; }
+[data-theme="dark"] .acp-signal-ready       { border-left-color: #6ee7b7; }
+[data-theme="dark"] .acp-signal-opportunity .acp-signal-tag { color: #4ade80; }
+[data-theme="dark"] .acp-signal-risk .acp-signal-tag        { color: #fbbf24; }
+[data-theme="dark"] .acp-signal-signal .acp-signal-tag      { color: #93c5fd; }
+[data-theme="dark"] .acp-signal-ready .acp-signal-tag       { color: #6ee7b7; }
+
+/* ═══════════════════════════════════════════════
+   AI COPILOT — SUGGESTION LIST (Would you like to:)
+   ═══════════════════════════════════════════════ */
+
+.acp-suggestions {
+  margin-top: 2px;
+}
+.acp-suggestions-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  display: block;
+  margin-bottom: 6px;
+}
+.acp-suggestion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.acp-suggestion-item {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 0 4px 14px;
+  position: relative;
+  transition: color .15s;
+  line-height: 1.4;
+}
+.acp-suggestion-item::before {
+  content: '•';
+  position: absolute;
+  left: 3px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+.acp-suggestion-item:hover {
+  color: var(--primary);
+}
+.acp-suggestion-item:hover::before {
+  color: var(--primary);
+}
+
+/* ═══════════════════════════════════════════════
+   AI COPILOT — PILLS LABEL (Suggested next steps)
+   ═══════════════════════════════════════════════ */
+
+.acp-pills-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 7px;
+  display: block;
+}
+
+/* ═══════════════════════════════════════════════
+   AI COPILOT — MODE SELECT DROPDOWN (inline)
+   ═══════════════════════════════════════════════ */
+
+.acp-mode-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 3px 22px 3px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-base) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23999'/%3E%3C/svg%3E") no-repeat right 7px center;
+  background-size: 7px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: border-color .15s, color .15s;
+  outline: none;
+}
+.acp-mode-select:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+.acp-mode-select:focus {
+  border-color: var(--border-strong);
+}
+[data-theme="dark"] .acp-mode-select {
+  background-color: rgba(255,255,255,.05);
+  border-color: rgba(255,255,255,.1);
+  color: var(--text-secondary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23aaa'/%3E%3C/svg%3E");
+}
+
+/* ═══════════════════════════════════════════════
+   AI COPILOT — SESSION HISTORY
+   ═══════════════════════════════════════════════ */
+
+.acp-session-history {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 16px;
+  margin-top: 4px;
+}
+.acp-sh-header {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+.acp-sh-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 10px;
+}
+.acp-sh-entry:last-child { margin-bottom: 0; }
+.acp-sh-store {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: -.005em;
+}
+.acp-sh-topic {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  padding-left: 12px;
+  line-height: 1.5;
+}
+[data-theme="dark"] .acp-session-history {
+  border-top-color: rgba(255,255,255,.07);
+}

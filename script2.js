@@ -906,65 +906,90 @@ function updateAICopilotContext(s) {
   renderInsightCards(s);
 }
 
-function buildInsightObs(s) {
-  const obs = [];
+function buildSignalStrips(s) {
+  const strips = [];
 
   if (s.black >= 60) {
-    obs.push({ type: 'opportunity', tag: 'Demographic Opportunity',
-      text: `<strong>${s.black}% Black population</strong> makes this a clear Black hair care-led market. Protective styles, extensions, and edge control should anchor the floor plan and all paid media.`,
-      action: 'summarize', actionLabel: 'Generate strategy' });
+    strips.push({ type: 'opportunity', tag: 'Demographic Opportunity', headline: `${s.black}% Black — clear hair care-led market` });
   } else if (s.hisp >= 25) {
-    obs.push({ type: 'opportunity', tag: 'Demographic Opportunity',
-      text: `<strong>${s.hisp}% Hispanic share</strong> exceeds the 20% bilingual threshold. English-only creative will underperform — dual-language execution across paid and in-store is required.`,
-      action: 'messaging', actionLabel: 'Develop messaging' });
+    strips.push({ type: 'opportunity', tag: 'Demographic Opportunity', headline: `${s.hisp}% Hispanic — bilingual execution required` });
   } else if (s.asian >= 15 || s.priority === 'info') {
-    obs.push({ type: 'opportunity', tag: 'Category Opportunity',
-      text: `K-Beauty is a priority revenue category here. <strong>${s.asian}% Asian population</strong> with K-Beauty priority designation — premium skincare and discovery should be visible at entry.`,
-      action: 'guide', actionLabel: 'View K-Beauty playbook' });
+    strips.push({ type: 'opportunity', tag: 'Category Opportunity', headline: `${s.asian}% Asian — K-Beauty priority category` });
   } else {
-    obs.push({ type: 'signal', tag: 'Market Signal',
-      text: `<strong>Balanced demographic mix</strong> (${s.raceLabel}) — no single group above 50%. Broad community positioning will outperform niche-only campaigns in this trade area.`,
-      action: 'summarize', actionLabel: 'Analyze full market' });
+    strips.push({ type: 'signal', tag: 'Market Signal', headline: `Balanced demographics — broad community positioning` });
   }
 
   if (s.poverty >= 15 || s.band === 'lower') {
-    obs.push({ type: 'risk', tag: 'Pricing Risk',
-      text: `<strong>${s.poverty}% poverty rate</strong> with ${s.bannerLabel} incomes. This market is price-sensitive — premium positioning without a value anchor will reduce conversion. Lead with bundles and clear price points.`,
-      action: 'risks', actionLabel: 'Review risks' });
+    strips.push({ type: 'risk', tag: 'Pricing Risk', headline: `${s.poverty}% poverty rate — price-sensitive market` });
   } else if (s.band === 'upper') {
-    obs.push({ type: 'opportunity', tag: 'Revenue Opportunity',
-      text: `<strong>$${s.income.toLocaleString()} median income</strong> with only ${s.poverty}% poverty rate. This market is price-resilient — premium SKUs, K-Beauty sets, and discovery bundles are strong plays.`,
-      action: 'guide', actionLabel: 'Build premium campaign' });
+    strips.push({ type: 'opportunity', tag: 'Revenue Opportunity', headline: `$${Math.round(s.income / 1000)}K income — premium positioning viable` });
   } else {
-    obs.push({ type: 'signal', tag: 'Income Signal',
-      text: `<strong>${s.bannerLabel} market</strong> at $${s.income.toLocaleString()} median income. Customers will trade up for trusted brands but need clear value justification. Avoid aspirational-only messaging.`,
-      action: 'messaging', actionLabel: 'Refine messaging' });
+    strips.push({ type: 'signal', tag: 'Income Signal', headline: `${s.bannerLabel} market — value justification needed` });
   }
 
   const pending = s.merch.filter(([t]) => t === 'pend');
   if (pending.length > 0) {
-    obs.push({ type: 'risk', tag: 'Execution Risk',
-      text: `<strong>${pending.length} merchandising item${pending.length > 1 ? 's' : ''} pending</strong> before launch: ${pending.map(([, txt]) => txt).join(', ')}. Launching paid media before shelf resolution creates a disconnect between ad promise and in-store reality.`,
-      action: 'merch-notes', actionLabel: 'Review merchandising' });
+    strips.push({ type: 'risk', tag: 'Execution Risk', headline: `${pending.length} merchandising item${pending.length > 1 ? 's' : ''} pending — hold paid media` });
   } else {
-    obs.push({ type: 'ready', tag: 'Campaign Ready',
-      text: `<strong>All merchandising complete.</strong> This store can support a full-funnel launch immediately — paid media, in-store signage, and digital can run simultaneously.`,
-      action: 'next', actionLabel: 'Get next best action' });
+    strips.push({ type: 'ready', tag: 'Campaign Ready', headline: 'All merchandising complete — full-funnel launch viable' });
   }
 
-  return obs;
+  return strips;
+}
+
+function buildProseOpening(s) {
+  let opener;
+  if (s.black >= 60) {
+    opener = `${s.name} is a clear Black hair care-led market with a ${s.black}% Black demographic.`;
+  } else if (s.hisp >= 25) {
+    opener = `${s.name} shows strong Hispanic representation at ${s.hisp}% — a bilingual-first market.`;
+  } else if (s.asian >= 15) {
+    opener = `${s.name} has meaningful Asian consumer share at ${s.asian}%, with K-Beauty as a priority category.`;
+  } else {
+    opener = `${s.name} is a broad-market opportunity with balanced demographics across ${s.raceLabel}.`;
+  }
+  if (s.band === 'upper') {
+    opener += ` Premium positioning and discovery bundles have strong potential here.`;
+  } else if (s.band === 'lower' || s.poverty >= 15) {
+    opener += ` Value anchoring and clear price points will be critical to conversion.`;
+  } else {
+    opener += ` Mid-market messaging with trusted brand emphasis fits this customer.`;
+  }
+  return opener;
+}
+
+function buildSuggestions(s) {
+  const sugg = [];
+  if (s.black >= 60) sugg.push('Build a Black hair care campaign');
+  else if (s.hisp >= 25) sugg.push('Develop bilingual campaign messaging');
+  else if (s.asian >= 15) sugg.push('Create a K-Beauty launch strategy');
+  else sugg.push('Build a grand opening campaign');
+
+  if (s.band === 'upper') sugg.push('Design a premium product bundle');
+  else if (s.poverty >= 15 || s.band === 'lower') sugg.push('Identify price sensitivity risks');
+  else sugg.push('Analyze pricing sensitivity');
+
+  sugg.push(`Compare similar ${s.state === 'FL' ? 'Florida' : 'Georgia'} stores`);
+  return sugg;
 }
 
 function renderInsightCards(s) {
   const container = document.getElementById('acp-insights');
   if (!container) return;
-  const obs = buildInsightObs(s);
-  const obsHtml = obs.map(o => `
-    <div class="acp-obs acp-obs-${o.type}">
-      <span class="acp-obs-tag">${o.tag}</span>
-      <p class="acp-obs-text">${o.text}</p>
-      <button class="acp-obs-action" onclick="handleAIChip(this,'${o.action}')">${o.actionLabel} →</button>
+
+  const prose = buildProseOpening(s);
+  const suggestions = buildSuggestions(s);
+  const strips = buildSignalStrips(s);
+
+  const stripsHtml = strips.map(st => `
+    <div class="acp-signal-strip acp-signal-${st.type}">
+      <span class="acp-signal-tag">${st.tag}</span>
+      <span class="acp-signal-headline">${st.headline}</span>
     </div>
+  `).join('');
+
+  const suggHtml = suggestions.map(sg => `
+    <li class="acp-suggestion-item" onclick="handleSuggestionClick('${sg.replace(/'/g, "&#39;")}')">${sg}</li>
   `).join('');
 
   container.innerHTML = `
@@ -973,10 +998,83 @@ function renderInsightCards(s) {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       </div>
       <div class="acp-ai-intro">
-        <p class="acp-intro-text">I've analyzed <strong>${s.name}</strong>. Here are the key observations before we begin:</p>
-        <div class="acp-obs-list">${obsHtml}</div>
+        <p class="acp-intro-text">${prose}</p>
+        <div class="acp-signal-strips">${stripsHtml}</div>
+        <div class="acp-suggestions">
+          <span class="acp-suggestions-label">Would you like to:</span>
+          <ul class="acp-suggestion-list">${suggHtml}</ul>
+        </div>
       </div>
     </div>
+  `;
+}
+
+function handleSuggestionClick(label) {
+  const keyMap = {
+    'Build a grand opening campaign': 'summarize',
+    'Build a Black hair care campaign': 'summarize',
+    'Develop bilingual campaign messaging': 'messaging',
+    'Create a K-Beauty launch strategy': 'guide',
+    'Design a premium product bundle': 'summarize',
+    'Identify price sensitivity risks': 'risks',
+    'Analyze pricing sensitivity': 'risks',
+  };
+  const key = label.toLowerCase().includes('compare') ? 'compare' : (keyMap[label] || 'next');
+
+  document.querySelectorAll('.acp-pill, .acp-obs-action, .ai-chip').forEach(c => c.classList.remove('active'));
+
+  const aiLoading = document.getElementById('ai-loading');
+  const aiResp    = document.getElementById('ai-response');
+  const aiUserMsg = document.getElementById('ai-user-msg');
+  const insights  = document.getElementById('acp-insights');
+
+  if (insights)  insights.style.display  = 'none';
+  if (aiResp)    aiResp.style.display    = 'none';
+  if (aiUserMsg) aiUserMsg.style.display = 'none';
+  if (aiLoading) aiLoading.style.display = 'flex';
+
+  sendMessageToAI(key, STORES[selectedId], label)
+    .then(result => {
+      if (aiLoading) aiLoading.style.display = 'none';
+      renderAIResponse(result);
+      addSessionThread(STORES[selectedId].name, label);
+    })
+    .catch(err => {
+      console.error('[AI Suggestion] error, falling back to mock:', err);
+      if (aiLoading) aiLoading.style.display = 'none';
+      renderAIResponse(generateMockAIResponse(key, STORES[selectedId], label));
+      addSessionThread(STORES[selectedId].name, label);
+    });
+}
+
+// ── Session history ──
+const sessionHistory = [];
+
+function addSessionThread(storeName, topicLabel) {
+  let entry = sessionHistory.find(e => e.storeName === storeName);
+  if (!entry) {
+    entry = { storeName, topics: [] };
+    sessionHistory.push(entry);
+  }
+  if (!entry.topics.some(t => t.label === topicLabel)) {
+    entry.topics.push({ label: topicLabel });
+  }
+  renderSessionHistory();
+}
+
+function renderSessionHistory() {
+  const el = document.getElementById('acp-session-history');
+  if (!el) return;
+  if (sessionHistory.length === 0) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.innerHTML = `
+    <div class="acp-sh-header">This session</div>
+    ${sessionHistory.map(entry => `
+      <div class="acp-sh-entry">
+        <span class="acp-sh-store">${entry.storeName}</span>
+        ${entry.topics.map(t => `<span class="acp-sh-topic">↳ ${t.label}</span>`).join('')}
+      </div>
+    `).join('')}
   `;
 }
 
@@ -1009,6 +1107,10 @@ function setAIMode(btn) {
   aiMode = btn.dataset.mode;
 }
 
+function setAIModeSelect(sel) {
+  aiMode = sel.value;
+}
+
 async function handleAIChip(btn, promptKey) {
   document.querySelectorAll('.acp-pill, .acp-obs-action, .ai-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
@@ -1028,10 +1130,12 @@ async function handleAIChip(btn, promptKey) {
     const result = await sendMessageToAI(promptKey, STORES[selectedId], chipLabel);
     if (aiLoading) aiLoading.style.display = 'none';
     renderAIResponse(result);
+    addSessionThread(STORES[selectedId].name, chipLabel);
   } catch (err) {
     console.error('[AI Assistant] Edge Function error, falling back to mock:', err);
     if (aiLoading) aiLoading.style.display = 'none';
     renderAIResponse(generateMockAIResponse(promptKey, STORES[selectedId], chipLabel));
+    addSessionThread(STORES[selectedId].name, chipLabel);
   }
 }
 
@@ -1069,10 +1173,12 @@ async function sendAIChatMessage() {
     const result = await sendMessageToAI(null, STORES[selectedId], userText, userText);
     if (aiLoading) aiLoading.style.display = 'none';
     renderAIResponse(result);
+    addSessionThread(STORES[selectedId].name, userText.length > 40 ? userText.slice(0, 40) + '…' : userText);
   } catch (err) {
     console.error('[AI Chat] Edge Function error, falling back to mock:', err);
     if (aiLoading) aiLoading.style.display = 'none';
     renderAIResponse(generateMockAIResponse('custom', STORES[selectedId], userText));
+    addSessionThread(STORES[selectedId].name, userText.length > 40 ? userText.slice(0, 40) + '…' : userText);
   } finally {
     input.disabled = false;
     if (sendBtn) sendBtn.disabled = false;
