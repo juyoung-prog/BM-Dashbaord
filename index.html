@@ -117,92 +117,70 @@
     <div class="ast-entries" id="ast-entries"></div>
   </div>
 
-  <!-- ── Scrollable conversation body ── -->
+  <!-- ── Intelligence analysis body ── -->
   <div class="acp-body" id="acp-body">
 
-    <!-- AI conversational opening + observations -->
+    <!-- Modular intelligence grid -->
     <div class="acp-insights" id="acp-insights"></div>
 
-    <!-- Loading: AI thinking -->
-    <div class="ai-loading" id="ai-loading">
-      <div class="acp-msg-ai">
-        <div class="acp-ai-avatar">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <div class="acp-thinking-dots">
+    <!-- Processing state -->
+    <div class="ai-loading" id="ai-loading" style="display:none">
+      <div class="acp-intel-loading">
+        <span class="acp-intel-loading-label">Processing analysis</span>
+        <span class="acp-intel-loading-dots">
           <span class="ai-loading-dot"></span>
           <span class="ai-loading-dot"></span>
           <span class="ai-loading-dot"></span>
-        </div>
+        </span>
       </div>
     </div>
 
-    <!-- User message bubble -->
+    <!-- Query context -->
     <div class="ai-user-msg" id="ai-user-msg" style="display:none">
-      <div class="acp-msg-user">
-        <div class="acp-user-bubble" id="ai-user-msg-text"></div>
+      <div class="acp-query-strip">
+        <span class="acp-query-prefix">Query</span>
+        <span class="acp-query-text" id="ai-user-msg-text"></span>
       </div>
     </div>
 
-    <!-- AI response block -->
-    <div class="ai-response" id="ai-response">
-      <div class="acp-msg-ai">
-        <div class="acp-ai-avatar">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <div class="acp-ai-block">
-          <div class="acp-ai-block-header">
-            <span class="ai-response-query" id="ai-response-query"></span>
-            <button class="ai-response-clear" onclick="clearAIResponse()" title="Clear response">&times;</button>
-          </div>
-          <div class="ai-response-body" id="ai-response-body"></div>
-        </div>
+    <!-- Analysis result -->
+    <div class="ai-response" id="ai-response" style="display:none">
+      <div class="acp-resp-header">
+        <span class="acp-resp-label" id="ai-response-query"></span>
+        <button class="acp-resp-back" onclick="clearAIResponse()" title="Back to analysis">↩</button>
       </div>
+      <div class="ai-response-body" id="ai-response-body"></div>
     </div>
 
   </div><!-- /acp-body -->
 
-  <!-- ── Sticky footer ── -->
-  <div class="acp-footer">
-
-    <!-- Suggested by AI -->
-    <div class="acp-suggestions-panel" id="acp-quick-pills">
-      <span class="acp-sugg-panel-label">Recommended workflows</span>
-      <div class="acp-sugg-panel-items">
-        <div class="acp-sugg-card" id="rp-act1"
-             data-prompt="summarize"
-             onclick="handleAICard(this,'summarize')">
-          <span class="acp-sugg-card-title">Build Campaign Strategy</span>
-          <span class="acp-sugg-card-reason">Demographic readiness confirmed</span>
-        </div>
-        <div class="acp-sugg-card"
-             data-prompt="risks"
-             onclick="handleAICard(this,'risks')">
-          <span class="acp-sugg-card-title">Analyze Execution Risks</span>
-          <span class="acp-sugg-card-reason">Pricing sensitivity signals detected</span>
-        </div>
-        <div class="acp-sugg-card"
-             data-prompt="compare"
-             onclick="handleAICard(this,'compare')">
-          <span class="acp-sugg-card-title">Compare Similar Markets</span>
-          <span class="acp-sugg-card-reason">Benchmarking transferable strategy</span>
-        </div>
-        <div class="acp-sugg-card"
-             data-prompt="messaging"
-             onclick="handleAICard(this,'messaging')">
-          <span class="acp-sugg-card-title">Develop Messaging Strategy</span>
-          <span class="acp-sugg-card-reason">Demographic signals mapped</span>
-        </div>
-        <div class="acp-sugg-card"
-             data-prompt="next"
-             onclick="handleAICard(this,'next')">
-          <span class="acp-sugg-card-title">Identify Next Best Action</span>
-          <span class="acp-sugg-card-reason">Operational state assessed</span>
-        </div>
-      </div>
+  <!-- ── Operational workflow matrix ── -->
+  <div class="acp-workflow-section" id="acp-quick-pills">
+    <span class="acp-workflow-label">Operational Workflows</span>
+    <div class="acp-matrix-grid">
+      <button class="acp-action-item" id="rp-act1" data-prompt="summarize" onclick="handleAICard(this,'summarize')">
+        <span class="acp-action-label">Campaign Planning</span>
+      </button>
+      <button class="acp-action-item" data-prompt="risks" onclick="handleAICard(this,'risks')">
+        <span class="acp-action-label">Risk Mitigation</span>
+      </button>
+      <button class="acp-action-item" data-prompt="next" onclick="handleAICard(this,'next')">
+        <span class="acp-action-label">Immediate Action</span>
+      </button>
+      <button class="acp-action-item" data-prompt="compare" onclick="handleAICard(this,'compare')">
+        <span class="acp-action-label">Market Expansion</span>
+      </button>
+      <button class="acp-action-item" data-prompt="messaging" onclick="handleAICard(this,'messaging')">
+        <span class="acp-action-label">Messaging Strategy</span>
+      </button>
+      <button class="acp-action-item" data-prompt="guide" onclick="handleAICard(this,'guide')">
+        <span class="acp-action-label">Pricing Strategy</span>
+      </button>
     </div>
+  </div>
 
-    <!-- Command bar -->
+  <!-- ── Command input ── -->
+  <div class="acp-footer">
     <div class="acp-input-wrap">
       <select class="acp-mode-select" id="acp-mode-select" onchange="setAIModeSelect(this)" aria-label="AI model">
         <option value="fast">Fast</option>
@@ -211,16 +189,15 @@
       </select>
       <div class="acp-input-sep"></div>
       <textarea class="ai-chat-input" id="ai-chat-input"
-                placeholder="Analyze launch readiness…"
+                placeholder="Query the intelligence layer…"
                 rows="1"
                 autocomplete="off"
                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChatMessage()}"
                 oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
-      <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send message">
+      <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </div>
-
   </div><!-- /acp-footer -->
 
 </aside><!-- /ai-copilot-panel -->
