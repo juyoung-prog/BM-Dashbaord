@@ -838,7 +838,7 @@ function selectStore(id) {
     const audPri = document.getElementById('rp-aud-priority');
     if (audPri) audPri.textContent = s.priorityText;
     // Primary action label — derived from store priority segment
-    const guideMap = { accent: 'Build Black Hair Care Strategy', warn: 'Build Bilingual Market Strategy', info: 'Build K-Beauty Launch Plan' };
+    const guideMap = { accent: 'Black Hair Care Strategy', warn: 'Bilingual Market Strategy', info: 'K-Beauty Launch Plan' };
     const guideReasonMap = {
       accent: `${parseFloat(s.black).toFixed(0)}% Black demographic concentration confirmed`,
       warn:   `${parseFloat(s.hisp).toFixed(0)}% Hispanic share — bilingual execution required`,
@@ -846,12 +846,8 @@ function selectStore(id) {
     };
     const act1 = document.getElementById('rp-act1');
     if (act1) {
-      const titleEl  = act1.querySelector('.acp-sugg-card-title');
-      const reasonEl = act1.querySelector('.acp-sugg-card-reason');
-      const titleText = guideMap[s.priority] || 'Build Campaign Strategy';
-      const reasonText = guideReasonMap[s.priority] || 'Based on store priority segment and market analysis.';
-      if (titleEl)  titleEl.textContent  = titleText;
-      if (reasonEl) reasonEl.textContent = reasonText;
+      const labelEl = act1.querySelector('.acp-action-label');
+      if (labelEl) labelEl.textContent = guideMap[s.priority] || 'Campaign Planning';
     }
     // Market lens label
     const htagType = document.getElementById('rp-htag-type');
@@ -1157,7 +1153,7 @@ function handleSuggestionClick(label) {
   };
   const key = label.toLowerCase().includes('compare') ? 'compare' : (keyMap[label] || 'next');
 
-  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-action-item, .acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 
   const aiLoading = document.getElementById('ai-loading');
   const aiResp    = document.getElementById('ai-response');
@@ -1221,7 +1217,7 @@ function resetAIState() {
   if (aiResp)    aiResp.style.display    = 'none';
   if (aiUserMsg) aiUserMsg.style.display = 'none';
   if (insights)  insights.style.display  = '';
-  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-action-item, .acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 }
 
 // Close on Escape
@@ -1283,10 +1279,12 @@ let aiMode = 'fast';
 
 // ── Editorial workflow card handler ──
 function handleAICard(el, promptKey) {
-  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-action-item, .acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
 
-  const label = el.querySelector('.acp-sugg-card-title')?.textContent?.trim() || promptKey;
+  const label = el.querySelector('.acp-action-label')?.textContent?.trim()
+             || el.querySelector('.acp-sugg-card-title')?.textContent?.trim()
+             || promptKey;
 
   const aiLoading = document.getElementById('ai-loading');
   const aiResp    = document.getElementById('ai-response');
@@ -1323,7 +1321,7 @@ function setAIModeSelect(sel) {
 }
 
 async function handleAIChip(btn, promptKey) {
-  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-action-item, .acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
 
   const chipLabel = btn.textContent.replace('→','').trim();
@@ -1358,7 +1356,7 @@ async function sendAIChatMessage() {
   const userText = input.value.trim();
   if (!userText) return;
 
-  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-action-item, .acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 
   // Show user message bubble
   const aiUserMsg    = document.getElementById('ai-user-msg');
@@ -1534,7 +1532,7 @@ function toggleStrategySection(btn) {
 }
 
 function clearAIResponse() {
-  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-action-item, .acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
   const aiResp    = document.getElementById('ai-response');
   const aiUserMsg = document.getElementById('ai-user-msg');
   const insights  = document.getElementById('acp-insights');
