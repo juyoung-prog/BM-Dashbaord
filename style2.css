@@ -5799,3 +5799,143 @@ body.ai-panel-open .tbl-row.selected .store-name {
   letter-spacing: .08em !important;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   Dashboard-29 · Live Intelligence Signal System
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Scan header (initial + response) ── */
+.acp-scan-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 0 7px 0 !important;
+}
+.acp-resp-scan-bar {
+  padding: 0 0 8px 0 !important;
+  margin-bottom: 2px !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+.acp-scan-label {
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  color: #22c55e !important;
+}
+.acp-scan-count {
+  font-size: 9px !important;
+  color: var(--text-tertiary) !important;
+  font-weight: 500 !important;
+}
+
+/* ── Signal grid container ── */
+.intel-signal-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  padding: 0 !important;
+}
+
+/* ── Signal card base ── */
+.intel-signal-card {
+  padding: 8px 11px 8px 12px !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-left: 3px solid var(--_sig, #6366f1) !important;
+  background: var(--bg-raised) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  animation: sig-reveal .22s ease both !important;
+}
+
+/* ── Type colors ── */
+.intel-signal-card[data-type="blocker"]     { --_sig: #ef4444; background: rgba(239,68,68,.03) !important; }
+.intel-signal-card[data-type="risk"]        { --_sig: #f59e0b; background: rgba(245,158,11,.03) !important; }
+.intel-signal-card[data-type="opportunity"] { --_sig: #10b981; background: rgba(16,185,129,.03) !important; }
+.intel-signal-card[data-type="momentum"]    { --_sig: #6366f1; background: rgba(99,102,241,.03) !important; }
+.intel-signal-card[data-type="readiness"]   { --_sig: #8b5cf6; background: rgba(139,92,246,.03) !important; }
+.intel-signal-card[data-type="revenue"]     { --_sig: #0ea5e9; background: rgba(14,165,233,.03) !important; }
+
+/* ── Stagger entrance ── */
+.intel-signal-grid .intel-signal-card:nth-child(1) { animation-delay: .03s !important; }
+.intel-signal-grid .intel-signal-card:nth-child(2) { animation-delay: .08s !important; }
+.intel-signal-grid .intel-signal-card:nth-child(3) { animation-delay: .13s !important; }
+.intel-signal-grid .intel-signal-card:nth-child(4) { animation-delay: .18s !important; }
+.intel-signal-grid .intel-signal-card:nth-child(5) { animation-delay: .23s !important; }
+.intel-signal-grid .intel-signal-card:nth-child(6) { animation-delay: .28s !important; }
+
+@keyframes sig-reveal {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Signal card parts ── */
+.intel-signal-badge {
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+  color: var(--_sig, #6366f1) !important;
+  line-height: 1 !important;
+  margin-bottom: 2px !important;
+}
+.intel-signal-headline {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  line-height: 1.45 !important;
+  margin: 0 !important;
+}
+.intel-signal-reason {
+  font-size: 9.5px !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.5 !important;
+  margin-top: 2px !important;
+}
+.intel-signal-action {
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  color: var(--_sig, #6366f1) !important;
+  margin-top: 4px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 4px !important;
+  line-height: 1.4 !important;
+}
+.intel-signal-action::before {
+  content: '→';
+  flex-shrink: 0;
+}
+
+/* dark mode */
+[data-theme="dark"] .intel-signal-card[data-type="blocker"]     { background: rgba(239,68,68,.06) !important; }
+[data-theme="dark"] .intel-signal-card[data-type="risk"]        { background: rgba(245,158,11,.06) !important; }
+[data-theme="dark"] .intel-signal-card[data-type="opportunity"] { background: rgba(16,185,129,.06) !important; }
+[data-theme="dark"] .intel-signal-card[data-type="momentum"]    { background: rgba(99,102,241,.06) !important; }
+[data-theme="dark"] .intel-signal-card[data-type="readiness"]   { background: rgba(139,92,246,.06) !important; }
+[data-theme="dark"] .intel-signal-card[data-type="revenue"]     { background: rgba(14,165,233,.06) !important; }
+
+/* ── Workflow button signal type indicators ── */
+.acp-action-item[data-signal-type="blocker"]     { border-color: rgba(239,68,68,.4) !important; }
+.acp-action-item[data-signal-type="risk"]        { border-color: rgba(245,158,11,.4) !important; }
+.acp-action-item[data-signal-type="opportunity"] { border-color: rgba(16,185,129,.3) !important; }
+.acp-action-item[data-signal-type="revenue"]     { border-color: rgba(14,165,233,.3) !important; }
+
+.acp-action-item[data-signal-type="blocker"] .acp-action-sub     { color: #ef4444 !important; font-weight: 600 !important; }
+.acp-action-item[data-signal-type="risk"] .acp-action-sub        { color: #f59e0b !important; font-weight: 600 !important; }
+.acp-action-item[data-signal-type="opportunity"] .acp-action-sub { color: #10b981 !important; font-weight: 600 !important; }
+.acp-action-item[data-signal-type="readiness"] .acp-action-sub   { color: #8b5cf6 !important; font-weight: 500 !important; }
+.acp-action-item[data-signal-type="revenue"] .acp-action-sub     { color: #0ea5e9 !important; font-weight: 500 !important; }
+
+/* ── acp-resp-header: query label visual update ── */
+.ai-response .acp-resp-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  letter-spacing: .02em !important;
+}
+
+/* intel-grid no longer used in initial panel — hide gracefully */
+.acp-insights .intel-grid { display: none !important; }
+
