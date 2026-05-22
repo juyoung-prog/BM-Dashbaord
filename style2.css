@@ -5732,7 +5732,7 @@ body.ai-panel-open .tbl-row.selected .store-name {
 }
 .intel-resp-block:last-child { border-bottom: none !important; }
 .intel-resp-key {
-  min-width: 100px !important;
+  min-width: 132px !important;
   flex-shrink: 0 !important;
   font-size: 8.5px !important;
   font-weight: 700 !important;

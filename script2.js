@@ -1492,6 +1492,85 @@ function generateMockAIResponse(promptKey, s, chipLabel) {
   };
 }
 
+function buildResponseSignals(result, s) {
+  if (!s) s = STORES[0];
+  const q = (result.query || '').toLowerCase();
+
+  const herocat     = s.state === 'FL' ? 'K-Beauty' : s.priority === 'accent' ? 'Black Hair Care' : s.priority === 'info' ? 'K-Beauty' : 'Hair Care';
+  const pend        = s.merch.filter(([t]) => t === 'pend');
+  const done        = s.merch.filter(([t]) => t === 'done');
+  const incomeStr   = '$' + s.income.toLocaleString();
+
+  const shelfReady  = pend.length === 0 ? 'Ready to launch' : `${pend.length} item${pend.length > 1 ? 's' : ''} pending`;
+  const opFriction  = pend.length === 0 ? 'None — cleared for activation' : pend.map(([, txt]) => txt).join(', ');
+  const promoReady  = pend.length === 0 ? 'Immediate launch window open' : 'Hold — resolve pending items first';
+  const campaignTiming = pend.length === 0 ? 'Launch now — no blockers detected' : `Delayed — ${pend.length} item${pend.length > 1 ? 's' : ''} must close first`;
+
+  const pricingSens = s.band === 'lower' ? 'High — value framing critical' : s.band === 'mid' ? 'Moderate — value + quality balance' : 'Low — price-resilient, premium SKUs viable';
+  const tradeUp     = s.band === 'upper' ? 'High — open to premium and trade-up SKUs' : s.band === 'mid' ? 'Moderate — will trade up for trusted brands' : 'Low — lead with offers; avoid premium-first';
+
+  const marketPos   = s.priority === 'accent' ? 'Black hair care-led market' : s.priority === 'warn' ? 'Bilingual / Hispanic opportunity' : s.priority === 'info' ? 'K-Beauty + premium segment' : 'Broad multicultural market';
+  const audienceSig = s.black >= 60 ? `Black-majority (${s.black}%) — protective styles, edge control` : s.hisp >= 30 ? `Hispanic-majority (${s.hisp}%) — bilingual, value-conscious` : s.asian >= 20 ? `Asian-significant (${s.asian}%) — K-Beauty, skincare routines` : `Mixed market — B ${s.black}% / H ${s.hisp}% / A ${s.asian}%`;
+  const revPotential = s.band === 'upper' ? `High — ${incomeStr} median, ${s.poverty}% poverty` : s.band === 'mid' ? `Moderate — ${incomeStr} median, manageable market` : `Value market — ${incomeStr} median, ${s.poverty}% poverty`;
+  const communityRes = s.hisp > 20 ? `Bilingual approach recommended — ${s.hisp}% Hispanic` : s.black > 50 ? `Strong community identity — ${s.black}% Black` : 'Broad-market — diverse audience mix';
+  const channelPri  = s.hisp > 20 ? 'Instagram Reels (bilingual) → Meta geo-target → in-store' : s.band === 'upper' ? 'Instagram + TikTok → influencer-adjacent → in-store' : 'Instagram Reels → in-store signage → flyer drop';
+  const storeMomentum = done.length >= 2 ? `Strong — ${done.length} shelf priorities complete` : done.length === 1 ? `Building — 1 priority complete, ${pend.length} pending` : `Early stage — ${pend.length} priorities pending`;
+  const tradeArea   = s.pop >= 300000 ? `Metro-scale — ${s.pop.toLocaleString()} pop.` : s.pop >= 100000 ? `Mid-market — ${s.pop.toLocaleString()} pop.` : `Neighborhood — ${s.pop.toLocaleString()} pop.`;
+  const customerMix = `${s.raceLabel} — ${s.femalePct}% female, ${s.under18}% under 18`;
+  const incomeBand  = `${s.bannerLabel} — ${incomeStr} median, ${s.poverty}% poverty`;
+  const messagingLead = s.priority === 'accent' ? 'Lead with identity and product quality' : s.priority === 'warn' ? 'Lead with bilingual access and value' : s.priority === 'info' ? 'Lead with discovery and trend awareness' : 'Lead with community and convenience';
+
+  const isRisk      = /risk|mitigation|blocker/.test(q);
+  const isPricing   = /pricing|price|offer|value|anchor/.test(q);
+  const isExpansion = /expansion|expand|compare/.test(q);
+  const isImmediate = /immediate|action|next|move/.test(q);
+
+  if (isRisk) return [
+    { key: 'SHELF READINESS',      val: shelfReady },
+    { key: 'OPERATIONAL FRICTION', val: opFriction },
+    { key: 'PRICING EXPOSURE',     val: pricingSens },
+    { key: 'CAMPAIGN TIMING',      val: campaignTiming },
+    { key: 'PROMO READINESS',      val: promoReady },
+    { key: 'COMPETITIVE RISK',     val: marketPos + ' — monitor adjacent category saturation' },
+  ];
+
+  if (isPricing) return [
+    { key: 'PRICING SENSITIVITY',  val: pricingSens },
+    { key: 'INCOME BAND',          val: incomeBand },
+    { key: 'TRADE-UP POTENTIAL',   val: tradeUp },
+    { key: 'REVENUE POTENTIAL',    val: revPotential },
+    { key: 'PROMO READINESS',      val: promoReady },
+    { key: 'HERO CATEGORY',        val: herocat + ' — primary margin driver' },
+  ];
+
+  if (isExpansion) return [
+    { key: 'MARKET POSITION',      val: marketPos },
+    { key: 'TRADE AREA',           val: tradeArea },
+    { key: 'CUSTOMER MIX',         val: customerMix },
+    { key: 'INCOME BAND',          val: incomeBand },
+    { key: 'COMMUNITY RESONANCE',  val: communityRes },
+    { key: 'REVENUE POTENTIAL',    val: revPotential },
+  ];
+
+  if (isImmediate) return [
+    { key: 'CAMPAIGN TIMING',      val: campaignTiming },
+    { key: 'SHELF READINESS',      val: shelfReady },
+    { key: 'OPERATIONAL FRICTION', val: opFriction },
+    { key: 'STORE MOMENTUM',       val: storeMomentum },
+    { key: 'HERO CATEGORY',        val: herocat },
+    { key: 'AUDIENCE SIGNAL',      val: audienceSig },
+  ];
+
+  return [
+    { key: 'MARKET POSITION',      val: marketPos },
+    { key: 'HERO CATEGORY',        val: herocat },
+    { key: 'AUDIENCE SIGNAL',      val: audienceSig },
+    { key: 'CHANNEL PRIORITY',     val: channelPri },
+    { key: 'REVENUE POTENTIAL',    val: revPotential },
+    { key: 'MESSAGING LEAD',       val: messagingLead },
+  ];
+}
+
 function renderAIResponse(result) {
   const queryEl = document.getElementById('ai-response-query');
   const bodyEl  = document.getElementById('ai-response-body');
@@ -1500,25 +1579,11 @@ function renderAIResponse(result) {
 
   queryEl.textContent = result.query || '';
 
-  const extract = (text) => {
-    if (!text) return null;
-    const line = text.split('\n').find(l => l.trim());
-    if (!line) return null;
-    const t = line.trim();
-    return t.length > 130 ? t.slice(0, 127) + '…' : t;
-  };
-
-  const blocks = [
-    { key: 'OBJECTIVE',      val: extract(result.objectiveSummary) },
-    { key: 'AUDIENCE',       val: extract(result.audienceInsight) },
-    { key: 'STRATEGIC MOVE', val: extract(result.strategicRecommendation) },
-    { key: 'CHANNEL',        val: extract(result.channelExecution) },
-    { key: 'HEADLINE',       val: extract(result.headlines) },
-    { key: 'EXECUTION',      val: extract(result.executionBrief) },
-  ].filter(b => b.val);
+  const s = STORES[selectedId] || STORES[0];
+  const signals = buildResponseSignals(result, s);
 
   bodyEl.innerHTML = `<div class="intel-response-grid">${
-    blocks.map(b => `<div class="intel-resp-block">
+    signals.map(b => `<div class="intel-resp-block">
       <span class="intel-resp-key">${esc(b.key)}</span>
       <span class="intel-resp-val">${esc(b.val)}</span>
     </div>`).join('')
