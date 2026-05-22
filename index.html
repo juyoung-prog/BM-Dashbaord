@@ -125,6 +125,9 @@
       </div>
     </div>
 
+    <!-- Session history -->
+    <div class="acp-session-history" id="acp-session-history" style="display:none"></div>
+
     <!-- AI response block -->
     <div class="ai-response" id="ai-response">
       <div class="acp-msg-ai">
@@ -148,6 +151,7 @@
 
     <!-- Quick action pills -->
     <div class="acp-quick-pills" id="acp-quick-pills">
+      <span class="acp-pills-label">Suggested next steps</span>
       <button class="acp-pill" id="rp-act1" onclick="handleAIChip(this,'summarize')">Generate Campaign Plan</button>
       <button class="acp-pill" onclick="handleAIChip(this,'risks')">Find Risks</button>
       <button class="acp-pill" onclick="handleAIChip(this,'compare')">Compare Stores</button>
@@ -164,11 +168,11 @@
                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChatMessage()}"
                 oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
       <div class="acp-input-controls">
-        <div class="ai-mode-btns">
-          <button class="ai-mode-btn is-active" data-mode="fast"     data-tooltip="GPT-4o mini — fast responses"   onclick="setAIMode(this)">Fast</button>
-          <button class="ai-mode-btn"           data-mode="balanced" data-tooltip="GPT-4.1 mini — balanced quality" onclick="setAIMode(this)">Balanced</button>
-          <button class="ai-mode-btn"           data-mode="advanced" data-tooltip="GPT-4.1 — deep analysis"        onclick="setAIMode(this)">Advanced</button>
-        </div>
+        <select class="acp-mode-select" id="acp-mode-select" onchange="setAIModeSelect(this)" aria-label="AI model">
+          <option value="fast">Fast</option>
+          <option value="balanced">Balanced</option>
+          <option value="advanced">Advanced</option>
+        </select>
         <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send message">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
