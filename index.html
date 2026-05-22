@@ -97,7 +97,7 @@
 
   <!-- ── Sticky context block ── -->
   <div class="acp-context" id="acp-context">
-    <div class="acp-ctx-eyebrow">Currently Analyzing<span class="acp-ctx-live">● Live</span></div>
+    <div class="acp-ctx-eyebrow">Store context</div>
     <div class="acp-ctx-store" id="acp-context-store">No store selected</div>
     <div class="acp-ctx-tags" id="acp-ctx-tags"></div>
     <div class="acp-ctx-stats" id="acp-context-grid"></div>
@@ -138,7 +138,6 @@
     <!-- Query context -->
     <div class="ai-user-msg" id="ai-user-msg" style="display:none">
       <div class="acp-query-strip">
-        <span class="acp-query-prefix">ACTIVE ANALYSIS</span>
         <span class="acp-query-text" id="ai-user-msg-text"></span>
       </div>
     </div>
@@ -146,11 +145,8 @@
     <!-- Analysis result -->
     <div class="ai-response" id="ai-response" style="display:none">
       <div class="acp-resp-header">
-        <div class="acp-resp-meta">
-          <span class="acp-resp-eyebrow">ACTIVE ANALYSIS</span>
-          <span class="acp-resp-label" id="ai-response-query"></span>
-        </div>
-        <button class="acp-resp-back" onclick="clearAIResponse()" title="Back to analysis">↩</button>
+        <span class="acp-resp-label" id="ai-response-query"></span>
+        <button class="acp-resp-back" onclick="clearAIResponse()" title="Back">↩</button>
       </div>
       <div class="ai-response-body" id="ai-response-body"></div>
     </div>
@@ -159,7 +155,7 @@
 
   <!-- ── Operational workflow matrix ── -->
   <div class="acp-workflow-section" id="acp-quick-pills">
-    <span class="acp-workflow-label">Operational Workflows</span>
+    <span class="acp-workflow-label">Ask about</span>
     <div class="acp-matrix-grid">
       <button class="acp-action-item" id="rp-act1" data-prompt="summarize" onclick="handleAICard(this,'summarize')">
         <span class="acp-action-label">Campaign Planning</span>
