@@ -5213,3 +5213,100 @@ body.auth-pending .sidebar-overlay {
   border-color: rgba(255,255,255,.1) !important;
 }
 
+/* ═══════════════════════════════════════════════
+   AI INTELLIGENCE DOCK — Operational right-side panel
+   Dashboard-25 Intelligence Workspace
+   ═══════════════════════════════════════════════ */
+
+:root { --ai-dock-w: 600px; }
+
+/* ── 1. Right-side dock: replaces centered modal ── */
+.ai-copilot-panel {
+  top: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  left: auto !important;
+  width: var(--ai-dock-w) !important;
+  max-width: calc(100vw - var(--sidebar-w) - 40px) !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-left: 1px solid var(--border-subtle) !important;
+  border-top: none !important;
+  box-shadow: -4px 0 20px rgba(0,0,0,.08) !important;
+  transform: translateX(100%) !important;
+  opacity: 1 !important;
+  transition: transform .25s cubic-bezier(.4,0,.2,1) !important;
+  z-index: 250 !important;
+}
+.ai-copilot-panel.is-open {
+  transform: translateX(0) !important;
+  opacity: 1 !important;
+}
+
+/* ── 2. Backdrop: off — dashboard stays continuously live ── */
+.ai-copilot-backdrop {
+  display: none !important;
+}
+
+/* ── 3. Content push: main shifts left as dock slides in ── */
+.main {
+  transition: padding-right .25s cubic-bezier(.4,0,.2,1);
+}
+body.ai-panel-open .main {
+  padding-right: calc(var(--ai-dock-w) + var(--s8)) !important;
+}
+body.ai-panel-open .right-panel {
+  display: none;
+}
+
+/* ── 4. Compact intelligence header ── */
+.acp-header {
+  padding: 11px 14px !important;
+}
+.acp-workspace-label {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+}
+.acp-workspace-sub {
+  font-size: 10px !important;
+}
+
+/* ── 5. Dense section padding ── */
+.acp-context  { padding: 8px 14px !important; }
+.acp-live-analysis { padding: 4px 14px 5px !important; }
+.acp-body     { padding: 12px 14px 10px !important; }
+.acp-footer   { padding: 8px 14px 10px !important; }
+
+/* ── 6. Dark mode dock ── */
+[data-theme="dark"] .ai-copilot-panel {
+  border-left-color: rgba(255,255,255,.1) !important;
+  box-shadow: -6px 0 32px rgba(0,0,0,.4) !important;
+}
+
+/* ── 7. Responsive: narrow screens — dock overlaps, no push ── */
+@media (max-width: 1080px) {
+  body.ai-panel-open .main {
+    padding-right: calc(var(--rpanel-w) + var(--s8)) !important;
+  }
+}
+@media (max-width: 600px) {
+  .ai-copilot-panel {
+    top: auto !important;
+    height: 88vh !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    border-radius: 16px 16px 0 0 !important;
+    transform: translateY(100%) !important;
+  }
+  .ai-copilot-panel.is-open {
+    transform: translateY(0) !important;
+  }
+  body.ai-panel-open .main {
+    padding-right: var(--s8) !important;
+  }
+}
+
