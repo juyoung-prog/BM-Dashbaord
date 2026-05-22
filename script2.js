@@ -1449,47 +1449,9 @@ const STRATEGY_SECTIONS = [
 ];
 
 function generateMockAIResponse(promptKey, s, chipLabel) {
-  const pend       = s.merch.filter(([t]) => t === 'pend').map(([, txt]) => txt);
-  const done       = s.merch.filter(([t]) => t === 'done').map(([, txt]) => txt);
-  const incomeStr  = '$' + s.income.toLocaleString();
-  const herocat    = s.state === 'FL' ? 'K-Beauty' : s.priority === 'accent' ? 'Black Hair Care' : 'Hair Care';
-  const secondcat  = s.state === 'FL' ? 'Hair Care' : s.priority === 'info' ? 'K-Beauty' : 'General Beauty';
-  const readyLabel = pend.length > 0 ? `${pend.length} item(s) pending before campaign activation` : 'store is campaign-ready';
-  const label      = chipLabel || promptKey || 'Store analysis';
-
-  return {
-    query: label.length > 60 ? label.slice(0, 57) + '…' : label,
-
-    objectiveSummary:
-      `Drive traffic and conversion at ${s.name} (${s.store}). Hero category: ${herocat}. Primary audience: ${s.priorityText} (${s.raceLabel}). ${readyLabel.charAt(0).toUpperCase() + readyLabel.slice(1)}.\n\nIncome band: ${s.bannerLabel} — median income ${incomeStr}, poverty rate ${s.poverty}%. This is a ${s.band === 'upper' ? 'price-resilient' : s.band === 'mid' ? 'value-conscious' : 'price-sensitive'} market.`,
-
-    audienceInsight:
-      `Primary audience: ${s.priorityText} shoppers — ${s.raceLabel}. Black population ${s.black}%, Hispanic ${s.hisp}%, Asian ${s.asian}%.\n\nMedian income ${incomeStr}, average wage $${s.wage}/hr, poverty rate ${s.poverty}% — shoppers are ${s.band === 'upper' ? 'price-resilient and open to premium SKUs' : s.band === 'mid' ? 'value-conscious but willing to trade up for trusted brands' : 'highly price-sensitive; value messaging and clear offers are critical'}.\n\nTrade area population: ${s.pop.toLocaleString()}. ${s.hisp > 20 ? `Hispanic share (${s.hisp}%) exceeds 20% — bilingual copy is strongly recommended.` : ''}`,
-
-    strategicRecommendation:
-      `Lead with ${herocat} — this is the hero category for ${s.name} based on location, audience, and store priority rules.\n\n1. ${pend.length > 0 ? `Complete pending shelf items (${pend.join(', ')}) before launching paid media` : `Launch a ${herocat}-led geo-targeted campaign within 5 miles of ${s.name}`}\n2. ${s.priority === 'accent' ? 'Lead with Black hair care endcap visibility and in-store signage' : s.priority === 'warn' ? 'Deploy bilingual (English + Spanish) in-store signage and digital creative' : s.priority === 'info' ? 'Expand K-Beauty shelf and run a product discovery campaign' : 'Run a neighborhood awareness campaign tied to community identity'}\n3. Set a 4-week paid digital flight geo-targeted to the ${s.name} trade area\n4. Measure foot traffic lift at Day 14 — benchmark: 8–12% above baseline`,
-
-    creativeDirection:
-      `Visual direction: authentic, community-first. Show real people, real products, real results in recognizable settings.\n\nHero product: ${herocat === 'K-Beauty' ? 'Sheet masks, skincare sets, tinted sun sticks — show the routine, not just the product' : 'Hair extensions, edge control, protective style products — show the transformation'}\n\nFirst 3 seconds: product reveal with on-screen text naming the offer or benefit — no slow builds.\n\nTone: direct and confident. Message: "${s.msg}"\n\nCasting: ${s.black > 50 ? 'Black women 25–44' : s.hisp > 25 ? 'Hispanic women 20–40, bilingual presentation' : 'diverse, local-feeling cast reflecting the trade area'}\n\nAvoid: stock imagery, cluttered shelves, low-light interiors.`,
-
-    offerCta:
-      `Lead offer: 15–20% off hero category, or BOGO on selected SKUs — choose based on margin.\n\nDigital CTA: "Shop Now" with urgency window (7–10 days)\nIn-store CTA: "Visit Us Today" + limited-time callout on signage\nEmail/SMS CTA: "Tap to see the deal" with store name and address prominent\n\nUrgency mechanic: countdown or expiry language on all digital assets.`,
-
-    channelExecution:
-      `1. Instagram Reels (launch first): 15-sec product reveal, creator-style, ${herocat} hero SKU — geo-targeted to ${s.name} ZIP\n2. In-store digital screen: offer callout with hero product visual, high contrast, large CTA\n3. Flyer/poster: ${s.hisp > 20 ? 'bilingual (English + Spanish)' : 'English'}, hero product image + offer + store address\n4. Paid social: Meta geo-target 5-mile radius, ${s.priorityText} interest audiences\n${s.hisp > 20 ? '5. Spanish-language ad set running in parallel on Meta and TikTok' : '5. TikTok: organic creator-style product try-on — rotate if IG Reels CTR exceeds 2%'}`,
-
-    executionBrief:
-      `Headline priority: lead with offer or product benefit — store name secondary\nHero visual: ${herocat === 'K-Beauty' ? 'K-Beauty skincare routine or product reveal' : 'hair transformation or extension styling'}\nHero category: ${herocat}\nSecondary category: ${secondcat}\nCTA: Visit / Shop Now\nDo not show: cluttered shelves, text-heavy layouts, generic stock imagery, low-light interiors`,
-
-    headlines:
-      `Option A (offer-led): "Up to 20% Off ${herocat}. This Week Only at ${s.name}."\nOption B (identity-led): "Your Beauty. Your Store. ${s.name}."\nOption C (product-led): "${herocat === 'K-Beauty' ? 'K-Beauty Is Here.' : 'Hair Goals Start Here.'} Shop ${s.name} Today."\nOption D (urgency-led): "Limited Time. Real Deals. Don't Miss It."\nOption E (community): "Find It. Feel It. Only at BeautyMaster ${s.store}."`,
-
-    designerVersion:
-      `Format: vertical 9:16 for Reels/TikTok, square 1:1 for feed, horizontal 16:9 for in-store screen\nBackground: clean beauty aisle or neutral — avoid busy backgrounds\nText hierarchy: (1) offer/benefit headline — bold, large; (2) store name — medium weight; (3) CTA — button-style or underlined\nColor: BeautyMaster brand palette — do not introduce off-brand colors\nFont: bold sans-serif for headlines, clean body copy\nRequired elements: store name or location tag on every asset`,
-
-    testPlan:
-      `Week 1 (launch): ${herocat} offer-led creative — static image + Reel, geo-targeted to ${s.name} ZIP\nWeek 2 (test): lifestyle/community creative without explicit offer — compare CTR vs. Week 1\nWeek 3 (rotate): if Week 1 CTR exceeds 2%, push more offer-led; if Week 2 wins, shift to identity angle\nDay 14 metric: foot traffic lift target 8–12%, CTR benchmark 1.5–2.5%, conversion goal 8–12% of clicks\n${pend.length > 0 ? `Note: delay paid media launch until pending items resolved (${pend.join(', ')})` : 'Note: store is ready — launch can begin immediately'}`,
-  };
+  const label = chipLabel || promptKey || 'Store analysis';
+  const query = label.length > 60 ? label.slice(0, 57) + '…' : label;
+  return { query, signals: buildResponseSignals({ query }, s) };
 }
 
 function buildResponseSignals(result, s) {
@@ -1580,7 +1542,9 @@ function renderAIResponse(result) {
   queryEl.textContent = result.query || '';
 
   const s = STORES[selectedId] || STORES[0];
-  const signals = buildResponseSignals(result, s);
+  const signals = Array.isArray(result.signals) && result.signals.length
+    ? result.signals
+    : buildResponseSignals(result, s);
 
   bodyEl.innerHTML = `<div class="intel-response-grid">${
     signals.map(b => `<div class="intel-resp-block">
