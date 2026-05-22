@@ -126,7 +126,7 @@
     <!-- Processing state -->
     <div class="ai-loading" id="ai-loading" style="display:none">
       <div class="acp-intel-loading">
-        <span class="acp-intel-loading-label">Processing analysis</span>
+        <span class="acp-intel-loading-label">Evaluating market conditions</span>
         <span class="acp-intel-loading-dots">
           <span class="ai-loading-dot"></span>
           <span class="ai-loading-dot"></span>
@@ -138,7 +138,7 @@
     <!-- Query context -->
     <div class="ai-user-msg" id="ai-user-msg" style="display:none">
       <div class="acp-query-strip">
-        <span class="acp-query-prefix">Query</span>
+        <span class="acp-query-prefix">ACTIVE ANALYSIS</span>
         <span class="acp-query-text" id="ai-user-msg-text"></span>
       </div>
     </div>
@@ -146,7 +146,10 @@
     <!-- Analysis result -->
     <div class="ai-response" id="ai-response" style="display:none">
       <div class="acp-resp-header">
-        <span class="acp-resp-label" id="ai-response-query"></span>
+        <div class="acp-resp-meta">
+          <span class="acp-resp-eyebrow">ACTIVE ANALYSIS</span>
+          <span class="acp-resp-label" id="ai-response-query"></span>
+        </div>
         <button class="acp-resp-back" onclick="clearAIResponse()" title="Back to analysis">↩</button>
       </div>
       <div class="ai-response-body" id="ai-response-body"></div>
