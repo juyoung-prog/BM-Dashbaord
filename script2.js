@@ -838,16 +838,20 @@ function selectStore(id) {
     const audPri = document.getElementById('rp-aud-priority');
     if (audPri) audPri.textContent = s.priorityText;
     // Primary action label — derived from store priority segment
-    const guideMap = { accent: 'View Black Hair Care Guide', warn: 'View Bilingual Market Guide', info: 'View K-Beauty Playbook' };
+    const guideMap = { accent: 'Build Black Hair Care Strategy', warn: 'Build Bilingual Market Strategy', info: 'Build K-Beauty Launch Plan' };
     const guideReasonMap = {
-      accent: `${s.black}% Black demographic — hair care-led strategy is the primary opportunity.`,
-      warn:   `${s.hisp}% Hispanic share — bilingual execution is highest-leverage action.`,
-      info:   `K-Beauty priority with ${s.asian}% Asian population — premium skincare leads.`,
+      accent: `${parseFloat(s.black).toFixed(0)}% Black demographic concentration confirmed`,
+      warn:   `${parseFloat(s.hisp).toFixed(0)}% Hispanic share — bilingual execution required`,
+      info:   `${parseFloat(s.asian).toFixed(0)}% Asian share — K-Beauty priority market`,
     };
     const act1 = document.getElementById('rp-act1');
     if (act1) {
-      act1.textContent   = guideMap[s.priority] || 'View Campaign Guide';
-      act1.dataset.reason = guideReasonMap[s.priority] || 'Based on store priority segment and market analysis.';
+      const titleEl  = act1.querySelector('.acp-sugg-card-title');
+      const reasonEl = act1.querySelector('.acp-sugg-card-reason');
+      const titleText = guideMap[s.priority] || 'Build Campaign Strategy';
+      const reasonText = guideReasonMap[s.priority] || 'Based on store priority segment and market analysis.';
+      if (titleEl)  titleEl.textContent  = titleText;
+      if (reasonEl) reasonEl.textContent = reasonText;
     }
     // Market lens label
     const htagType = document.getElementById('rp-htag-type');
@@ -1038,7 +1042,10 @@ function renderInsightCards(s) {
     const suggHtml = suggestions.map(sg => `
       <li class="acp-suggestion-item"
           data-reason="${sg.reason.replace(/"/g, '&quot;')}"
-          onclick="handleSuggestionClick('${sg.label.replace(/'/g, "&#39;")}')">${sg.label}</li>
+          onclick="handleSuggestionClick('${sg.label.replace(/'/g, "&#39;")}')">
+        <span class="acp-suggestion-title">${sg.label}</span>
+        <span class="acp-suggestion-reason">${sg.reason}</span>
+      </li>
     `).join('');
 
     container.innerHTML = `
@@ -1081,7 +1088,7 @@ function handleSuggestionClick(label) {
   };
   const key = label.toLowerCase().includes('compare') ? 'compare' : (keyMap[label] || 'next');
 
-  document.querySelectorAll('.acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 
   const aiLoading = document.getElementById('ai-loading');
   const aiResp    = document.getElementById('ai-response');
@@ -1145,7 +1152,7 @@ function resetAIState() {
   if (aiResp)    aiResp.style.display    = 'none';
   if (aiUserMsg) aiUserMsg.style.display = 'none';
   if (insights)  insights.style.display  = '';
-  document.querySelectorAll('.acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 }
 
 // Close on Escape
@@ -1159,16 +1166,41 @@ document.addEventListener('keydown', (e) => {
 
 let aiMode = 'fast';
 
-// Cycle input placeholder to reinforce operational tone
+// ── Live analysis state ticker ──
+(function initLiveAnalysisTicker() {
+  const states = [
+    'Demographic balance',
+    'Pricing sensitivity',
+    'Execution readiness',
+    'Market positioning',
+    'Campaign viability',
+    'Competitive landscape',
+    'Audience segmentation',
+  ];
+  let idx = 0;
+  function rotate() {
+    const el = document.getElementById('acp-live-text');
+    if (!el) return;
+    el.classList.add('fading');
+    setTimeout(() => {
+      idx = (idx + 1) % states.length;
+      el.textContent = states[idx];
+      el.classList.remove('fading');
+    }, 360);
+  }
+  setInterval(rotate, 3600);
+})();
+
+// ── Cycle input placeholder to reinforce operational tone ──
 (function initPlaceholderCycle() {
   const options = [
     'Analyze launch readiness…',
-    'Compare with similar markets…',
+    'Compare Florida market positioning…',
+    'Identify pricing sensitivity…',
     'Suggest campaign direction…',
-    'Identify pricing risks…',
-    'Build influencer strategy…',
-    'Evaluate community positioning…',
     'Assess merchandising readiness…',
+    'Evaluate community positioning…',
+    'Build influencer strategy…',
   ];
   let idx = 0;
   setInterval(() => {
@@ -1179,6 +1211,37 @@ let aiMode = 'fast';
     }
   }, 3800);
 })();
+
+// ── Editorial workflow card handler ──
+function handleAICard(el, promptKey) {
+  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+
+  const label = el.querySelector('.acp-sugg-card-title')?.textContent?.trim() || promptKey;
+
+  const aiLoading = document.getElementById('ai-loading');
+  const aiResp    = document.getElementById('ai-response');
+  const aiUserMsg = document.getElementById('ai-user-msg');
+  const insights  = document.getElementById('acp-insights');
+
+  if (insights)  insights.style.display  = 'none';
+  if (aiResp)    aiResp.style.display    = 'none';
+  if (aiUserMsg) aiUserMsg.style.display = 'none';
+  if (aiLoading) aiLoading.style.display = 'flex';
+
+  sendMessageToAI(promptKey, STORES[selectedId], label)
+    .then(result => {
+      if (aiLoading) aiLoading.style.display = 'none';
+      renderAIResponse(result);
+      addSessionThread(STORES[selectedId].name, label);
+    })
+    .catch(err => {
+      console.error('[AI Card] error, falling back to mock:', err);
+      if (aiLoading) aiLoading.style.display = 'none';
+      renderAIResponse(generateMockAIResponse(promptKey, STORES[selectedId], label));
+      addSessionThread(STORES[selectedId].name, label);
+    });
+}
 
 function setAIMode(btn) {
   document.querySelectorAll('.ai-mode-btn').forEach(b => b.classList.remove('is-active'));
@@ -1191,7 +1254,7 @@ function setAIModeSelect(sel) {
 }
 
 async function handleAIChip(btn, promptKey) {
-  document.querySelectorAll('.acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
 
   const chipLabel = btn.textContent.replace('→','').trim();
@@ -1226,7 +1289,7 @@ async function sendAIChatMessage() {
   const userText = input.value.trim();
   if (!userText) return;
 
-  document.querySelectorAll('.acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 
   // Show user message bubble
   const aiUserMsg    = document.getElementById('ai-user-msg');
@@ -1394,7 +1457,7 @@ function toggleStrategySection(btn) {
 }
 
 function clearAIResponse() {
-  document.querySelectorAll('.acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-sugg-card, .acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
   const aiResp    = document.getElementById('ai-response');
   const aiUserMsg = document.getElementById('ai-user-msg');
   const insights  = document.getElementById('acp-insights');
