@@ -5310,3 +5310,135 @@ body.ai-panel-open .right-panel {
   }
 }
 
+/* ═══════════════════════════════════════════════
+   OPERATIONAL INTELLIGENCE GRID
+   Dashboard-25 — Modular analysis workspace
+   ═══════════════════════════════════════════════ */
+
+/* ── 2×2 intelligence block grid ── */
+.intel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+.intel-block {
+  padding: 9px 11px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-base);
+  border-top: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.intel-block--signal      { border-top-color: #60a5fa; }
+.intel-block--risk        { border-top-color: #f59e0b; }
+.intel-block--angle       { border-top-color: #a78bfa; }
+.intel-block--opportunity { border-top-color: #34d399; }
+
+.intel-block-label {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 7px;
+  display: block;
+}
+.intel-block-items {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.intel-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.intel-item:first-child { padding-top: 0; }
+.intel-item:last-child  { border-bottom: none; padding-bottom: 0; }
+.intel-item-key {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  line-height: 1;
+}
+.intel-item-val {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+/* ── Session prior rail ── */
+.intel-prior-rail {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 7px;
+  flex-wrap: wrap;
+}
+.intel-prior-label {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.intel-prior-topic {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+/* ── Operational response blocks (replaces accordion) ── */
+.intel-response-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.intel-resp-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.intel-resp-block:first-child { padding-top: 0; }
+.intel-resp-block:last-child  { border-bottom: none; }
+.intel-resp-key {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.intel-resp-val {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* ── Dark mode ── */
+[data-theme="dark"] .intel-block {
+  background: rgba(255,255,255,.03);
+  border-color: rgba(255,255,255,.07);
+}
+[data-theme="dark"] .intel-item,
+[data-theme="dark"] .intel-resp-block {
+  border-bottom-color: rgba(255,255,255,.06);
+}
+[data-theme="dark"] .intel-prior-topic {
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.08);
+}
+

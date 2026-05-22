@@ -1009,70 +1009,137 @@ function buildSuggestions(s) {
 
 let _insightRenderTimer = null;
 
+function buildIntelBlocks(s) {
+  const popStr = s.pop >= 1000000
+    ? (s.pop / 1000000).toFixed(1) + 'M'
+    : (s.pop / 1000).toFixed(0) + 'K';
+
+  const posLabel = s.black >= 60 ? 'Black hair care-led market'
+    : s.hisp >= 25              ? 'Hispanic bilingual market'
+    : s.asian >= 15             ? 'K-Beauty opportunity'
+    :                             'Balanced broad-market';
+
+  const custLabel = s.band === 'upper'                        ? 'Premium-receptive, discovery-ready'
+    : (s.band === 'lower' || s.poverty >= 15)                ? 'Price-sensitive — value anchoring critical'
+    :                                                          'Value-conscious, brand trade-up';
+
+  const pending = s.merch.filter(([t]) => t === 'pend');
+  const shelfStatus   = pending.length > 0
+    ? `${pending.length} item${pending.length > 1 ? 's' : ''} pending`
+    : 'Complete — ready';
+  const activationLabel = pending.length > 0
+    ? `Delay ${pending.length > 1 ? '7–10' : '5–7'} days`
+    : 'Full-funnel launch viable now';
+  const incomeRisk = s.band === 'lower' || s.poverty >= 15
+    ? `High · ${s.poverty}% poverty rate`
+    : s.band === 'upper'
+    ? 'Low · price-resilient'
+    : `Moderate · $${Math.round(s.income / 1000)}K median`;
+
+  const messagingLead = s.black >= 60 ? 'Black hair care, community-first'
+    : s.hisp >= 25                    ? 'Bilingual EN + ES — structural'
+    : s.asian >= 15                   ? 'K-Beauty discovery, premium lead'
+    :                                   'Broad-community identity';
+
+  const toneLabel = s.band === 'upper' ? 'Aspirational + confident'
+    : s.band === 'lower'              ? 'Value-forward, direct'
+    :                                   'Trusted brand + clear value';
+
+  const offerLabel = s.band === 'upper'                       ? 'Discovery bundles, premium SKUs'
+    : (s.band === 'lower' || s.poverty >= 15)                ? 'BOGO or % off + price callout'
+    :                                                          '15–20% off hero category';
+
+  const heroCat = s.state === 'FL' ? 'K-Beauty'
+    : s.priority === 'accent'      ? 'Black Hair Care'
+    :                                'Hair Care';
+
+  const revenuePlay = s.band === 'upper'   ? 'Premium bundle + K-Beauty sets'
+    : s.poverty >= 15                      ? 'Value bundle + BOGO conversion'
+    :                                        'Category discovery + trade-up';
+
+  const launchWindow = pending.length > 0
+    ? `Ready in ${pending.length > 1 ? '7–10' : '5–7'} days`
+    : 'Immediate — activate now';
+
+  return {
+    signals: {
+      label: 'Market Signals', accent: 'signal',
+      items: [
+        { key: 'POSITION',    val: posLabel },
+        { key: 'CUSTOMER',    val: custLabel },
+        { key: 'DEMO MIX',   val: `${s.black}% Black · ${s.hisp}% Hisp · ${s.asian}% Asian` },
+        { key: 'TRADE AREA', val: `${popStr} residents` },
+      ],
+    },
+    risks: {
+      label: 'Execution Risks', accent: 'risk',
+      items: [
+        { key: 'SHELF STATUS', val: shelfStatus },
+        { key: 'ACTIVATION',   val: activationLabel },
+        { key: 'INCOME RISK',  val: incomeRisk },
+      ],
+    },
+    angle: {
+      label: 'Messaging Angle', accent: 'angle',
+      items: [
+        { key: 'PRIMARY LEAD', val: messagingLead },
+        { key: 'TONE',         val: toneLabel },
+        { key: 'OFFER TYPE',   val: offerLabel },
+      ],
+    },
+    opportunities: {
+      label: 'Opportunities', accent: 'opportunity',
+      items: [
+        { key: 'HERO CATEGORY', val: heroCat },
+        { key: 'REVENUE PLAY',  val: revenuePlay },
+        { key: 'LAUNCH WINDOW', val: launchWindow },
+      ],
+    },
+  };
+}
+
 function renderInsightCards(s) {
   const container = document.getElementById('acp-insights');
   if (!container) return;
 
-  // Cancel any pending render from rapid store switching
   if (_insightRenderTimer) { clearTimeout(_insightRenderTimer); _insightRenderTimer = null; }
 
-  // Show scanning state immediately to signal "system is computing"
   container.innerHTML = `
     <div class="acp-scanning-state">
       <span class="acp-scanning-dot"></span>
-      <span>Analyzing market conditions…</span>
+      <span>Scanning market conditions…</span>
     </div>
   `;
 
   _insightRenderTimer = setTimeout(() => {
-    const prose        = buildProseOpening(s);
-    const observations = buildAIObservations(s);
-    const suggestions  = buildSuggestions(s);
+    const blocks = buildIntelBlocks(s);
 
     const priorEntry = sessionHistory.find(e => e.storeName === s.name);
-    const priorHtml  = priorEntry && priorEntry.topics.length > 0
-      ? `<p class="acp-prior-context">Earlier in this session you explored: ${priorEntry.topics.map(t => t.label).join(', ')}.</p>`
+    const priorRail  = priorEntry && priorEntry.topics.length > 0
+      ? `<div class="intel-prior-rail"><span class="intel-prior-label">Session</span>${priorEntry.topics.map(t => `<span class="intel-prior-topic">${esc(t.label)}</span>`).join('')}</div>`
       : '';
 
-    const obsHtml = observations.map(o => `
-      <div class="acp-obs-strip acp-obs-strip-${o.type}">
-        <span class="acp-obs-prefix">${o.prefix}</span>
-        <span class="acp-obs-line">${o.text}</span>
-      </div>
-    `).join('');
-
-    const suggHtml = suggestions.map(sg => `
-      <li class="acp-suggestion-item"
-          data-reason="${sg.reason.replace(/"/g, '&quot;')}"
-          onclick="handleSuggestionClick('${sg.label.replace(/'/g, "&#39;")}')">
-        <span class="acp-suggestion-title">${sg.label}</span>
-        <span class="acp-suggestion-reason">${sg.reason}</span>
-      </li>
-    `).join('');
+    const renderBlock = (block) => {
+      const items = block.items.map(item => `
+        <div class="intel-item">
+          <span class="intel-item-key">${item.key}</span>
+          <span class="intel-item-val">${esc(item.val)}</span>
+        </div>`).join('');
+      return `<div class="intel-block intel-block--${block.accent}">
+        <div class="intel-block-label">${block.label}</div>
+        <div class="intel-block-items">${items}</div>
+      </div>`;
+    };
 
     container.innerHTML = `
-      <div class="acp-msg-ai">
-        <div class="acp-ai-avatar">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <div class="acp-ai-intro">
-          ${priorHtml}
-          <p class="acp-intro-text">${prose}</p>
-          <div class="acp-obs-strips">${obsHtml}</div>
-          <div class="acp-suggestions">
-            <span class="acp-suggestions-label">Suggested next actions</span>
-            <ul class="acp-suggestion-list">${suggHtml}</ul>
-          </div>
-        </div>
+      ${priorRail}
+      <div class="intel-grid">
+        ${renderBlock(blocks.signals)}
+        ${renderBlock(blocks.risks)}
+        ${renderBlock(blocks.angle)}
+        ${renderBlock(blocks.opportunities)}
       </div>
     `;
-
-    // Staggered entrance — each strip fades in with 130ms offset
-    requestAnimationFrame(() => {
-      container.querySelectorAll('.acp-obs-strip').forEach((el, i) => {
-        setTimeout(() => el.classList.add('is-visible'), i * 130);
-      });
-    });
 
     _insightRenderTimer = null;
   }, 520);
@@ -1435,22 +1502,30 @@ function renderAIResponse(result) {
 
   queryEl.textContent = result.query || '';
 
-  const isKorean = /[가-힣]/.test(result.query || '');
+  const extract = (text) => {
+    if (!text) return null;
+    const line = text.split('\n').find(l => l.trim());
+    if (!line) return null;
+    const t = line.trim();
+    return t.length > 130 ? t.slice(0, 127) + '…' : t;
+  };
 
-  const sectionsHtml = STRATEGY_SECTIONS.map(s => {
-    const content   = result[s.key] ?? '';
-    const label     = isKorean ? s.ko : s.en;
-    const openClass = s.defaultOpen ? ' is-open' : '';
-    return `<div class="ai-strategy-section${openClass}">` +
-      `<button class="ai-strategy-toggle" onclick="toggleStrategySection(this)">` +
-        `<span>${esc(label)}</span>` +
-        `<span class="ai-strategy-chevron">&#8250;</span>` +
-      `</button>` +
-      `<div class="ai-strategy-body">${esc(content)}</div>` +
-    `</div>`;
-  }).join('');
+  const blocks = [
+    { key: 'OBJECTIVE',      val: extract(result.objectiveSummary) },
+    { key: 'AUDIENCE',       val: extract(result.audienceInsight) },
+    { key: 'STRATEGIC MOVE', val: extract(result.strategicRecommendation) },
+    { key: 'CHANNEL',        val: extract(result.channelExecution) },
+    { key: 'HEADLINE',       val: extract(result.headlines) },
+    { key: 'EXECUTION',      val: extract(result.executionBrief) },
+  ].filter(b => b.val);
 
-  bodyEl.innerHTML = `<div class="ai-strategy-doc">${sectionsHtml}</div>`;
+  bodyEl.innerHTML = `<div class="intel-response-grid">${
+    blocks.map(b => `<div class="intel-resp-block">
+      <span class="intel-resp-key">${esc(b.key)}</span>
+      <span class="intel-resp-val">${esc(b.val)}</span>
+    </div>`).join('')
+  }</div>`;
+
   respEl.style.display = 'block';
 }
 
