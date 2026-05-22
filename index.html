@@ -84,14 +84,11 @@
     <div class="acp-drag-handle-bar"></div>
   </div>
 
-  <!-- ── Sticky header ── -->
+  <!-- ── Header ── -->
   <div class="acp-header">
-    <div class="acp-header-left">
-      <div class="acp-header-dot"></div>
-      <div class="acp-header-identity">
-        <span class="acp-title">AI Copilot</span>
-        <span class="acp-tagline">Live operational analysis</span>
-      </div>
+    <div class="acp-header-identity">
+      <span class="acp-workspace-label">AI Operational Analysis</span>
+      <span class="acp-workspace-sub">Live Market Intelligence</span>
     </div>
     <button class="acp-close" onclick="closeAICopilot()" aria-label="Close">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -205,24 +202,23 @@
       </div>
     </div>
 
-    <!-- Input area -->
+    <!-- Command bar -->
     <div class="acp-input-wrap">
+      <select class="acp-mode-select" id="acp-mode-select" onchange="setAIModeSelect(this)" aria-label="AI model">
+        <option value="fast">Fast</option>
+        <option value="balanced">Balanced</option>
+        <option value="advanced">Advanced</option>
+      </select>
+      <div class="acp-input-sep"></div>
       <textarea class="ai-chat-input" id="ai-chat-input"
                 placeholder="Analyze launch readiness…"
                 rows="1"
                 autocomplete="off"
                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChatMessage()}"
-                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
-      <div class="acp-input-controls">
-        <select class="acp-mode-select" id="acp-mode-select" onchange="setAIModeSelect(this)" aria-label="AI model">
-          <option value="fast">Fast</option>
-          <option value="balanced">Balanced</option>
-          <option value="advanced">Advanced</option>
-        </select>
-        <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send message">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
-      </div>
+                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
+      <button class="ai-chat-send" id="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send message">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
     </div>
 
   </div><!-- /acp-footer -->
