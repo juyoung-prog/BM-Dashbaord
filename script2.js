@@ -859,7 +859,9 @@ function openAICopilot() {
   document.getElementById('ai-copilot-panel').classList.add('is-open');
   document.getElementById('ai-copilot-backdrop').classList.add('is-open');
   document.getElementById('ai-copilot-trigger').classList.add('is-open');
-  // Focus chat input for immediate use
+  // Populate context + insight cards if not already rendered
+  const store = STORES[selectedId];
+  if (store) updateAICopilotContext(store);
   setTimeout(() => {
     const input = document.getElementById('ai-chat-input');
     if (input) input.focus();
@@ -873,26 +875,121 @@ function closeAICopilot() {
 }
 
 function updateAICopilotContext(s) {
-  const valEl  = document.getElementById('acp-context-value');
-  const metaEl = document.getElementById('acp-context-meta');
-  if (!valEl || !s) return;
-  valEl.textContent  = s.name + ' · ' + s.state;
-  metaEl.textContent = s.bannerLabel + ' · ' + s.raceLabel + ' · ' + s.priorityText;
+  if (!s) return;
+
+  const storeEl = document.getElementById('acp-context-store');
+  if (storeEl) storeEl.textContent = s.name + ' · ' + s.state;
+
+  const gridEl = document.getElementById('acp-context-grid');
+  if (gridEl) {
+    const popStr = s.pop >= 1000000
+      ? (s.pop / 1000000).toFixed(1) + 'M'
+      : Math.round(s.pop / 1000) + 'K';
+    gridEl.innerHTML = `
+      <div class="acp-ctx-item"><span class="acp-ctx-k">Population</span><span class="acp-ctx-v">${popStr}</span></div>
+      <div class="acp-ctx-item"><span class="acp-ctx-k">Black</span><span class="acp-ctx-v">${s.black}%</span></div>
+      <div class="acp-ctx-item"><span class="acp-ctx-k">Hispanic</span><span class="acp-ctx-v">${s.hisp}%</span></div>
+      <div class="acp-ctx-item"><span class="acp-ctx-k">Income</span><span class="acp-ctx-v">$${Math.round(s.income / 1000)}K</span></div>
+      <div class="acp-ctx-item acp-ctx-wide"><span class="acp-ctx-k">Market Band</span><span class="acp-ctx-v">${s.bannerLabel}</span></div>
+    `;
+  }
+
+  const marketEl = document.getElementById('acp-context-market');
+  if (marketEl) {
+    marketEl.innerHTML = `<span class="acp-ctx-market-label">Primary Focus</span><span class="acp-ctx-market-value">${s.priorityText}</span>`;
+  }
+
+  renderInsightCards(s);
+}
+
+function generateInsightCards(s) {
+  const cards = [];
+
+  // Card 1 — Demographic signal
+  if (s.black >= 60) {
+    cards.push({ type: 'opportunity', label: 'Demographic Opportunity',
+      title: 'Black hair care is the category anchor',
+      body: `${s.black}% Black population. Protective styles, extensions, and edge control should lead all media, in-store endcaps, and paid creative.`,
+      action: 'summarize', actionLabel: 'Build Strategy' });
+  } else if (s.hisp >= 25) {
+    cards.push({ type: 'opportunity', label: 'Demographic Opportunity',
+      title: 'Bilingual execution is required, not optional',
+      body: `${s.hisp}% Hispanic share exceeds the 20% threshold. English-only creative will underperform. Bilingual copy should run across all paid and in-store channels.`,
+      action: 'messaging', actionLabel: 'Develop Messaging' });
+  } else if (s.asian >= 15 || s.priority === 'info') {
+    cards.push({ type: 'opportunity', label: 'Category Opportunity',
+      title: 'K-Beauty upsell potential is high',
+      body: `${s.asian}% Asian population with K-Beauty priority designation. Premium skincare and K-Beauty discovery should be visible at entry and featured in digital creative.`,
+      action: 'guide', actionLabel: 'View Playbook' });
+  } else {
+    cards.push({ type: 'signal', label: 'Market Signal',
+      title: 'Mixed market — broad community positioning',
+      body: `${s.raceLabel} — no single demographic above 50%. Niche campaigns will miss reach. Lead with community identity and category breadth.`,
+      action: 'summarize', actionLabel: 'Analyze Market' });
+  }
+
+  // Card 2 — Pricing sensitivity
+  if (s.poverty >= 15 || s.band === 'lower') {
+    cards.push({ type: 'risk', label: 'Pricing Risk',
+      title: 'Price-sensitive market — value framing is critical',
+      body: `${s.poverty}% poverty rate · ${s.bannerLabel}. Premium positioning without a price anchor reduces conversion. Lead with bundles and clear offer mechanics.`,
+      action: 'risks', actionLabel: 'Review Risks' });
+  } else if (s.band === 'upper') {
+    cards.push({ type: 'opportunity', label: 'Revenue Opportunity',
+      title: 'Premium SKU environment — upsell is viable',
+      body: `$${s.income.toLocaleString()} median income · ${s.poverty}% poverty rate. Price-resilient market. K-Beauty sets, premium skincare, and discovery bundles are strong plays.`,
+      action: 'guide', actionLabel: 'Build Campaign' });
+  } else {
+    cards.push({ type: 'signal', label: 'Income Signal',
+      title: 'Mid-income — quality-value balance required',
+      body: `$${s.income.toLocaleString()} median income. Customers will trade up for trusted brands but need clear value justification. Avoid aspirational-only tone.`,
+      action: 'messaging', actionLabel: 'Refine Messaging' });
+  }
+
+  // Card 3 — Merchandising readiness
+  const pending = s.merch.filter(([t]) => t === 'pend');
+  if (pending.length > 0) {
+    cards.push({ type: 'risk', label: 'Execution Risk',
+      title: `${pending.length} shelf item${pending.length > 1 ? 's' : ''} unresolved before launch`,
+      body: `Pending: ${pending.map(([, txt]) => txt).join(', ')}. Launching paid media before shelf resolution creates a gap between ad promise and in-store reality.`,
+      action: 'merch-notes', actionLabel: 'Review Merch' });
+  } else {
+    cards.push({ type: 'ready', label: 'Campaign Ready',
+      title: 'All merchandising complete — activation-ready',
+      body: 'This store can support a full-funnel launch. Paid media, in-store signage, and digital can run simultaneously without shelf risk.',
+      action: 'next', actionLabel: 'Next Best Action' });
+  }
+
+  return cards;
+}
+
+function renderInsightCards(s) {
+  const container = document.getElementById('acp-insights');
+  if (!container) return;
+  const cards = generateInsightCards(s);
+  container.innerHTML = cards.map(c => `
+    <div class="acp-insight-card acp-insight-${c.type}">
+      <div class="acp-insight-label">${c.label}</div>
+      <div class="acp-insight-title">${c.title}</div>
+      <div class="acp-insight-body">${c.body}</div>
+      <button class="acp-insight-action" onclick="handleAIChip(this,'${c.action}')">${c.actionLabel} →</button>
+    </div>
+  `).join('');
 }
 
 function resetAIState() {
-  const aiEmpty   = document.getElementById('ai-empty');
   const aiLoading = document.getElementById('ai-loading');
   const aiResp    = document.getElementById('ai-response');
   const aiUserMsg = document.getElementById('ai-user-msg');
-  if (aiEmpty)   aiEmpty.style.display   = '';
+  const insights  = document.getElementById('acp-insights');
   if (aiLoading) aiLoading.style.display = 'none';
   if (aiResp)    aiResp.style.display    = 'none';
   if (aiUserMsg) aiUserMsg.style.display = 'none';
-  document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
+  if (insights)  insights.style.display  = '';
+  document.querySelectorAll('.acp-action-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 }
 
-// Close panel on Escape key
+// Close on Escape
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeAICopilot();
 });
@@ -910,16 +1007,16 @@ function setAIMode(btn) {
 }
 
 async function handleAIChip(btn, promptKey) {
-  document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-action-btn, .ai-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
 
-  const chipLabel = btn.textContent.trim();
-  const aiEmpty   = document.getElementById('ai-empty');
+  const chipLabel = btn.textContent.replace('→','').trim();
   const aiLoading = document.getElementById('ai-loading');
   const aiResp    = document.getElementById('ai-response');
   const aiUserMsg = document.getElementById('ai-user-msg');
+  const insights  = document.getElementById('acp-insights');
 
-  if (aiEmpty)   aiEmpty.style.display   = 'none';
+  if (insights)  insights.style.display  = 'none';
   if (aiResp)    aiResp.style.display    = 'none';
   if (aiUserMsg) aiUserMsg.style.display = 'none';
   if (aiLoading) aiLoading.style.display = 'flex';
@@ -943,8 +1040,7 @@ async function sendAIChatMessage() {
   const userText = input.value.trim();
   if (!userText) return;
 
-  // Deactivate chips — chat is a free-form query
-  document.querySelectorAll('.ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-action-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 
   // Show user message bubble
   const aiUserMsg    = document.getElementById('ai-user-msg');
@@ -958,11 +1054,11 @@ async function sendAIChatMessage() {
   input.disabled    = true;
   if (sendBtn) sendBtn.disabled = true;
 
-  const aiEmpty   = document.getElementById('ai-empty');
   const aiLoading = document.getElementById('ai-loading');
   const aiResp    = document.getElementById('ai-response');
+  const insights  = document.getElementById('acp-insights');
 
-  if (aiEmpty)   aiEmpty.style.display   = 'none';
+  if (insights)  insights.style.display  = 'none';
   if (aiResp)    aiResp.style.display    = 'none';
   if (aiLoading) aiLoading.style.display = 'flex';
 

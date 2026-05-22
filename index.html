@@ -79,53 +79,30 @@
 
 <aside class="ai-copilot-panel" id="ai-copilot-panel" role="complementary" aria-label="AI Copilot">
 
-  <!-- Panel header -->
+  <!-- ── Panel header ── -->
   <div class="acp-header">
     <div class="acp-header-left">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/><circle cx="12" cy="12" r="3"/></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span class="acp-title">AI Copilot</span>
     </div>
-    <button class="acp-close" onclick="closeAICopilot()" aria-label="Close AI Copilot">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <button class="acp-close" onclick="closeAICopilot()" aria-label="Close">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
 
-  <!-- Context badge -->
+  <!-- ── AI Analysis Context block ── -->
   <div class="acp-context" id="acp-context">
-    <div class="acp-context-label">Context</div>
-    <div class="acp-context-value" id="acp-context-value">No store selected</div>
-    <div class="acp-context-meta" id="acp-context-meta"></div>
+    <div class="acp-context-eyebrow">Currently Analyzing</div>
+    <div class="acp-context-store" id="acp-context-store">No store selected</div>
+    <div class="acp-context-grid" id="acp-context-grid"></div>
+    <div class="acp-context-market" id="acp-context-market"></div>
   </div>
 
-  <!-- Chip prompts -->
-  <div class="acp-chips-wrap">
-    <div class="acp-chip-group-label">Analyze</div>
-    <div class="ai-chips">
-      <button class="ai-chip" onclick="handleAIChip(this,'summarize')">Summarize this store</button>
-      <button class="ai-chip" onclick="handleAIChip(this,'messaging')">Suggest campaign messaging</button>
-      <button class="ai-chip" onclick="handleAIChip(this,'risks')">Find marketing risks</button>
-      <button class="ai-chip" onclick="handleAIChip(this,'next')">Recommend next action</button>
-    </div>
-    <div class="acp-chip-group-label">Actions</div>
-    <div class="ai-chips">
-      <button class="ai-chip" id="rp-act1" onclick="handleAIChip(this,'guide')">View Campaign Guide</button>
-      <button class="ai-chip" onclick="handleAIChip(this,'export')">Export Store Brief</button>
-      <button class="ai-chip" onclick="handleAIChip(this,'playbook')">Open Store Playbook</button>
-      <button class="ai-chip" onclick="handleAIChip(this,'merch-notes')">Review Merchandising Notes</button>
-      <button class="ai-chip" onclick="handleAIChip(this,'compare')">Compare Similar Stores</button>
-    </div>
-  </div>
-
-  <!-- Scrollable conversation area — independent scroll context -->
+  <!-- ── Scrollable body: insights + conversation ── -->
   <div class="acp-body" id="acp-body">
 
-    <!-- Empty state -->
-    <div class="ai-empty" id="ai-empty">
-      <div class="ai-empty-icon">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/><circle cx="12" cy="12" r="3"/></svg>
-      </div>
-      <div class="ai-empty-text">Select a prompt above or ask a question below.</div>
-    </div>
+    <!-- Proactive insight cards (idle state) -->
+    <div class="acp-insights" id="acp-insights"></div>
 
     <!-- Loading state -->
     <div class="ai-loading" id="ai-loading">
@@ -140,7 +117,7 @@
       <div id="ai-user-msg-text"></div>
     </div>
 
-    <!-- Response area -->
+    <!-- AI response -->
     <div class="ai-response" id="ai-response">
       <div class="ai-response-header">
         <span class="ai-response-query" id="ai-response-query"></span>
@@ -151,8 +128,26 @@
 
   </div><!-- /acp-body -->
 
-  <!-- Footer: mode selector + chat input — pinned to bottom -->
+  <!-- ── Footer: 3 primary actions + mode + input ── -->
   <div class="acp-footer">
+
+    <!-- 3 primary actions -->
+    <div class="acp-actions">
+      <button class="acp-action-btn" id="rp-act1" onclick="handleAIChip(this,'summarize')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Generate Strategy
+      </button>
+      <button class="acp-action-btn" onclick="handleAIChip(this,'risks')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Find Risks
+      </button>
+      <button class="acp-action-btn" onclick="handleAIChip(this,'compare')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Compare Stores
+      </button>
+    </div>
+
+    <!-- Mode selector -->
     <div class="ai-mode-row">
       <div class="ai-mode-btns">
         <button class="ai-mode-btn is-active" data-mode="fast"     data-tooltip="gpt-4o-mini"  onclick="setAIMode(this)">Fast</button>
@@ -161,6 +156,8 @@
       </div>
       <span class="ai-mode-hint">Advanced uses more credits.</span>
     </div>
+
+    <!-- Chat input -->
     <div class="ai-chat-row">
       <input type="text" class="ai-chat-input" id="ai-chat-input"
              placeholder="Ask about this store…"
@@ -170,7 +167,8 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </div>
-  </div>
+
+  </div><!-- /acp-footer -->
 
 </aside><!-- /ai-copilot-panel -->
 
