@@ -79,6 +79,11 @@
 
 <aside class="ai-copilot-panel" id="ai-copilot-panel" role="complementary" aria-label="AI Copilot">
 
+  <!-- ── Drag handle (Layout 2: bottom dock resize) ── -->
+  <div class="acp-drag-handle" id="acp-drag-handle" title="Drag to resize">
+    <div class="acp-drag-handle-bar"></div>
+  </div>
+
   <!-- ── Sticky header ── -->
   <div class="acp-header">
     <div class="acp-header-left">
@@ -99,6 +104,14 @@
     <div class="acp-ctx-store" id="acp-context-store">No store selected</div>
     <div class="acp-ctx-tags" id="acp-ctx-tags"></div>
     <div class="acp-ctx-stats" id="acp-context-grid"></div>
+  </div>
+
+  <!-- ── Live analysis state ── -->
+  <div class="acp-live-analysis" id="acp-live-analysis">
+    <span class="acp-live-analysis-dot"></span>
+    <span class="acp-live-analysis-label">Analyzing</span>
+    <span class="acp-live-analysis-sep">·</span>
+    <span class="acp-live-analysis-text" id="acp-live-text">Demographic balance</span>
   </div>
 
   <!-- ── Strategy thread (workspace memory, hidden until work accumulates) ── -->
@@ -157,30 +170,45 @@
 
     <!-- Suggested by AI -->
     <div class="acp-suggestions-panel" id="acp-quick-pills">
-      <span class="acp-sugg-panel-label">Suggested next actions</span>
+      <span class="acp-sugg-panel-label">Recommended workflows</span>
       <div class="acp-sugg-panel-items">
-        <button class="acp-sugg-btn" id="rp-act1"
-                data-reason="Based on store readiness and demographic profile"
-                onclick="handleAIChip(this,'summarize')">Generate Campaign Plan</button>
-        <button class="acp-sugg-btn"
-                data-reason="Flagged due to pricing pressure signals in this market"
-                onclick="handleAIChip(this,'risks')">Find Risks</button>
-        <button class="acp-sugg-btn"
-                data-reason="Benchmarking similar stores reveals transferable strategies"
-                onclick="handleAIChip(this,'compare')">Compare Similar Stores</button>
-        <button class="acp-sugg-btn"
-                data-reason="Demographic signals point to specific messaging angles"
-                onclick="handleAIChip(this,'messaging')">Develop Messaging Strategy</button>
-        <button class="acp-sugg-btn"
-                data-reason="Based on current operational state and market timing"
-                onclick="handleAIChip(this,'next')">Identify Next Best Action</button>
+        <div class="acp-sugg-card" id="rp-act1"
+             data-prompt="summarize"
+             onclick="handleAICard(this,'summarize')">
+          <span class="acp-sugg-card-title">Build Campaign Strategy</span>
+          <span class="acp-sugg-card-reason">Demographic readiness confirmed</span>
+        </div>
+        <div class="acp-sugg-card"
+             data-prompt="risks"
+             onclick="handleAICard(this,'risks')">
+          <span class="acp-sugg-card-title">Analyze Execution Risks</span>
+          <span class="acp-sugg-card-reason">Pricing sensitivity signals detected</span>
+        </div>
+        <div class="acp-sugg-card"
+             data-prompt="compare"
+             onclick="handleAICard(this,'compare')">
+          <span class="acp-sugg-card-title">Compare Similar Markets</span>
+          <span class="acp-sugg-card-reason">Benchmarking transferable strategy</span>
+        </div>
+        <div class="acp-sugg-card"
+             data-prompt="messaging"
+             onclick="handleAICard(this,'messaging')">
+          <span class="acp-sugg-card-title">Develop Messaging Strategy</span>
+          <span class="acp-sugg-card-reason">Demographic signals mapped</span>
+        </div>
+        <div class="acp-sugg-card"
+             data-prompt="next"
+             onclick="handleAICard(this,'next')">
+          <span class="acp-sugg-card-title">Identify Next Best Action</span>
+          <span class="acp-sugg-card-reason">Operational state assessed</span>
+        </div>
       </div>
     </div>
 
     <!-- Input area -->
     <div class="acp-input-wrap">
       <textarea class="ai-chat-input" id="ai-chat-input"
-                placeholder="Ask about this store…"
+                placeholder="Analyze launch readiness…"
                 rows="1"
                 autocomplete="off"
                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChatMessage()}"
