@@ -2157,3 +2157,48 @@ function _applyThemeIcon(theme) {
     _applyThemeIcon(saved);
   }
 })();
+
+// ══════════════════════════════════════════
+// AI COPILOT — LAYOUT 2: BOTTOM DOCK
+// Drag-to-resize handle
+// ══════════════════════════════════════════
+(function initDockResize() {
+  const handle = document.getElementById('acp-drag-handle');
+  const panel  = document.getElementById('ai-copilot-panel');
+  if (!handle || !panel) return;
+
+  const MIN_H = 200;
+  const MAX_RATIO = 0.78;
+  let startY, startH;
+
+  handle.addEventListener('pointerdown', e => {
+    startY = e.clientY;
+    startH = panel.offsetHeight;
+    handle.setPointerCapture(e.pointerId);
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  handle.addEventListener('pointermove', e => {
+    if (startY === undefined) return;
+    const dy  = startY - e.clientY;
+    const maxH = Math.floor(window.innerHeight * MAX_RATIO);
+    const newH = Math.max(MIN_H, Math.min(maxH, startH + dy));
+    panel.style.height = newH + 'px';
+  });
+
+  handle.addEventListener('pointerup', () => {
+    startY = undefined;
+    document.body.style.userSelect = '';
+  });
+
+  handle.addEventListener('pointercancel', () => {
+    startY = undefined;
+    document.body.style.userSelect = '';
+  });
+
+  // Double-click resets to default height
+  handle.addEventListener('dblclick', () => {
+    panel.style.height = '380px';
+  });
+})();

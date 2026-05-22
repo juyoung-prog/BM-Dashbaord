@@ -4416,3 +4416,220 @@ body.auth-pending .sidebar-overlay {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
+
+/* ═══════════════════════════════════════════════
+   AI COPILOT — LAYOUT 2: BOTTOM DOCK
+   Full-width bottom panel that slides up.
+   Context shown as horizontal strip.
+   Suggestions as horizontal scrollable pills.
+   ═══════════════════════════════════════════════ */
+
+/* Panel: bottom dock */
+.ai-copilot-panel {
+  top: auto;
+  bottom: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  width: auto;
+  max-width: none;
+  height: 380px;
+  border-left: none;
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 14px 14px 0 0;
+  transform: translateY(100%);
+  transition: transform .28s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 -6px 32px rgba(0,0,0,.1);
+}
+.ai-copilot-panel.is-open {
+  transform: translateY(0);
+}
+
+/* Drag handle */
+.acp-drag-handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0 4px;
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+}
+.acp-drag-handle-bar {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-strong);
+  opacity: .45;
+  transition: opacity .15s;
+}
+.acp-drag-handle:hover .acp-drag-handle-bar { opacity: .75; }
+
+/* Header: compact */
+.acp-header {
+  padding: 6px 16px 8px;
+  border-bottom: none;
+}
+.acp-tagline {
+  display: none;
+}
+
+/* Context block: horizontal strip */
+.acp-context {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+.acp-context::-webkit-scrollbar { display: none; }
+
+.acp-ctx-eyebrow {
+  display: none;
+}
+.acp-ctx-store {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  margin-bottom: 0;
+  flex-shrink: 0;
+  letter-spacing: -.015em;
+  color: var(--text-primary);
+}
+.acp-ctx-tags {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+.acp-ctx-stats {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Divider between context sections */
+.acp-ctx-div {
+  width: 1px;
+  height: 14px;
+  background: var(--border-default);
+  flex-shrink: 0;
+}
+
+/* Strategy thread: compact horizontal */
+.acp-strategy-thread {
+  padding: 6px 16px 7px;
+}
+.ast-entries {
+  flex-direction: row;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.ast-entry {
+  flex-direction: row;
+  gap: 6px;
+  align-items: baseline;
+}
+.ast-topic {
+  padding-left: 0;
+}
+.ast-topic::before { display: none; }
+
+/* Body: adjust padding for wider/shorter space */
+.acp-body {
+  padding: 12px 18px 10px;
+  gap: 12px;
+}
+
+/* Suggestions: horizontal scrollable pills */
+.acp-suggestions-panel {
+  padding-bottom: 0;
+}
+.acp-sugg-panel-label {
+  margin-bottom: 6px;
+  display: block;
+}
+.acp-sugg-panel-items {
+  flex-direction: row;
+  gap: 5px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.acp-sugg-panel-items::-webkit-scrollbar { display: none; }
+
+.acp-sugg-btn {
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+  white-space: nowrap;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+  flex-shrink: 0;
+  position: static;
+  text-align: center;
+  font-family: var(--font-sans);
+}
+.acp-sugg-btn::before { display: none; }
+.acp-sugg-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+  background: var(--bg-overlay);
+}
+.acp-sugg-btn.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--bg-surface);
+}
+
+/* Footer: compact */
+.acp-footer {
+  padding: 8px 16px 12px;
+  gap: 7px;
+}
+
+/* Backdrop: lighter since main content still visible above */
+.ai-copilot-backdrop {
+  background: rgba(15,23,42,.06);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Mobile: full width, taller */
+@media (max-width: 600px) {
+  .ai-copilot-panel {
+    left: 0;
+    height: 88vh;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+/* Dark mode */
+[data-theme="dark"] .ai-copilot-panel {
+  box-shadow: 0 -8px 40px rgba(0,0,0,.45);
+}
+[data-theme="dark"] .acp-ctx-div {
+  background: rgba(255,255,255,.12);
+}
+[data-theme="dark"] .acp-sugg-btn {
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.1);
+}
+[data-theme="dark"] .acp-sugg-btn:hover {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.18);
+}
