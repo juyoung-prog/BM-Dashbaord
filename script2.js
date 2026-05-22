@@ -872,6 +872,7 @@ function openAICopilot() {
   document.getElementById('ai-copilot-panel').classList.add('is-open');
   document.getElementById('ai-copilot-backdrop').classList.add('is-open');
   document.getElementById('ai-copilot-trigger').classList.add('is-open');
+  document.body.classList.add('ai-panel-open');
   // Populate context + insight cards if not already rendered
   const store = STORES[selectedId];
   if (store) updateAICopilotContext(store);
@@ -885,6 +886,7 @@ function closeAICopilot() {
   document.getElementById('ai-copilot-panel').classList.remove('is-open');
   document.getElementById('ai-copilot-backdrop').classList.remove('is-open');
   document.getElementById('ai-copilot-trigger').classList.remove('is-open');
+  document.body.classList.remove('ai-panel-open');
 }
 
 function updateAICopilotContext(s) {
