@@ -839,7 +839,16 @@ function selectStore(id) {
     if (audPri) audPri.textContent = s.priorityText;
     // Primary action label — derived from store priority segment
     const guideMap = { accent: 'View Black Hair Care Guide', warn: 'View Bilingual Market Guide', info: 'View K-Beauty Playbook' };
-    document.getElementById('rp-act1').textContent = guideMap[s.priority] || 'View Campaign Guide';
+    const guideReasonMap = {
+      accent: `${s.black}% Black demographic — hair care-led strategy is the primary opportunity.`,
+      warn:   `${s.hisp}% Hispanic share — bilingual execution is highest-leverage action.`,
+      info:   `K-Beauty priority with ${s.asian}% Asian population — premium skincare leads.`,
+    };
+    const act1 = document.getElementById('rp-act1');
+    if (act1) {
+      act1.textContent   = guideMap[s.priority] || 'View Campaign Guide';
+      act1.dataset.reason = guideReasonMap[s.priority] || 'Based on store priority segment and market analysis.';
+    }
     // Market lens label
     const htagType = document.getElementById('rp-htag-type');
     if (htagType) htagType.textContent = s.priorityText;
@@ -906,35 +915,44 @@ function updateAICopilotContext(s) {
   renderInsightCards(s);
 }
 
-function buildSignalStrips(s) {
-  const strips = [];
+function buildAIObservations(s) {
+  const obs = [];
 
   if (s.black >= 60) {
-    strips.push({ type: 'opportunity', tag: 'Demographic Opportunity', headline: `${s.black}% Black — clear hair care-led market` });
+    obs.push({ type: 'opportunity', prefix: 'Opportunity detected',
+      text: `${s.black}% Black demographic makes this a clear hair care-led market. Protective styles and edge control should anchor the floor plan and paid media.` });
   } else if (s.hisp >= 25) {
-    strips.push({ type: 'opportunity', tag: 'Demographic Opportunity', headline: `${s.hisp}% Hispanic — bilingual execution required` });
+    obs.push({ type: 'opportunity', prefix: 'Opportunity detected',
+      text: `${s.hisp}% Hispanic share — English-only creative will underperform here. Dual-language execution across paid and in-store is a stronger play.` });
   } else if (s.asian >= 15 || s.priority === 'info') {
-    strips.push({ type: 'opportunity', tag: 'Category Opportunity', headline: `${s.asian}% Asian — K-Beauty priority category` });
+    obs.push({ type: 'opportunity', prefix: 'Opportunity detected',
+      text: `${s.asian}% Asian population with K-Beauty priority designation. Premium skincare as lead category at entry.` });
   } else {
-    strips.push({ type: 'signal', tag: 'Market Signal', headline: `Balanced demographics — broad community positioning` });
+    obs.push({ type: 'signal', prefix: 'AI noticed',
+      text: `Balanced demographics (${s.raceLabel}) — broad community positioning will outperform niche-only campaigns in this trade area.` });
   }
 
   if (s.poverty >= 15 || s.band === 'lower') {
-    strips.push({ type: 'risk', tag: 'Pricing Risk', headline: `${s.poverty}% poverty rate — price-sensitive market` });
+    obs.push({ type: 'risk', prefix: 'Risk flagged',
+      text: `${s.poverty}% poverty rate — premium positioning without a value anchor will compress conversion. Lead with bundles and clear price points.` });
   } else if (s.band === 'upper') {
-    strips.push({ type: 'opportunity', tag: 'Revenue Opportunity', headline: `$${Math.round(s.income / 1000)}K income — premium positioning viable` });
+    obs.push({ type: 'opportunity', prefix: 'Opportunity detected',
+      text: `$${s.income.toLocaleString()} median income with low poverty. Premium SKUs and discovery bundles are high-viability plays here.` });
   } else {
-    strips.push({ type: 'signal', tag: 'Income Signal', headline: `${s.bannerLabel} market — value justification needed` });
+    obs.push({ type: 'signal', prefix: 'AI noticed',
+      text: `${s.bannerLabel} income market — customers will trade up for trusted brands but need clear value justification.` });
   }
 
   const pending = s.merch.filter(([t]) => t === 'pend');
   if (pending.length > 0) {
-    strips.push({ type: 'risk', tag: 'Execution Risk', headline: `${pending.length} merchandising item${pending.length > 1 ? 's' : ''} pending — hold paid media` });
+    obs.push({ type: 'risk', prefix: 'Risk flagged',
+      text: `${pending.length} merchandising item${pending.length > 1 ? 's' : ''} pending before launch. Paid media should hold until shelf is resolved.` });
   } else {
-    strips.push({ type: 'ready', tag: 'Campaign Ready', headline: 'All merchandising complete — full-funnel launch viable' });
+    obs.push({ type: 'ready', prefix: 'Ready to launch',
+      text: 'All merchandising complete — full-funnel activation is viable immediately.' });
   }
 
-  return strips;
+  return obs;
 }
 
 function buildProseOpening(s) {
@@ -960,16 +978,26 @@ function buildProseOpening(s) {
 
 function buildSuggestions(s) {
   const sugg = [];
-  if (s.black >= 60) sugg.push('Build a Black hair care campaign');
-  else if (s.hisp >= 25) sugg.push('Develop bilingual campaign messaging');
-  else if (s.asian >= 15) sugg.push('Create a K-Beauty launch strategy');
-  else sugg.push('Build a grand opening campaign');
 
-  if (s.band === 'upper') sugg.push('Design a premium product bundle');
-  else if (s.poverty >= 15 || s.band === 'lower') sugg.push('Identify price sensitivity risks');
-  else sugg.push('Analyze pricing sensitivity');
+  if (s.black >= 60) {
+    sugg.push({ label: 'Build a Black hair care campaign', reason: `${s.black}% Black demographic — targeted hair care strategy is the natural first move.` });
+  } else if (s.hisp >= 25) {
+    sugg.push({ label: 'Develop bilingual campaign messaging', reason: `${s.hisp}% Hispanic share — dual-language execution will outperform English-only.` });
+  } else if (s.asian >= 15) {
+    sugg.push({ label: 'Create a K-Beauty launch strategy', reason: `${s.asian}% Asian population with K-Beauty priority in this market.` });
+  } else {
+    sugg.push({ label: 'Build a grand opening campaign', reason: `Balanced demographic mix — broad community positioning is the strongest angle.` });
+  }
 
-  sugg.push(`Compare similar ${s.state === 'FL' ? 'Florida' : 'Georgia'} stores`);
+  if (s.band === 'upper') {
+    sugg.push({ label: 'Design a premium product bundle', reason: `$${Math.round(s.income / 1000)}K median income — market is price-resilient and discovery-ready.` });
+  } else if (s.poverty >= 15 || s.band === 'lower') {
+    sugg.push({ label: 'Identify price sensitivity risks', reason: `${s.poverty}% poverty rate — value anchoring is critical before media spend.` });
+  } else {
+    sugg.push({ label: 'Analyze pricing sensitivity', reason: `Mid-income market — customers trade up but need clear value justification.` });
+  }
+
+  sugg.push({ label: `Compare similar ${s.state === 'FL' ? 'Florida' : 'Georgia'} stores`, reason: `Benchmarking similar markets reveals transferable campaign strategies.` });
   return sugg;
 }
 
@@ -978,18 +1006,26 @@ function renderInsightCards(s) {
   if (!container) return;
 
   const prose = buildProseOpening(s);
+  const observations = buildAIObservations(s);
   const suggestions = buildSuggestions(s);
-  const strips = buildSignalStrips(s);
 
-  const stripsHtml = strips.map(st => `
-    <div class="acp-signal-strip acp-signal-${st.type}">
-      <span class="acp-signal-tag">${st.tag}</span>
-      <span class="acp-signal-headline">${st.headline}</span>
+  // Stateful context: show prior topics if this store has session history
+  const priorEntry = sessionHistory.find(e => e.storeName === s.name);
+  const priorHtml = priorEntry && priorEntry.topics.length > 0
+    ? `<p class="acp-prior-context">Earlier in this session you explored: ${priorEntry.topics.map(t => t.label).join(', ')}.</p>`
+    : '';
+
+  const obsHtml = observations.map(o => `
+    <div class="acp-obs-strip acp-obs-strip-${o.type}">
+      <span class="acp-obs-prefix">${o.prefix}</span>
+      <span class="acp-obs-line">${o.text}</span>
     </div>
   `).join('');
 
   const suggHtml = suggestions.map(sg => `
-    <li class="acp-suggestion-item" onclick="handleSuggestionClick('${sg.replace(/'/g, "&#39;")}')">${sg}</li>
+    <li class="acp-suggestion-item"
+        data-reason="${sg.reason.replace(/"/g, '&quot;')}"
+        onclick="handleSuggestionClick('${sg.label.replace(/'/g, "&#39;")}')">${sg.label}</li>
   `).join('');
 
   container.innerHTML = `
@@ -998,8 +1034,9 @@ function renderInsightCards(s) {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       </div>
       <div class="acp-ai-intro">
+        ${priorHtml}
         <p class="acp-intro-text">${prose}</p>
-        <div class="acp-signal-strips">${stripsHtml}</div>
+        <div class="acp-obs-strips">${obsHtml}</div>
         <div class="acp-suggestions">
           <span class="acp-suggestions-label">Would you like to:</span>
           <ul class="acp-suggestion-list">${suggHtml}</ul>
@@ -1021,7 +1058,7 @@ function handleSuggestionClick(label) {
   };
   const key = label.toLowerCase().includes('compare') ? 'compare' : (keyMap[label] || 'next');
 
-  document.querySelectorAll('.acp-pill, .acp-obs-action, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 
   const aiLoading = document.getElementById('ai-loading');
   const aiResp    = document.getElementById('ai-response');
@@ -1059,23 +1096,21 @@ function addSessionThread(storeName, topicLabel) {
   if (!entry.topics.some(t => t.label === topicLabel)) {
     entry.topics.push({ label: topicLabel });
   }
-  renderSessionHistory();
+  renderStrategyThread();
 }
 
-function renderSessionHistory() {
-  const el = document.getElementById('acp-session-history');
-  if (!el) return;
+function renderStrategyThread() {
+  const el  = document.getElementById('acp-strategy-thread');
+  const ent = document.getElementById('ast-entries');
+  if (!el || !ent) return;
   if (sessionHistory.length === 0) { el.style.display = 'none'; return; }
   el.style.display = '';
-  el.innerHTML = `
-    <div class="acp-sh-header">This session</div>
-    ${sessionHistory.map(entry => `
-      <div class="acp-sh-entry">
-        <span class="acp-sh-store">${entry.storeName}</span>
-        ${entry.topics.map(t => `<span class="acp-sh-topic">↳ ${t.label}</span>`).join('')}
-      </div>
-    `).join('')}
-  `;
+  ent.innerHTML = sessionHistory.map(entry => `
+    <div class="ast-entry">
+      <span class="ast-store-name">${entry.storeName}</span>
+      ${entry.topics.map(t => `<span class="ast-topic">${t.label}</span>`).join('')}
+    </div>
+  `).join('');
 }
 
 function resetAIState() {
@@ -1087,7 +1122,7 @@ function resetAIState() {
   if (aiResp)    aiResp.style.display    = 'none';
   if (aiUserMsg) aiUserMsg.style.display = 'none';
   if (insights)  insights.style.display  = '';
-  document.querySelectorAll('.acp-pill, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 }
 
 // Close on Escape
@@ -1112,7 +1147,7 @@ function setAIModeSelect(sel) {
 }
 
 async function handleAIChip(btn, promptKey) {
-  document.querySelectorAll('.acp-pill, .acp-obs-action, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
 
   const chipLabel = btn.textContent.replace('→','').trim();
@@ -1147,7 +1182,7 @@ async function sendAIChatMessage() {
   const userText = input.value.trim();
   if (!userText) return;
 
-  document.querySelectorAll('.acp-pill, .acp-obs-action, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
 
   // Show user message bubble
   const aiUserMsg    = document.getElementById('ai-user-msg');
@@ -1315,7 +1350,7 @@ function toggleStrategySection(btn) {
 }
 
 function clearAIResponse() {
-  document.querySelectorAll('.acp-pill, .acp-obs-action, .ai-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.acp-sugg-btn, .ai-chip').forEach(c => c.classList.remove('active'));
   const aiResp    = document.getElementById('ai-response');
   const aiUserMsg = document.getElementById('ai-user-msg');
   const insights  = document.getElementById('acp-insights');

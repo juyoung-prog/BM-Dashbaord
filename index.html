@@ -98,10 +98,16 @@
     <div class="acp-ctx-stats" id="acp-context-grid"></div>
   </div>
 
+  <!-- ── Strategy thread (workspace memory, hidden until work accumulates) ── -->
+  <div class="acp-strategy-thread" id="acp-strategy-thread" style="display:none">
+    <div class="ast-header">Strategy thread</div>
+    <div class="ast-entries" id="ast-entries"></div>
+  </div>
+
   <!-- ── Scrollable conversation body ── -->
   <div class="acp-body" id="acp-body">
 
-    <!-- AI intro / proactive insight message -->
+    <!-- AI conversational opening + observations -->
     <div class="acp-insights" id="acp-insights"></div>
 
     <!-- Loading: AI thinking -->
@@ -125,9 +131,6 @@
       </div>
     </div>
 
-    <!-- Session history -->
-    <div class="acp-session-history" id="acp-session-history" style="display:none"></div>
-
     <!-- AI response block -->
     <div class="ai-response" id="ai-response">
       <div class="acp-msg-ai">
@@ -149,14 +152,26 @@
   <!-- ── Sticky footer ── -->
   <div class="acp-footer">
 
-    <!-- Quick action pills -->
-    <div class="acp-quick-pills" id="acp-quick-pills">
-      <span class="acp-pills-label">Suggested next steps</span>
-      <button class="acp-pill" id="rp-act1" onclick="handleAIChip(this,'summarize')">Generate Campaign Plan</button>
-      <button class="acp-pill" onclick="handleAIChip(this,'risks')">Find Risks</button>
-      <button class="acp-pill" onclick="handleAIChip(this,'compare')">Compare Stores</button>
-      <button class="acp-pill" onclick="handleAIChip(this,'messaging')">Suggest Messaging</button>
-      <button class="acp-pill" onclick="handleAIChip(this,'next')">Next Best Action</button>
+    <!-- Suggested by AI -->
+    <div class="acp-suggestions-panel" id="acp-quick-pills">
+      <span class="acp-sugg-panel-label">Suggested by AI</span>
+      <div class="acp-sugg-panel-items">
+        <button class="acp-sugg-btn" id="rp-act1"
+                data-reason="Based on store readiness and demographic profile"
+                onclick="handleAIChip(this,'summarize')">Generate Campaign Plan</button>
+        <button class="acp-sugg-btn"
+                data-reason="Flagged due to pricing pressure signals in this market"
+                onclick="handleAIChip(this,'risks')">Find Risks</button>
+        <button class="acp-sugg-btn"
+                data-reason="Benchmarking similar stores reveals transferable strategies"
+                onclick="handleAIChip(this,'compare')">Compare Similar Stores</button>
+        <button class="acp-sugg-btn"
+                data-reason="Demographic signals point to specific messaging angles"
+                onclick="handleAIChip(this,'messaging')">Develop Messaging Strategy</button>
+        <button class="acp-sugg-btn"
+                data-reason="Based on current operational state and market timing"
+                onclick="handleAIChip(this,'next')">Identify Next Best Action</button>
+      </div>
     </div>
 
     <!-- Input area -->
