@@ -1471,226 +1471,229 @@ function buildResponseSignals(result, s) {
 
   const shelfSig = pend.length > 0
     ? { type: 'blocker', label: 'EXECUTION BLOCKER',
-        headline: `Paid launch should pause — ${pend.length} shelf item${pend.length > 1 ? 's' : ''} unresolved.`,
-        reason:   'Campaign-to-shelf inconsistency undermines first-impression trust.',
+        headline: "Paid media should not launch — shelf inconsistency will undermine the campaign's first impression.",
+        reason:   `${pend.length} item${pend.length > 1 ? 's' : ''} unresolved — ad-to-shelf inconsistency damages trust on launch day.`,
         action:   `Resolve: ${pend.map(([, t]) => t).join(', ')}` }
     : { type: 'readiness', label: 'LAUNCH READY',
-        headline: 'All shelf activations confirmed. Full-funnel launch viable.',
-        reason:   'No operational blockers — campaign can activate immediately.',
+        headline: 'All shelf activations confirmed. Full-funnel launch is viable immediately.',
+        reason:   'No operational blockers — paid, in-store, and digital channels can activate.',
         action:   null };
 
   const frictionSig = pend.length > 0
     ? { type: 'risk', label: 'OPERATIONAL FRICTION',
-        headline: `${pend.length} unresolved item${pend.length > 1 ? 's' : ''} creating execution delay.`,
+        headline: 'Active execution delay — pending items are blocking campaign activation.',
         reason:   pend.map(([, t]) => t).join(', '),
         action:   'Clear pending items before activating paid media.' }
     : { type: 'momentum', label: 'EXECUTION MOMENTUM',
-        headline: `${done.length} shelf priorit${done.length === 1 ? 'y' : 'ies'} confirmed — strong activation base.`,
-        reason:   'Operational readiness supports immediate campaign activation.',
+        headline: 'No execution delays detected — full activation pathway is clear.',
+        reason:   `${done.length} shelf priorit${done.length === 1 ? 'y' : 'ies'} confirmed — operational readiness established.`,
         action:   null };
 
   const timingSig = pend.length > 0
     ? { type: 'blocker', label: 'CAMPAIGN TIMING',
-        headline: 'Launch window blocked. Pending items must close first.',
-        reason:   `${pend.length} unresolved item${pend.length > 1 ? 's' : ''} delay activation viability.`,
+        headline: 'Activation is premature. Launching now risks ad-to-shelf inconsistency.',
+        reason:   'Pending items must resolve before paid media can activate safely.',
         action:   'Target launch after merchandising completion.' }
     : { type: 'readiness', label: 'CAMPAIGN TIMING',
-        headline: 'Launch window is open. No blockers detected.',
-        reason:   'Full operational readiness confirmed — campaign can begin immediately.',
+        headline: 'Launch window is open. Full activation is viable across all channels.',
+        reason:   'Operational readiness confirmed — no timing blockers detected.',
         action:   null };
 
   const promoSig = pend.length > 0
     ? { type: 'risk', label: 'PROMO READINESS',
-        headline: 'Promotional activation should wait for shelf resolution.',
-        reason:   'Running offers before shelf completion creates in-store expectation gaps.',
+        headline: "Promotions should not run until shelf completion — expectation gaps will damage credibility.",
+        reason:   'Offers that cannot be fulfilled in-store create trust problems that outlast the campaign.',
         action:   'Hold paid media. Prioritize in-store readiness first.' }
     : { type: 'readiness', label: 'PROMO READINESS',
-        headline: 'Store is promotion-ready. Offers can activate immediately.',
-        reason:   'All shelf priorities complete — paid and in-store channels aligned.',
+        headline: 'Store is promotion-ready — offers can activate across paid and in-store channels.',
+        reason:   'All shelf priorities complete — in-store experience will support the campaign promise.',
         action:   null };
 
   const pricingSig = s.band === 'lower'
     ? { type: 'risk', label: 'PRICE RISK',
-        headline: 'Value-sensitive market — premium-first messaging will underperform.',
-        reason:   `${s.poverty}% poverty rate signals high price sensitivity in trade area.`,
+        headline: 'Premium-first creative will underperform — offer clarity and value anchors are critical.',
+        reason:   `${s.poverty}% poverty rate confirms high price sensitivity across the trade area.`,
         action:   'Lead with clear offer anchor. Avoid aspirational pricing.' }
     : s.band === 'mid'
     ? { type: 'momentum', label: 'PRICE RESPONSE',
-        headline: 'Mid-income audience responds to trusted-brand value positioning.',
-        reason:   `${inc} median — receptive to trade-up at the right price anchor.`,
+        headline: 'Trusted-brand messaging with clear value anchors outperforms both luxury and discount positioning.',
+        reason:   `${inc} median — market is value-conscious but receptive to quality.`,
         action:   null }
     : { type: 'opportunity', label: 'PREMIUM SIGNAL',
-        headline: 'Price-resilient market. Premium and K-Beauty upsell viable.',
-        reason:   `${inc} median, ${s.poverty}% poverty — low financial constraint on spend.`,
+        headline: 'Price resistance is low — premium and K-Beauty upsell campaigns are viable.',
+        reason:   `${inc} median, ${s.poverty}% poverty — financial constraint on spend is minimal.`,
         action:   'Expand premium SKU placement. Lead discovery campaigns.' };
 
   const tradeUpSig = s.band === 'upper'
     ? { type: 'opportunity', label: 'TRADE-UP POTENTIAL',
-        headline: 'High — premium positioning and K-Beauty trade-up viable.',
-        reason:   `Price-resilient market at ${inc} median income.`,
+        headline: 'Customers are open to premium positioning — trade-up conversion potential is high.',
+        reason:   `Price-resilient trade area at ${inc} median income.`,
         action:   'Lead with premium SKUs and skincare routines.' }
     : s.band === 'mid'
     ? { type: 'momentum', label: 'TRADE-UP POTENTIAL',
-        headline: 'Moderate — will trade up for trusted brands at right price.',
+        headline: 'Customers will trade up for trusted brands — premium needs strong value anchoring.',
         reason:   `Value-conscious buyers at ${inc} respond to quality proof points.`,
         action:   null }
     : { type: 'risk', label: 'TRADE-UP POTENTIAL',
-        headline: 'Limited — offer-led entry required before trade-up can follow.',
-        reason:   `${inc} median, ${s.poverty}% poverty limits premium category adoption.`,
+        headline: 'Value positioning is required before any trade-up attempt — premium will fail first contact.',
+        reason:   `${inc} median, ${s.poverty}% poverty creates genuine barrier to premium adoption.`,
         action:   'Establish value trust first. Introduce trade-up in Phase 2.' };
 
   const marketPosSig = s.priority === 'accent'
     ? { type: 'opportunity', label: 'POSITIONING ADVANTAGE',
-        headline: 'Black hair care-led market — strong community identity alignment.',
-        reason:   `${s.black}% Black population supports identity-first positioning.`,
-        action:   'Lead with Black hair care category and community messaging.' }
+        headline: 'Identity-first campaigns significantly outperform generic beauty messaging in this market.',
+        reason:   `${s.black}% Black population creates natural alignment with community-first positioning.`,
+        action:   'Lead with Black hair care category and community-first messaging.' }
     : s.priority === 'warn'
     ? { type: 'opportunity', label: 'POSITIONING ADVANTAGE',
-        headline: 'Bilingual market with underserved Hispanic audience signal.',
-        reason:   `${s.hisp}% Hispanic share — bilingual activation is strongly recommended.`,
+        headline: 'Bilingual activation unlocks the full trade area — monolingual execution leaves revenue unrealized.',
+        reason:   `${s.hisp}% Hispanic share — Spanish-language creative reaches an underserved audience.`,
         action:   'Deploy bilingual creative and Spanish-language channel variants.' }
     : s.priority === 'info'
     ? { type: 'opportunity', label: 'CATEGORY OPPORTUNITY',
-        headline: 'K-Beauty discovery window open in premium-adjacent market.',
+        headline: 'K-Beauty discovery campaigns will find strong natural affinity in this market.',
         reason:   `${s.asian}% Asian population and income profile support K-Beauty expansion.`,
         action:   'Expand K-Beauty shelf. Run discovery-led campaign.' }
     : { type: 'momentum', label: 'MARKET POSITION',
-        headline: 'Broad multicultural market — community identity positioning is viable.',
-        reason:   `Mixed profile: ${s.raceLabel}. Community access messaging performs broadly.`,
+        headline: 'Broad-community positioning will outperform niche demographic targeting in this market.',
+        reason:   `Mixed profile — ${s.raceLabel}. No dominant segment to over-target.`,
         action:   null };
 
   const heroCatSig = {
     type: 'momentum', label: 'HERO CATEGORY',
-    headline: `${herocat} is the primary revenue driver for this store.`,
-    reason: s.state === 'FL'    ? 'Florida priority: K-Beauty leads all campaign angles.'
-      : s.priority === 'accent' ? 'Black Hair Care aligned with dominant 40%+ Black market.'
-      : s.priority === 'info'   ? 'K-Beauty elevated for premium + Asian demographic profile.'
-      : 'Hair Care maintains hero position for standard Georgia market.',
+    headline: s.state === 'FL'    ? 'K-Beauty campaigns will outperform Hair Care — Florida priority overrides standard category hierarchy.'
+      : s.priority === 'accent'   ? 'Black Hair Care campaigns will outperform general beauty — demographic alignment is strong.'
+      : s.priority === 'info'     ? 'K-Beauty leads — premium and Asian demographic profile supports discovery-led campaigns.'
+      : 'Hair Care campaigns remain the strongest revenue driver — Georgia market profile confirmed.',
+    reason: s.state === 'FL'      ? 'Florida priority: K-Beauty leads all campaign angles.'
+      : s.priority === 'accent'   ? `${s.black}% Black market — Black Hair Care is the natural category alignment.`
+      : s.priority === 'info'     ? `${s.asian}% Asian share and upper-income profile elevate K-Beauty.`
+      : 'Standard Georgia market — Hair Care maintains category leadership.',
     action: null,
   };
 
   const audienceSig = s.black >= 60
     ? { type: 'opportunity', label: 'AUDIENCE SIGNAL',
-        headline: `Black-majority market (${s.black}%) — identity-led positioning is dominant.`,
-        reason:   'Protective styles, edge control, and extensions are must-lead categories.',
+        headline: 'Identity-first campaigns significantly outperform generic messaging in this market.',
+        reason:   `${s.black}% Black population — protective styles, edge control, and extensions are must-lead categories.`,
         action:   null }
     : s.hisp >= 30
     ? { type: 'opportunity', label: 'AUDIENCE SIGNAL',
-        headline: `Hispanic-majority market (${s.hisp}%) — bilingual strategy is required.`,
-        reason:   'Monolingual execution will underperform. Bilingual assets are mandatory.',
+        headline: 'Monolingual execution will leave a substantial portion of the trade area unreached.',
+        reason:   `${s.hisp}% Hispanic share — bilingual assets are not optional, they are required.`,
         action:   'Run parallel Spanish-language ad sets across all paid channels.' }
     : s.asian >= 20
     ? { type: 'opportunity', label: 'AUDIENCE SIGNAL',
-        headline: `Strong Asian audience (${s.asian}%) — K-Beauty discovery is viable.`,
-        reason:   'K-Beauty and skincare routines have direct community affinity here.',
+        headline: 'K-Beauty discovery campaigns will find strong natural affinity in this audience.',
+        reason:   `${s.asian}% Asian population — K-Beauty and skincare routines have direct community alignment.`,
         action:   null }
     : { type: 'momentum', label: 'AUDIENCE SIGNAL',
-        headline: `Mixed market: ${s.raceLabel}. Broad community positioning recommended.`,
-        reason:   'No single dominant segment — avoid over-narrowing campaign angle.',
+        headline: 'No dominant segment — broad community positioning reduces targeting risk.',
+        reason:   `Mixed market — ${s.raceLabel}. Over-narrowing risks excluding large trade area portions.`,
         action:   null };
 
   const revPotSig = s.band === 'upper'
     ? { type: 'revenue', label: 'REVENUE POTENTIAL',
-        headline: `High — ${inc} median, ${s.poverty}% poverty. Premium demand viable.`,
-        reason:   'Price-resilient buyers are open to full-price and premium SKU purchases.',
+        headline: 'Premium positioning works here — price resistance is low across this trade area.',
+        reason:   `${inc} median, ${s.poverty}% poverty — buyers are open to full-price and premium SKU purchases.`,
         action:   null }
     : s.band === 'mid'
     ? { type: 'revenue', label: 'REVENUE POTENTIAL',
-        headline: `Moderate — ${inc} median. Value + quality balance required.`,
-        reason:   'Market responds to trusted-brand value, not lowest-price positioning.',
+        headline: 'Customers respond better to trusted-value offers than luxury-first messaging.',
+        reason:   `${inc} median — value-conscious but willing to pay for trusted brands.`,
         action:   null }
     : { type: 'risk', label: 'REVENUE POTENTIAL',
-        headline: `Constrained — ${inc} median, ${s.poverty}% poverty. Value-first market.`,
-        reason:   'Bundle and offer-led messaging are critical to conversion.',
+        headline: 'Offer clarity and price anchoring will determine conversion — premium messaging will underperform.',
+        reason:   `${inc} median, ${s.poverty}% poverty — this is a value-first market.`,
         action:   'Lead with value bundles. Track offer-to-shelf conversion rate.' };
 
   const channelSig = s.hisp > 20
     ? { type: 'readiness', label: 'CHANNEL PRIORITY',
-        headline: 'Bilingual Reels → Meta geo-target → in-store signage.',
-        reason:   `${s.hisp}% Hispanic share demands parallel Spanish-language execution.`,
+        headline: 'Bilingual short-form campaigns will significantly outperform monolingual promotional content.',
+        reason:   `${s.hisp}% Hispanic share demands parallel Spanish-language execution across all channels.`,
         action:   null }
     : s.band === 'upper'
     ? { type: 'readiness', label: 'CHANNEL PRIORITY',
-        headline: 'Instagram + TikTok → influencer-adjacent creative → in-store.',
-        reason:   'Upper-income audience responds to discovery and trend-led content.',
+        headline: 'Discovery-led and trend-adjacent creative will outperform offer-led approaches here.',
+        reason:   'Upper-income audience responds to aspiration and discovery, not discount-first messaging.',
         action:   null }
     : { type: 'readiness', label: 'CHANNEL PRIORITY',
-        headline: 'Instagram Reels → in-store signage → flyer distribution.',
-        reason:   'Offer-clarity creative outperforms lifestyle content at this income band.',
+        headline: 'Offer-clarity creative consistently outperforms lifestyle content at this income level.',
+        reason:   'At this income band, clear offers convert better than brand aspiration.',
         action:   null };
 
   const communityResSig = s.hisp > 20
     ? { type: 'opportunity', label: 'COMMUNITY RESONANCE',
-        headline: `Bilingual market — ${s.hisp}% Hispanic audience is underactivated.`,
-        reason:   'Spanish-language creative unlocks an underserved segment of the trade area.',
+        headline: 'Spanish-language creative will unlock a significant underactivated segment of the trade area.',
+        reason:   `${s.hisp}% Hispanic share — bilingual assets reach the full audience, English-only does not.`,
         action:   'Launch bilingual assets across paid and in-store channels simultaneously.' }
     : s.black > 50
     ? { type: 'opportunity', label: 'COMMUNITY RESONANCE',
-        headline: `Strong Black community identity — ${s.black}% market share.`,
-        reason:   'Identity-first positioning creates deeper loyalty and repeat purchase behavior.',
+        headline: 'Community identity campaigns generate deeper engagement than transactional messaging.',
+        reason:   `${s.black}% Black market share — identity-first positioning creates loyalty, not just conversion.`,
         action:   null }
     : { type: 'momentum', label: 'COMMUNITY RESONANCE',
-        headline: 'Broad multicultural market — diverse audience mix confirmed.',
-        reason:   'Community identity messaging creates wide appeal without demographic narrowing.',
+        headline: 'Multicultural positioning creates broad appeal without demographic narrowing risk.',
+        reason:   'Diverse audience mix rewards inclusive messaging over segment-specific targeting.',
         action:   null };
 
   const tradeAreaSig = s.pop >= 300000
     ? { type: 'revenue', label: 'TRADE AREA',
-        headline: `Metro-scale market — ${s.pop.toLocaleString()} trade area population.`,
-        reason:   'High-volume audience supports aggressive geo-targeted paid media investment.',
+        headline: 'Metro-scale reach supports full-funnel paid investment — audience volume justifies the spend.',
+        reason:   `${s.pop.toLocaleString()} trade area population — high-volume market for geo-targeted campaigns.`,
         action:   null }
     : s.pop >= 100000
     ? { type: 'momentum', label: 'TRADE AREA',
-        headline: `Mid-market trade area — ${s.pop.toLocaleString()} reachable population.`,
-        reason:   'Sufficient reach for meaningful geo-targeted campaign ROI.',
+        headline: 'Trade area scale supports geo-targeted campaigns with meaningful ROI potential.',
+        reason:   `${s.pop.toLocaleString()} reachable population — sufficient reach for effective paid media.`,
         action:   null }
     : { type: 'risk', label: 'TRADE AREA',
-        headline: `Neighborhood market — ${s.pop.toLocaleString()} trade area population.`,
-        reason:   'Limited reach requires high campaign precision and strong in-store focus.',
+        headline: 'Hyper-local and in-store approaches will outperform broad paid reach in this neighborhood market.',
+        reason:   `${s.pop.toLocaleString()} trade area population — limited reach requires high campaign precision.`,
         action:   'Prioritize in-store and hyper-local targeting over broad paid reach.' };
 
   const storeMomentumSig = done.length >= 2
     ? { type: 'momentum', label: 'STORE MOMENTUM',
-        headline: `Strong execution base — ${done.length} shelf priorities confirmed.`,
-        reason:   'Operational readiness supports immediate campaign activation.',
+        headline: 'Operational foundation is strong — full-funnel campaign activation is supported.',
+        reason:   `${done.length} shelf priorities confirmed — no readiness blockers detected.`,
         action:   null }
     : done.length === 1
     ? { type: 'momentum', label: 'STORE MOMENTUM',
-        headline: `Building — 1 priority complete. ${pend.length} pending.`,
-        reason:   'Partial readiness — phased activation may be viable.',
+        headline: 'Store is building activation readiness — phased launch may be viable.',
+        reason:   `1 priority confirmed, ${pend.length} pending — partial operational readiness.`,
         action:   null }
     : { type: 'risk', label: 'STORE MOMENTUM',
-        headline: `Early stage — all ${pend.length} priorities still pending.`,
-        reason:   'Operational baseline not established. Campaign launch is premature.',
+        headline: 'Campaign launch is premature — operational foundation is not yet established.',
+        reason:   `All ${pend.length} shelf priorities remain unresolved.`,
         action:   'Resolve all pending items before any paid media investment.' };
 
   const compRiskSig = {
     type: 'risk', label: 'COMPETITIVE RISK',
-    headline: 'Unactivated hero category creates competitor entry vulnerability.',
-    reason:   `${herocat} shelf gap leaves market position open to adjacent competitors.`,
+    headline: 'Delayed activation creates a competitor entry window in the primary category.',
+    reason:   `${herocat} shelf gap leaves the market position exposed to adjacent competitors.`,
     action:   pend.length > 0 ? 'Accelerate shelf readiness to close the vulnerability window.' : null,
   };
 
   const incomeBandSig = {
     type: 'revenue', label: 'INCOME BAND',
-    headline: `${s.bannerLabel} — ${inc} median, ${s.poverty}% poverty.`,
-    reason:   'Income band sets the ceiling for offer aggressiveness and SKU mix strategy.',
+    headline: `${s.bannerLabel} market conditions — offer ceiling and SKU mix are constrained by income profile.`,
+    reason:   `${inc} median, ${s.poverty}% poverty rate.`,
     action:   null,
   };
 
   const customerMixSig = {
     type: 'momentum', label: 'CUSTOMER MIX',
-    headline: `${s.raceLabel} — ${s.femalePct}% female, ${s.under18}% under 18.`,
-    reason:   'Demographic composition shapes category affinity and channel selection.',
+    headline: `${s.raceLabel} — ${s.femalePct}% female shopper profile dominates purchase decisions.`,
+    reason:   'Demographic composition shapes category affinity and which channel performs strongest.',
     action:   null,
   };
 
   const messagingLeadSig = {
     type: 'readiness', label: 'MESSAGING LEAD',
-    headline: s.priority === 'accent' ? 'Lead with identity and product quality.'
-      : s.priority === 'warn'         ? 'Lead with bilingual access and community value.'
-      : s.priority === 'info'         ? 'Lead with trend discovery and K-Beauty education.'
-      : 'Lead with community access and convenience.',
+    headline: s.priority === 'accent' ? 'Identity-first messaging creates deeper loyalty than convenience or discount positioning.'
+      : s.priority === 'warn'         ? 'Bilingual access messaging reaches the full trade area — English-only leaves revenue on the table.'
+      : s.priority === 'info'         ? 'Trend and discovery messaging will outperform promotional approach for this audience.'
+      : 'Community access messaging consistently outperforms niche positioning in broad-market stores.',
     reason:   'Message direction determined by dominant demographic and income signal.',
     action:   null,
   };
@@ -1723,8 +1726,8 @@ function renderAIResponse(result) {
 
   bodyEl.innerHTML = `
     <div class="acp-scan-header acp-resp-scan-bar">
-      <span class="acp-scan-label">● ANALYSIS COMPLETE</span>
-      <span class="acp-scan-count">${signals.length} signals</span>
+      <span class="acp-scan-label">● LIVE SIGNALS</span>
+      <span class="acp-scan-count">${signals.length} active</span>
     </div>
     <div class="intel-signal-grid">
       ${signals.map(sig => renderSignalCard(sig)).join('')}
@@ -1739,12 +1742,12 @@ function refreshWorkflowButtons(s) {
   const herocat = s.state === 'FL' ? 'K-Beauty' : s.priority === 'accent' ? 'Black Hair Care' : s.priority === 'info' ? 'K-Beauty' : 'Hair Care';
 
   const configs = {
-    'summarize': [herocat + ' strategy scan',                                                              'opportunity'],
-    'risks':     [pend.length > 0 ? `${pend.length} blocker${pend.length > 1 ? 's' : ''} detected` : 'No active blockers', pend.length > 0 ? 'blocker' : 'readiness'],
-    'next':      [pend.length > 0 ? 'Resolve shelf blockers first' : 'Launch window is open',             pend.length > 0 ? 'risk' : 'readiness'],
-    'compare':   [s.pop >= 300000 ? 'Metro-scale opportunity' : s.pop >= 100000 ? 'Mid-market scan' : 'Neighborhood market', 'revenue'],
-    'messaging': [s.hisp > 20 ? 'Bilingual execution needed' : s.priority === 'accent' ? 'Identity-led approach' : 'Community positioning', 'momentum'],
-    'guide':     [s.band === 'upper' ? 'Premium-viable market' : s.band === 'lower' ? 'Value-sensitive market' : 'Balanced offer structure', 'readiness'],
+    'summarize': ['Full market intelligence scan',                                                                        'opportunity'],
+    'risks':     [pend.length > 0 ? `Execution delay detected — ${pend.length} item${pend.length > 1 ? 's' : ''}` : 'No execution delays', pend.length > 0 ? 'blocker' : 'readiness'],
+    'next':      [pend.length > 0 ? 'Resolve before activation'  : 'Activate now',                                       pend.length > 0 ? 'risk' : 'readiness'],
+    'compare':   [s.pop >= 300000 ? 'Metro market conditions'    : s.pop >= 100000 ? 'Mid-market conditions' : 'Neighborhood market', 'revenue'],
+    'messaging': [s.hisp > 20 ? 'Bilingual creative required'    : s.priority === 'accent' ? 'Identity-led positioning' : 'Community-first approach', 'momentum'],
+    'guide':     [s.band === 'upper' ? 'Premium conditions active' : s.band === 'lower' ? 'Value-sensitive conditions' : 'Balanced offer window', 'readiness'],
   };
 
   document.querySelectorAll('.acp-action-item[data-prompt]').forEach(btn => {
