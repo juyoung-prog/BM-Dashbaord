@@ -4348,3 +4348,71 @@ body.auth-pending .sidebar-overlay {
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
+
+/* ═══════════════════════════════════════════════
+   AI COPILOT — LIVE INTELLIGENCE LAYER
+   ═══════════════════════════════════════════════ */
+
+/* ── "Analyzing…" scanning state ── */
+.acp-scanning-state {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 0 2px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  letter-spacing: .01em;
+}
+.acp-scanning-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+  animation: scanDotBlink .75s ease-in-out infinite;
+}
+@keyframes scanDotBlink {
+  0%, 100% { opacity: .25; }
+  50%       { opacity: 1; }
+}
+
+/* ── Observation strip: entrance animation ── */
+.acp-obs-strip {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .28s ease, transform .28s ease;
+}
+.acp-obs-strip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Live indicator in context eyebrow ── */
+.acp-ctx-live {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  color: #22c55e;
+  margin-left: 7px;
+  animation: ctxLivePulse 2.8s ease-in-out infinite;
+}
+@keyframes ctxLivePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .4; }
+}
+
+/* ── Input: operational terminal feel ── */
+.acp-input-wrap {
+  border-radius: 6px;
+}
+.ai-chat-input {
+  border-radius: 0;
+}
+
+/* ── Backdrop: focused analysis mode ── */
+.ai-copilot-backdrop {
+  background: rgba(15,23,42,.20);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
