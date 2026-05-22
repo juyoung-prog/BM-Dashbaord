@@ -211,10 +211,6 @@
           <div class="ph-title">Store Market Summary</div>
           <div class="ph-subtitle">Local market intelligence across 15 BeautyMaster locations</div>
         </div>
-        <button class="ai-copilot-trigger" id="ai-copilot-trigger" onclick="openAICopilot()" title="Open AI Copilot">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/><path d="M8 12h8M12 8v8"/></svg>
-          <span>AI Copilot</span>
-        </button>
       </div>
 
       <!-- KPI Grid -->
@@ -293,8 +289,18 @@
         <div style="display:flex;flex-direction:column;gap:var(--s4);">
           <div class="card">
           <div class="card-header">
-            <div class="card-title">Store Market Priorities</div>
-          <div style="font-size:11px;color:var(--text-tertiary)">Click a row to open Store Playbook</div>
+            <div>
+              <div class="card-title">Store Market Priorities</div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">Click a row to open Store Playbook</div>
+            </div>
+            <button class="ai-copilot-trigger" id="ai-copilot-trigger" onclick="openAICopilot()"
+                    data-tooltip="AI-powered operational analysis" aria-label="Open AI Copilot">
+              <span class="ai-trigger-dot"></span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l1.9 5.8L20 10.5l-5.6 1.7-.9 6-3.5-4.8-6 .9 3.8-4.6z"/>
+              </svg>
+              <span>AI Copilot</span>
+            </button>
           </div>
           <div class="tbl-head">
             <div class="th th-sortable" id="th-name" onclick="openStoreSort(event)">
