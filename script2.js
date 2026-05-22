@@ -903,12 +903,12 @@ function updateAICopilotContext(s) {
   if (gridEl) {
     const popStr = s.pop >= 1000000
       ? (s.pop / 1000000).toFixed(1) + 'M'
-      : Math.round(s.pop / 1000) + 'K';
+      : (s.pop / 1000).toFixed(1) + 'K';
     gridEl.innerHTML = `
       <span class="acp-ctx-stat"><b>${popStr}</b> pop</span>
-      <span class="acp-ctx-stat"><b>${s.black}%</b> Black</span>
-      <span class="acp-ctx-stat"><b>${s.hisp}%</b> Hispanic</span>
-      <span class="acp-ctx-stat"><b>$${Math.round(s.income / 1000)}K</b> income</span>
+      <span class="acp-ctx-stat"><b>${parseFloat(s.black).toFixed(1)}%</b> Black</span>
+      <span class="acp-ctx-stat"><b>${parseFloat(s.hisp).toFixed(1)}%</b> Hispanic</span>
+      <span class="acp-ctx-stat"><b>$${(s.income / 1000).toFixed(1)}K</b> income</span>
     `;
   }
 
@@ -1001,49 +1001,72 @@ function buildSuggestions(s) {
   return sugg;
 }
 
+let _insightRenderTimer = null;
+
 function renderInsightCards(s) {
   const container = document.getElementById('acp-insights');
   if (!container) return;
 
-  const prose = buildProseOpening(s);
-  const observations = buildAIObservations(s);
-  const suggestions = buildSuggestions(s);
+  // Cancel any pending render from rapid store switching
+  if (_insightRenderTimer) { clearTimeout(_insightRenderTimer); _insightRenderTimer = null; }
 
-  // Stateful context: show prior topics if this store has session history
-  const priorEntry = sessionHistory.find(e => e.storeName === s.name);
-  const priorHtml = priorEntry && priorEntry.topics.length > 0
-    ? `<p class="acp-prior-context">Earlier in this session you explored: ${priorEntry.topics.map(t => t.label).join(', ')}.</p>`
-    : '';
-
-  const obsHtml = observations.map(o => `
-    <div class="acp-obs-strip acp-obs-strip-${o.type}">
-      <span class="acp-obs-prefix">${o.prefix}</span>
-      <span class="acp-obs-line">${o.text}</span>
-    </div>
-  `).join('');
-
-  const suggHtml = suggestions.map(sg => `
-    <li class="acp-suggestion-item"
-        data-reason="${sg.reason.replace(/"/g, '&quot;')}"
-        onclick="handleSuggestionClick('${sg.label.replace(/'/g, "&#39;")}')">${sg.label}</li>
-  `).join('');
-
+  // Show scanning state immediately to signal "system is computing"
   container.innerHTML = `
-    <div class="acp-msg-ai">
-      <div class="acp-ai-avatar">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      </div>
-      <div class="acp-ai-intro">
-        ${priorHtml}
-        <p class="acp-intro-text">${prose}</p>
-        <div class="acp-obs-strips">${obsHtml}</div>
-        <div class="acp-suggestions">
-          <span class="acp-suggestions-label">Would you like to:</span>
-          <ul class="acp-suggestion-list">${suggHtml}</ul>
-        </div>
-      </div>
+    <div class="acp-scanning-state">
+      <span class="acp-scanning-dot"></span>
+      <span>Analyzing market conditions…</span>
     </div>
   `;
+
+  _insightRenderTimer = setTimeout(() => {
+    const prose        = buildProseOpening(s);
+    const observations = buildAIObservations(s);
+    const suggestions  = buildSuggestions(s);
+
+    const priorEntry = sessionHistory.find(e => e.storeName === s.name);
+    const priorHtml  = priorEntry && priorEntry.topics.length > 0
+      ? `<p class="acp-prior-context">Earlier in this session you explored: ${priorEntry.topics.map(t => t.label).join(', ')}.</p>`
+      : '';
+
+    const obsHtml = observations.map(o => `
+      <div class="acp-obs-strip acp-obs-strip-${o.type}">
+        <span class="acp-obs-prefix">${o.prefix}</span>
+        <span class="acp-obs-line">${o.text}</span>
+      </div>
+    `).join('');
+
+    const suggHtml = suggestions.map(sg => `
+      <li class="acp-suggestion-item"
+          data-reason="${sg.reason.replace(/"/g, '&quot;')}"
+          onclick="handleSuggestionClick('${sg.label.replace(/'/g, "&#39;")}')">${sg.label}</li>
+    `).join('');
+
+    container.innerHTML = `
+      <div class="acp-msg-ai">
+        <div class="acp-ai-avatar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="acp-ai-intro">
+          ${priorHtml}
+          <p class="acp-intro-text">${prose}</p>
+          <div class="acp-obs-strips">${obsHtml}</div>
+          <div class="acp-suggestions">
+            <span class="acp-suggestions-label">Suggested next actions</span>
+            <ul class="acp-suggestion-list">${suggHtml}</ul>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Staggered entrance — each strip fades in with 130ms offset
+    requestAnimationFrame(() => {
+      container.querySelectorAll('.acp-obs-strip').forEach((el, i) => {
+        setTimeout(() => el.classList.add('is-visible'), i * 130);
+      });
+    });
+
+    _insightRenderTimer = null;
+  }, 520);
 }
 
 function handleSuggestionClick(label) {
